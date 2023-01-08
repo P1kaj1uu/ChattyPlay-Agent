@@ -43,6 +43,50 @@
                 </el-col>
             </el-row>
         </el-card>
+
+        <el-card>
+            <el-row style="text-align: center;">
+                <el-col>
+                    <div class="steps">备注1：若出现如下情况，请看下面的备注2-备注4</div>
+                </el-col>
+                <el-col>
+                    <img class="helpImgs" src="@/assets/images/help/help4.png">
+                </el-col>
+            </el-row>
+        </el-card>
+
+        <el-card>
+            <el-row style="text-align: center;">
+                <el-col>
+                    <div class="steps">备注2：若出现备注1的情况，则先在视频输入框中输入完整片名，然后点击搜索按钮</div>
+                </el-col>
+                <el-col>
+                    <img class="helpImgs" src="@/assets/images/help/help5.png">
+                </el-col>
+            </el-row>
+        </el-card>
+
+        <el-card>
+            <el-row style="text-align: center;">
+                <el-col>
+                    <div class="steps">备注3：若出现备注1的情况，再然后点击图示该处</div>
+                </el-col>
+                <el-col>
+                    <img class="helpImgs" src="@/assets/images/help/help6.png">
+                </el-col>
+            </el-row>
+        </el-card>
+
+        <el-card>
+            <el-row style="text-align: center;">
+                <el-col>
+                    <div class="steps">备注4：若出现备注1的情况，最后可点击图示按钮选择对应的集数</div>
+                </el-col>
+                <el-col>
+                    <img class="helpImgs" src="@/assets/images/help/help7.png">
+                </el-col>
+            </el-row>
+        </el-card>
     </div>
 </template>
 
