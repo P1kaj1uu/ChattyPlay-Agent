@@ -9,8 +9,16 @@ export const getData = () => {
 	
 		var data = [
 			{
-				name: "万能接口（推荐）",
+				name: "万能接口（推荐可用）",
 				url: "http://www.sfsft.com/admin.php?url="
+			},
+      {
+				name: "腾讯视频接口（推荐可用）",
+				url: "http://www.82190555.com/index/qqvod.php?url="
+      },
+      {
+				name: "优酷超清接口（推荐可用）",
+				url: "http://www.82190555.com/index/qqvod.php?url="
 			},
 			{
 				name: "优酷接口",
@@ -49,10 +57,6 @@ export const getData = () => {
 				url: "http://player.jidiaose.com/supapi/iframe.php?v="
 			},
 			{
-				name: "腾讯视频接口",
-				url: "http://www.82190555.com/index/qqvod.php?url="
-			},
-			{
 				name: "爱奇艺超清接口1",
 				url: "http://api.pucms.com/?url="
 			},
@@ -71,10 +75,6 @@ export const getData = () => {
 			{
 				name: "芒果TV手机接口",
 				url: "http://65yw.2m.vc/chaojikan.php?url="
-			},
-			{
-				name: "优酷超清接口",
-				url: "http://www.82190555.com/index/qqvod.php?url="
 			},
 			{
 				name: "搜狐视频接口",
