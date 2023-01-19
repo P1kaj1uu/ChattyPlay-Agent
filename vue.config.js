@@ -37,5 +37,6 @@ module.exports = {
   },
 }
 module.exports = defineConfig({
-  transpileDependencies: true
+  transpileDependencies: true,
+  productionSourceMap: false
 })
