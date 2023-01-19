@@ -1,5 +1,5 @@
 const { defineConfig } = require('@vue/cli-service')
-// // 引入等比适配插件
+// 引入等比适配插件
 const px2rem = require("postcss-px2rem");
 // 配置基本大小
 const postcss = px2rem({
