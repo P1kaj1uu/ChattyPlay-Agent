@@ -9,7 +9,7 @@ export const getData = () => {
 	
     var data = [
       {
-				name: "B站万能接口（首推-超推荐可用）",
+				name: "超级万能接口（首推-超推荐可用）",
 				url: "https://jx.jsonplayer.com/player/?url="
       },
 			{

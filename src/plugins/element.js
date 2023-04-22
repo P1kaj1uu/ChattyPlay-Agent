@@ -24,7 +24,8 @@ import {
     Select,
     Option,
     Input,
-    Notification
+    Notification,
+    Message
   } from 'element-ui'
   
   Vue.use(Button)
@@ -47,6 +48,6 @@ import {
   Vue.use(Select)
   Vue.use(Option)
   Vue.use(Input)
-  Vue.use(Notification)
 
   Vue.prototype.$notify = Notification
+  Vue.prototype.$message = Message
