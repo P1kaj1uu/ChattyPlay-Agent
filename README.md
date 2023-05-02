@@ -1,16 +1,18 @@
-# VIP视频在线解析及ChatGPT
+# VIP视频在线解析及ChatGPT服务
 
-## 免责声明
+## 📄 免责声明
 ### 本项目提供音乐、影视解析和ChatGPT服务，仅供学习使用，请勿用于任何商业用途。如有侵权，请联系我！
 
-> 详情可跳转WiKi：https://github.com/P1kaj1uu/VIP-Video-Parsing/wiki/%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3
+> License：
+
+> 项目描述详情信息可跳转WiKi：https://github.com/P1kaj1uu/VIP-Video-Parsing/wiki/%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3
 
 > 移动端适配进度已经完成45%，但可能要搁置一段时间，这段时间要论文降重和答辩
 
-## 在线体验
+## 🚀 在线体验
 - 体验地址：<a href="http://121.36.82.52:9200/">个人项目</a>
 
-## 版本迭代
+## 📖 版本迭代
 - v1.0版本已完成（2023.1.7凌晨）
 - v1.1版本优化观看页面的提示内容（2023.1.7上午）
 - v1.2版本优化解析接口（2023.1.8下午）
@@ -24,9 +26,9 @@
 - v2.1版本增加论文降重功能（2023.4.30）
 - v2.2版本接入ChatGPT服务，可无需再代理和APIkey（2023.5.1-2023.5.3）
 
-## 参与贡献
-- 该项目是实习期间摸鱼时，原因之一是不想再续费视频会员，于是自己一人独立开发尝试做了这个网站。
-- 除了可以解析VIP视频外，其中还包含一加载进入网站的爱心跳动效果。
+## 🖋 参与贡献
+
+<a href="https://github.com/P1Kaj1uu/VIP-Video-Parsing/graphs/contributors">  <img src="https://contrib.rocks/image?repo=P1Kaj1uu/VIP-Video-Parsing" /></a>
 
 ## 🍺 赞助
 
@@ -56,5 +58,4 @@ WeChat Pay：
 ## ⏰ Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=P1kaj1uu/VIP-Video-Parsing&type=Timeline)](https://star-history.com/#P1kaj1uu/VIP-Video-Parsing&Timeline)
-
 
