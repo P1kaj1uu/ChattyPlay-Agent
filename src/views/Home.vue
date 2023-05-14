@@ -94,7 +94,7 @@
         </div>
         <div style="text-align: center">
           <img
-            style="width: 350px; height: 350px; text-align: center"
+            style="width: 65%; height: 55%; text-align: center; margin: 10px 0;"
             src="@/assets/images/home/wx.jpg"
           />
         </div>
@@ -128,7 +128,7 @@ export default {
     }
   },
   created () {
-    console.info("%c欢迎您访问不见水星记的VIP视频在线解析网站，预祝使用愉快！", "font-family: 'Microsoft YaHei'; font-size: 24px; color: #00BFFF; text-shadow: 1px 1px #D3D3D3;");
+    console.info("%c欢迎您访问不见水星记的网站，预祝使用愉快！", "font-family: 'Microsoft YaHei'; font-size: 24px; color: #00BFFF; text-shadow: 1px 1px #D3D3D3;");
     axios.get('https://ipapi.co/json/').then(res => {
       console.log(res.data)
       const { ip } = res.data

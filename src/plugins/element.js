@@ -25,7 +25,9 @@ import {
     Option,
     Input,
     Notification,
-    Message
+    Message,
+    MessageBox,
+    Tooltip
   } from 'element-ui'
   
   Vue.use(Button)
@@ -48,6 +50,9 @@ import {
   Vue.use(Select)
   Vue.use(Option)
   Vue.use(Input)
+  Vue.use(Tooltip)
 
   Vue.prototype.$notify = Notification
   Vue.prototype.$message = Message
+  Vue.prototype.$msgbox = MessageBox
+  Vue.prototype.$confirm = MessageBox.confirm

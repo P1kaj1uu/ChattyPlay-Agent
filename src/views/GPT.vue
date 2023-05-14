@@ -10,67 +10,74 @@
       <el-breadcrumb-item>ChatGPT</el-breadcrumb-item>
     </el-breadcrumb>
 
-    <div class="loader">
+    <div class="loader" ref="loader">
       <div class="bar"></div>
     </div>
 
     <div class="gptBox">
       <!-- 内容聊天区域 -->
       <div class="chat-content">
-        <!-- 初始状态开始 -->
-        <!-- 用户 -->
-        <div class="chat-wrapper">
-          <div class="chat-me">
-            <div class="chat-text">
-              <span style="font-size: 16px;">你好</span>
+        <div class="message" v-for="(item, index) in messages" :key="index">
+          <!-- 用户 -->
+          <template v-if="item.role === 'user'">
+            <div class="me chat">
+              <div v-html="markdown(item.content)"></div>
             </div>
-            <div class="info-time">
+            <div class="infoMe-time">
               <span>权志龙的小迷弟</span>
               <span>{{ new Date().toLocaleString() }}</span>
               <img src="@/assets/images/gpt/user.jpg" />
             </div>
-          </div>
-        </div>
-        <!-- GPT -->
-        <div class="chat-wrapper">
-          <div class="chat-friend">
-            <div class="chat-text">
-              <div class="el-row" style="margin-left: -10px; margin-right: -10px;">
-                <div class="el-col el-col-2" style="padding-left: 10px; padding-right: 10px; cursor: pointer;" @click="copy">
-                  <svg t="1679666016648" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="6241" width="22" height="22" class="icon">
-                    <path p-id="6242" fill="#909399" d="M661.333333 234.666667A64 64 0 0 1 725.333333 298.666667v597.333333a64 64 0 0 1-64 64h-469.333333A64 64 0 0 1 128 896V298.666667a64 64 0 0 1 64-64z m-21.333333 85.333333H213.333333v554.666667h426.666667v-554.666667z m191.829333-256a64 64 0 0 1 63.744 57.856l0.256 6.144v575.701333a42.666667 42.666667 0 0 1-85.034666 4.992l-0.298667-4.992V149.333333H384a42.666667 42.666667 0 0 1-42.368-37.674666L341.333333 106.666667a42.666667 42.666667 0 0 1 37.674667-42.368L384 64h447.829333z"></path>
-                  </svg>
-                </div>
-                <div class="el-col el-col-21" style="padding-left: 10px; padding-right: 10px;"></div>
-              </div>
-              <div>
-                <div class="markdown-body">
-                  <p id="markdown-content">你好！请问有什么我可以帮助你的吗？</p>
-                </div>
-              </div>
-            </div>
-            <div class="info-time">
+          </template>
+          <!-- GPT -->
+          <template v-else>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="复制该内容"
+              placement="top"
+            >
+              <img src="@/assets/images/gpt/copy.png" @click="copy" class="exactImg" alt="复制">
+            </el-tooltip>
+            <div class="ai chat" v-html="markdown(item.content)"></div>
+            <div class="infoAI-time">
               <img src="@/assets/images/gpt/chatgpt.jpg" />
               <span class="gptName">ChatGPT</span>
               <span>{{ new Date().toLocaleString() }}</span>
             </div>
-          </div>
+          </template>
         </div>
-        <!-- 初始状态结束 -->
       </div>
       <!-- 发送问题区域 -->
       <div class="chatInputs">
         <el-input
           ref="myInput"
           type="textarea"
-          :autosize="{ minRows: 1, maxRows: 2}"
+          :autosize="{ minRows: 1, maxRows: 2 }"
           placeholder="在此输入您的提示词，点击右侧火箭按钮发送消息~"
           v-model="gptValue"
         >
         </el-input>
-        <button class="sendImg" @click="sendMessage" :disabled="flag">
-          <img src="@/assets/images/gpt/rocket.png" alt="发送" />
-        </button>
+        <el-tooltip
+          class="item"
+          effect="dark"
+          content="发送消息"
+          placement="top"
+        >
+          <button class="sendImg" @click="handleSend" :disabled="false">
+            <img src="@/assets/images/gpt/rocket.png" alt="发送" />
+          </button>
+        </el-tooltip>
+        <el-tooltip
+          class="item"
+          effect="dark"
+          content="清空会话"
+          placement="top"
+        >
+          <button class="clears" @click="clearSession" :disabled="false">
+            <img src="@/assets/images/gpt/delete.png" alt="清空" />
+          </button>
+        </el-tooltip>
       </div>
     </div>
 
@@ -88,28 +95,164 @@
 </template>
 
 <script>
-import axios from 'axios'
-// 导入封装的获取当前时间、用户输入的DOM结构和GPT响应的DOM结构函数
-import { getTime } from '@/utils/currentTime'
-import { getUserDOM } from '@/utils/userDOM'
-import { getGPTDOM } from '@/utils/gptDOM'
+import { resolveStreamResponse } from '@/utils/resolveStreamResponse'
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
+
+const initSession = [
+  {
+    role: 'user',
+    content: '你好'
+  },
+  {
+    role: 'assistant',
+    content: '你好！请问有什么我可以帮助你的吗？'
+  }
+]
 
 export default {
-  name: "GPTView",
-  data () {
+  name: 'GPTView',
+  data() {
     return {
       gptValue: '',
-      flag: false,
-      gptNum: 0,
-      messageGPTList: []
+      messages: this.getSessionCache() ? this.getSessionCache() : initSession
     }
   },
   methods: {
+    handleSend() {
+      if (this.gptValue.trim().length === 0) {
+        this.gptValue = ''
+        this.focusInput()
+        this.$message.warning('发送的消息不能为空哦~')
+        return
+      }
+      this.messages.push({
+        role: 'user',
+        content: this.gptValue.trim()
+      })
+      this.toMessageBottom()
+      document.querySelector('.sendImg').disabled = true
+      document.querySelector('.clears').disabled = true
+      document.querySelector('.loadEffect').style.display = 'block'
+      document.querySelector('.loader').style.visibility = 'visible'
+      this.getGPTResponse(this.gptValue)
+      this.gptValue = ''
+    },
+    async getGPTResponse (content) {
+      // 此处填入GPT3.5模型的接口
+      const fetchPromise = fetch(
+        `GPT.URL`,
+        {
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json'
+          },
+          body: JSON.stringify({
+            frequency_penalty: 0,
+            max_tokens: 1000,
+            messages: this.messages,
+            model: 'gpt-3.5-turbo',
+            n: 1,
+            presence_penalty: 0,
+            stop: '',
+            stream: true,
+            temperature: 1,
+            top_p: 1
+          })
+        }
+      ).catch(() => {
+        this.$message.error('出错啦~建议刷新页面后，再重新尝试')
+        this.toMessageBottom()
+        document.querySelector('.loadEffect').style.display = 'none'
+        document.querySelector('.loader').style.visibility = 'hidden'
+      }).finally(() => {
+        this.focusInput()
+      })
+      const message = {
+        role: 'assistant',
+        content: ''
+      }
+      this.messages.push(message)
+      resolveStreamResponse(
+        fetchPromise,
+        (data) => {
+          message.content += data.choices.map((_) => _.delta.content).join('')
+        },
+        (err) => {
+          message.content += "宝，我出错啦，这个问题我也不知道该怎么回答你呢，要不你慢一点，容我再想一想~（建议：清空会话记录试试..."
+          this.$message.error('出错啦~建议刷新页面后，再重新尝试')
+          console.log('错误！', err)
+        },
+        () => {
+          localStorage.setItem('session_cached', JSON.stringify(this.messages))
+        },
+        document.querySelector('.sendImg'),
+        document.querySelector('.clears')
+      )
+    },
+    // 清空会话
+    clearSession () {
+      this.$confirm('此操作将永久清空已存在的对话内容，是否继续？', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      })
+        .then(() => {
+          this.messages = initSession
+          this.$message({
+            type: 'success',
+            message: '清空成功'
+          })
+          this.setSessionCache()
+        })
+        .catch(() => {})
+    },
+    // 存储会话
+    setSessionCache() {
+      return localStorage.setItem(
+        'session_cached',
+        JSON.stringify(this.messages)
+      )
+    },
+    // 获取会话
+    getSessionCache() {
+      return JSON.parse(localStorage.getItem('session_cached'))
+    },
+    // 解析markdown格式和代码高亮显示
+    markdown(content) {
+      const md = new MarkdownIt({
+        highlight: function (str, lang) {
+          if (lang && hljs.getLanguage(lang)) {
+            try {
+              return (
+                '<pre class="hljs"><code>' +
+                hljs.highlight(lang, str, true).value +
+                '</code></pre>'
+              )
+            } catch (__) {}
+          }
+          return (
+            '<pre class="hljs"><code>' +
+            md.utils.escapeHtml(str) +
+            '</code></pre>'
+          )
+        }
+      })
+      const result = md.render(content)
+      return result
+    },
     // 复制GPT回答的内容
-    copy (e) {
-      const input = e.target.parentNode.parentNode.nextElementSibling.querySelector('#markdown-content')
+    copy(e) {
+      const input = e.target.parentNode.querySelectorAll('.ai')
+      if (input.length === 0) {
+        this.$message.info('请耐心等待ChatGPT回复后再复制')
+        return
+      }
       const textarea = document.createElement('textarea')
-      textarea.value = input.innerText || input.textContent
+      input.forEach(item => {
+        textarea.value += item.innerText || item.textContent
+      })
       // 将隐藏的 <textarea> 元素添加到文档中，并选中其中的文本
       document.body.appendChild(textarea)
       textarea.select()
@@ -119,82 +262,24 @@ export default {
       this.$message.success('复制成功')
     },
     // 聚焦输入框
-    focusInput () {
+    focusInput() {
       this.$nextTick(() => {
         this.$refs.myInput.focus()
       })
     },
     // 封装消息滚动到底部的方法
-    toBottom () {
+    toMessageBottom() {
       this.$nextTick(() => {
         const content = document.querySelector('.chat-content')
         content.scrollTop = content.scrollHeight
       })
-    },
-    sendMessage () {
-      if (this.gptValue.trim().length === 0) {
-        this.gptValue = ''
-        this.focusInput()
-        this.$message.warning('发送的消息不能为空哦~')
-        return
-      }
-      // 用户发送的时间
-      const userTime = getTime()
-      getUserDOM(this.gptValue, userTime)
-      this.toBottom()
-      document.querySelector('.loadEffect').style.display = 'block'
-      document.querySelector('.loader').style.visibility = 'visible'
-      this.flag = true
-      // 支持上下文对话
-      let messageList = this.gptNum >= 1 ? [...this.messageGPTList, { role: 'user', content: this.gptValue }] : [{ role: 'user', content: this.gptValue }]
-      // 此处填入GPT3.5模型的接口
-      axios.post('GPT.URL', {
-        frequency_penalty: 0,
-        max_tokens: 1000,
-        messages: messageList,
-        model: 'gpt-3.5-turbo',
-        n: 1,
-        presence_penalty: 0,
-        stop: '',
-        stream: true,
-        temperature: 1,
-        top_p: 1
-      }).then(res => {
-        let dataArray = res.data.split('\n')
-        let gptRes = ''
-        // GPT响应时间
-        let gptTime = getTime()
-        dataArray.forEach(str => {
-          if (str.trim() !== '' && str.startsWith('data:') && str.includes('content')) {
-            let curStr = str.replace('…', '",').replace(/\\n/g, '\n')
-            let indexFirst = curStr.indexOf('content') + 10
-            let indexLast = curStr.indexOf('"}')
-            gptRes += curStr.substring(indexFirst, indexLast)
-          }
-        })
-        ++this.gptNum
-        this.messageGPTList = [...messageList, { role: 'assistant', content: gptRes }]
-        getGPTDOM(gptRes, gptTime)
-      }).catch(error => {
-        // GPT响应时间
-        let gptErrorTime = getTime()
-        let errorMessage = '宝，我好卡呀，这个问题我也不知道该怎么回答你呢，要不你慢一点，容我再想一想'
-        getGPTDOM(errorMessage, gptErrorTime)
-        console.log(error)
-      }).finally(() => {
-        this.gptValue = ''
-        this.flag = false
-        this.focusInput()
-        this.toBottom()
-        document.querySelector('.loadEffect').style.display = 'none'
-        document.querySelector('.loader').style.visibility = 'hidden'
-      })
     }
   },
-  created () {
+  created() {
     this.focusInput()
+    this.toMessageBottom()
   }
-};
+}
 </script>
 
 <style lang="less" scoped>
@@ -214,126 +299,106 @@ export default {
   scrollbar-color: #999 #eee; /* 滚动条颜色 */
 }
 
-.chat-me {
-  width: 100%;
-  float: right;
-  margin-bottom: 20px;
-  position: relative;
+.chat {
+  margin: 10px;
+  line-height: 1.5;
+  font-size: 16px;
+  max-width: 50vw;
+}
+.message {
   display: flex;
   flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-end;
+  position: relative;
+}
+.me {
+  padding: 10px;
+  border-radius: 20px 20px 5px 20px;
+  background-color: #95ec69;
+  color: #000;
+  word-break: break-all;
+  align-self: flex-end;
+}
+.ai {
+  padding: 35px 10px 10px;
+  background-color: #fff;
+  border-radius: 20px 20px 20px 5px;
+  align-self: flex-start;
+}
 
-  .chat-text {
-    float: right;
-    max-width: 90%;
-    padding: 15px;
-    border-radius: 20px 20px 5px 20px;
-    background-color: #95ec69;
-    color: #000;
-    word-break: break-all;
+.infoMe-time {
+  color: #fff;
+  user-select: none;
+  font-size: 14px;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+
+  span:first-child {
+    color: rgb(101, 104, 115);
+    margin-right: 10px;
+    vertical-align: middle;
+    height: 30px;
+    line-height: 30px;
   }
 
-  .info-time {
-    margin: 10px 0;
-    color: #fff;
-    font-size: 14px;
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
+  span:last-child {
+    line-height: 30px;
+  }
 
-    span:first-child {
-      color: rgb(101, 104, 115);
-      margin-right: 10px;
-      vertical-align: middle;
-      height: 30px;
-      line-height: 30px;
-    }
-
-    span:last-child {
-      line-height: 30px;
-    }
-
-    img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-left: 10px;
   }
 }
 
-.chat-friend {
-  width: 80%;
-  float: left;
-  margin-bottom: 20px;
-  position: relative;
+.infoAI-time {
+  color: #fff;
+  user-select: none;
+  font-size: 14px;
   display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  align-items: flex-start;
+  justify-content: flex-start;
+  align-items: center;
 
-  .chat-text {
-    float: left;
-    max-width: 90%;
-    padding: 15px;
-    border-radius: 20px 20px 20px 5px;
-    background-color: #fff;
-
-    .markdown-body {
-      -webkit-text-size-adjust: 100%;
-      color: #24292e;
-      font-family: -apple-system,BlinkMacSystemFont,Segoe UI,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji;
-      font-size: 16px;
-      line-height: 1.5;
-      word-wrap: break-word;
-    }
-    .markdown-body>:first-child {
-      margin-top: 0 !important;
-    }
-    .markdown-body>:last-child {
-      margin-bottom: 0 !important;
-    }
+  img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    vertical-align: middle;
+    margin-left: 10px;
   }
 
-  .info-time {
-    margin: 10px 0;
-    color: #fff;
-    font-size: 14px;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    img {
-      width: 30px;
-      height: 30px;
-      border-radius: 50%;
-      vertical-align: middle;
-      margin-left: 10px;
-    }
-
-    span:first-child {
-      line-height: 30px;
-    }
-
-    .gptName {
-      margin: 0 10px;
-    }
-
-    span:last-child {
-      color: rgb(101, 104, 115);
-      margin-right: 10px;
-      vertical-align: middle;
-      height: 30px;
-      line-height: 30px;
-    }
+  span:first-child {
+    line-height: 30px;
   }
+
+  .gptName {
+    margin: 0 10px;
+  }
+
+  span:last-child {
+    color: rgb(101, 104, 115);
+    margin-right: 10px;
+    vertical-align: middle;
+    height: 30px;
+    line-height: 30px;
+  }
+}
+
+.exactImg {
+  position: absolute;
+  top: 15px;
+  left: 25px;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
 }
 
 /* 隐藏默认的滚动条 */
 ::-webkit-scrollbar {
-   display: none;
+  display: none;
 }
 .chatInputs {
   width: 90%;
@@ -364,6 +429,26 @@ export default {
   border: 0;
   transition: 0.3s;
   box-shadow: 0px 0px 5px 0px rgb(0 136 255);
+
+  img {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+.clears {
+  position: relative;
+  cursor: pointer;
+  width: 10%;
+  background-color: wheat;
+  border: 0;
+  transition: 0.3s;
+  font-style: 20px;
+  box-shadow: 0px 0px 5px 0px wheat;
 
   img {
     width: 30px;
@@ -459,10 +544,16 @@ export default {
   top: 0;
   left: 0;
   height: 100%;
-  background-image: linear-gradient(to right, #ff5b5b, #ffbd2f, #21d07a, #3c7bff);
+  background-image: linear-gradient(
+    to right,
+    #ff5b5b,
+    #ffbd2f,
+    #21d07a,
+    #3c7bff
+  );
   background-size: auto 100%;
   animation: loading 2s ease-in-out infinite alternate;
-  box-shadow: 0 0 5px rgba(255,255,255,0.2);
+  box-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
 }
 
 @keyframes loading {

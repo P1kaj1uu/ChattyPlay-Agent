@@ -3,6 +3,9 @@
  * @Author: 不见水星记（P1kaj1uu）
 */
 import Vue from 'vue'
+import MarkdownIt from 'markdown-it'
+import hljs from 'highlight.js'
+import 'highlight.js/styles/github.css'
 import { Message } from 'element-ui'
 Vue.prototype.$message = Message
 
@@ -18,6 +21,23 @@ const copy = (e) => {
   // 删除隐藏的 <textarea> 元素
   document.body.removeChild(textarea)
   Vue.prototype.$message.success('复制成功')
+}
+
+const markdown = (content) => {
+  const md = new MarkdownIt({
+    highlight: function (str, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try {
+          return '<pre class="hljs"><code>' +
+            hljs.highlight(lang, str, true).value +
+            '</code></pre>'
+          } catch (__) { }
+      }
+      return '<pre class="hljs"><code>' + md.utils.escapeHtml(str) + '</code></pre>'
+    }
+  })
+  const result = md.render(content)
+  return result
 }
 
 export const getGPTDOM = (value, time) => {

@@ -100,5 +100,7 @@ export default {
 </script>
 
 <style lang="less" scoped>
-
+.hljs {
+  padding: 10px;
+}
 </style>
