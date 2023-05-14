@@ -53,7 +53,7 @@
 
 
 - ### ChatGPT页面
-![99152c731e268c9cf037f245cd8b3fd](https://user-images.githubusercontent.com/94435057/235587854-863caaee-f085-4a07-953e-3fcfa16549bc.jpg)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/1f9762b3-e1dd-4fa8-bf0f-1b7b45e1d9a0)
 
 
 ## 🖋 参与贡献
