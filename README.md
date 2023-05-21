@@ -80,7 +80,7 @@
 
 
 - ### ChatGPT页面
-![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/fe0de511-22f2-4320-83a8-fe2b36c6937c)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/205037a3-9430-4b2c-b7c7-f33f5acbdf91)
 
 
 ## ⚡ 网站性能
