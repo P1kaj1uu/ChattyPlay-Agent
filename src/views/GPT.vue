@@ -37,7 +37,15 @@
               content="复制该内容"
               placement="top"
             >
-              <img src="@/assets/images/gpt/copy.png" @click="copy" class="exactImg" alt="复制">
+              <img src="@/assets/images/gpt/copy.png" @click="copy" class="copyImg" alt="复制">
+            </el-tooltip>
+            <el-tooltip
+              class="item"
+              effect="dark"
+              content="播放该内容"
+              placement="top"
+            >
+              <img src="@/assets/images/gpt/trumpet.png" @click="playSoundFn" class="trumpetImg" alt="播放">
             </el-tooltip>
             <div class="ai chat" v-html="markdown(item.content)"></div>
             <div class="infoAI-time">
@@ -50,11 +58,12 @@
       </div>
       <!-- 发送问题区域 -->
       <div class="chatInputs">
+        <Role @selectChange="getSelectValue" ref="roleRef" />
         <el-input
           ref="myInput"
           type="textarea"
           :autosize="{ minRows: 1, maxRows: 2 }"
-          placeholder="在此输入您的提示词，点击右侧火箭按钮发送消息~"
+          placeholder="在此输入您的提示词，Esc键换行，Enter键或点击右侧火箭按钮发送消息~"
           v-model="gptValue"
         >
         </el-input>
@@ -95,6 +104,7 @@
 </template>
 
 <script>
+import Role from '@/components/Role'
 import { resolveStreamResponse } from '@/utils/resolveStreamResponse'
 import MarkdownIt from 'markdown-it'
 import hljs from 'highlight.js'
@@ -116,11 +126,24 @@ export default {
   data() {
     return {
       gptValue: '',
-      messages: this.getSessionCache() ? this.getSessionCache() : initSession
+      messages: this.getSessionCache() ? this.getSessionCache() : initSession,
+      backupMessage: [
+        {
+          role: 'user',
+          content: '你好'
+        },
+        {
+          role: 'assistant',
+          content: '你好！请问有什么我可以帮助你的吗？'
+        }
+      ]
     }
   },
+  components: {
+    Role
+  },
   methods: {
-    handleSend() {
+    handleSend () {
       if (this.gptValue.trim().length === 0) {
         this.gptValue = ''
         this.focusInput()
@@ -138,6 +161,16 @@ export default {
       document.querySelector('.loader').style.visibility = 'visible'
       this.getGPTResponse(this.gptValue)
       this.gptValue = ''
+      this.$refs.roleRef.clearSelect()
+    },
+    onKeyDown (event) {
+      if (event.key === 'Escape') {
+        this.gptValue += '\n'
+      }
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        this.handleSend()
+      }
     },
     async getGPTResponse (content) {
       // 此处填入GPT3.5模型的接口
@@ -191,6 +224,10 @@ export default {
         document.querySelector('.clears')
       )
     },
+    // 获取子组件传递过来的数据
+    getSelectValue (data) {
+      this.gptValue = data
+    },
     // 清空会话
     clearSession () {
       this.$confirm('此操作将永久清空已存在的对话内容，是否继续？', '提示', {
@@ -199,34 +236,34 @@ export default {
         type: 'warning'
       })
         .then(() => {
-          this.messages = initSession
           this.$message({
             type: 'success',
             message: '清空成功'
           })
+          this.messages = this.backupMessage
           this.setSessionCache()
         })
         .catch(() => {})
     },
     // 存储会话
-    setSessionCache() {
+    setSessionCache () {
       return localStorage.setItem(
         'session_cached',
         JSON.stringify(this.messages)
       )
     },
     // 获取会话
-    getSessionCache() {
+    getSessionCache () {
       return JSON.parse(localStorage.getItem('session_cached'))
     },
     // 解析markdown格式和代码高亮显示
-    markdown(content) {
+    markdown (content) {
       const md = new MarkdownIt({
         highlight: function (str, lang) {
           if (lang && hljs.getLanguage(lang)) {
             try {
               return (
-                '<pre class="hljs"><code>' +
+                '<pre class="hljs"><button class="CodesBlock" @click="copyCodeBlock">复制代码</button><code>' +
                 hljs.highlight(lang, str, true).value +
                 '</code></pre>'
               )
@@ -240,10 +277,16 @@ export default {
         }
       })
       const result = md.render(content)
+      this.$nextTick(() => {
+        let elements = document.querySelectorAll('.CodesBlock')
+        elements.forEach(item => {
+          item.addEventListener('click', this.copyCodeBlock)
+        })
+      })
       return result
     },
-    // 复制GPT回答的内容
-    copy(e) {
+    // 复制GPT回答的全部内容
+    copy (e) {
       const input = e.target.parentNode.querySelectorAll('.ai')
       if (input.length === 0) {
         this.$message.info('请耐心等待ChatGPT回复后再复制')
@@ -253,6 +296,7 @@ export default {
       input.forEach(item => {
         textarea.value += item.innerText || item.textContent
       })
+      textarea.value = textarea.value.replaceAll('复制代码', '')
       // 将隐藏的 <textarea> 元素添加到文档中，并选中其中的文本
       document.body.appendChild(textarea)
       textarea.select()
@@ -261,28 +305,95 @@ export default {
       document.body.removeChild(textarea)
       this.$message.success('复制成功')
     },
+    // 复制代码
+    copyCodeBlock (e) {
+      const codes = e.target.nextElementSibling
+      const text = codes.innerText || codes.textContent
+      const textarea = document.createElement('textarea')
+      textarea.value = text
+      document.body.appendChild(textarea)
+      textarea.select()
+      document.execCommand('copy')
+      document.body.removeChild(textarea)
+      this.$message.success('复制代码成功')
+    },
+    // 播放声音
+    playSoundFn (e) {
+      const input = e.target.parentNode.querySelectorAll('.ai')
+      if (input.length === 0) {
+        this.$message.info('请耐心等待ChatGPT回复后再播放')
+        return
+      }
+      // 判断浏览器是否支持
+      const isSupport = 'speechSynthesis' in window
+      if (!isSupport) {
+        this.$message.warning('该浏览器暂不支持，请切换浏览器后重试！')
+        return
+      }
+      let soundValue = ''
+      input.forEach(item => {
+        soundValue += item.innerText || item.textContent
+      })
+      soundValue = soundValue.replace('复制代码', '')
+      const count = Math.ceil(soundValue.length / 20)
+      for (let i = 0; i < count; i++) {
+        let cur = soundValue.slice(i * 20, i * 20 + 20)
+        // 创建SpeechSynthesisUtterance对象
+        const speech = new SpeechSynthesisUtterance()
+        // 设置要播放的文本内容
+        speech.text = cur
+        // 调用SpeechSynthesis.speak方法开始播放
+        window.speechSynthesis.speak(speech)
+      }
+    },
     // 聚焦输入框
-    focusInput() {
+    focusInput () {
       this.$nextTick(() => {
         this.$refs.myInput.focus()
       })
     },
     // 封装消息滚动到底部的方法
-    toMessageBottom() {
+    toMessageBottom () {
       this.$nextTick(() => {
         const content = document.querySelector('.chat-content')
         content.scrollTop = content.scrollHeight
       })
     }
   },
-  created() {
+  created () {
     this.focusInput()
     this.toMessageBottom()
-  }
+    this.$nextTick(() => {
+      this.$refs.myInput.$el.querySelector('.el-textarea__inner').addEventListener('keydown', this.onKeyDown)
+    })
+  },
+  beforeDestroy() {
+    this.$refs.myInput.$el.querySelector('.el-textarea__inner').removeEventListener('keydown', this.onKeyDown)
+  },
 }
 </script>
 
 <style lang="less" scoped>
+/deep/ .hljs {
+  position: relative;
+  padding: 10px;
+  background-color: #f6f8fa;
+}
+
+/deep/ .CodesBlock {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  cursor: pointer;
+  font-size: 15px;
+  background-color: #f6f8fa;
+}
+/deep/ .CodesBlock:hover {
+  color: pink;
+}
+.gptContainer {
+  position: relative;
+}
 .gptBox {
   position: relative;
   height: 80vh;
@@ -319,7 +430,7 @@ export default {
   align-self: flex-end;
 }
 .ai {
-  padding: 35px 10px 10px;
+  padding: 35px 30px 10px;
   background-color: #fff;
   border-radius: 20px 20px 20px 5px;
   align-self: flex-start;
@@ -387,10 +498,19 @@ export default {
   }
 }
 
-.exactImg {
+.copyImg {
   position: absolute;
   top: 15px;
   left: 25px;
+  cursor: pointer;
+  width: 25px;
+  height: 25px;
+}
+
+.trumpetImg {
+  position: absolute;
+  top: 15px;
+  left: 70px;
   cursor: pointer;
   width: 25px;
   height: 25px;
@@ -400,6 +520,7 @@ export default {
 ::-webkit-scrollbar {
   display: none;
 }
+
 .chatInputs {
   width: 90%;
   position: absolute;
@@ -460,12 +581,32 @@ export default {
   }
 }
 
+.optionals {
+  position: relative;
+  cursor: pointer;
+  width: 10%;
+  background-color: #fff;
+  border: 0;
+  border-radius: 5%;
+  transition: 0.3s;
+  font-style: 20px;
+
+  img {
+    width: 30px;
+    height: 30px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
+
 .loadEffect {
   display: none;
   width: 100px;
   height: 100px;
-  left: 40%;
-  top: 40%;
+  left: 50%;
+  top: 50%;
   position: absolute;
 }
 .loadEffect span {

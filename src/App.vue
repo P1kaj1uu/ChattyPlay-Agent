@@ -6,7 +6,8 @@
 </template>
 
 <script>
-import { Heart } from '@/utils/model';
+import { Heart } from '@/utils/model'
+import { sleep } from '@/utils/sleep'
 
 export default {
   name: 'App',
@@ -14,14 +15,7 @@ export default {
     (function () {
       // 在不刷新页面的情况下，只执行一次爱心跳动效果
       // 加载爱心跳动效果
-      setTimeout(async () => {
-        let main = document.querySelector('.el-main')
-        console.log(
-          main.clientWidth,
-          main.clientHeight,
-          main.getBoundingClientRect().left,
-          main.getBoundingClientRect().top
-        )
+      sleep(250).then(async () => {
         await Heart()
         // 伪数组
         let ele = document.querySelectorAll('body canvas')
@@ -37,17 +31,17 @@ export default {
             item.classList.add('model')
           }
         })
-      }, 2800)
+      })
       // 移除爱心跳动效果
-      setTimeout(() => {
-        let eles = document.querySelectorAll('body .model')
-        Array.from(eles).forEach((item) => {
+      sleep(5800).then(() => {
+        let element = document.querySelectorAll('body .model')
+        Array.from(element).forEach((item) => {
           console.log(item.className)
           if (item.className === 'model') {
             item.style.display = 'none'
           }
         })
-      }, 7800)
+      })
     })();
     
     // 核心价值！
@@ -100,7 +94,5 @@ export default {
 </script>
 
 <style lang="less" scoped>
-.hljs {
-  padding: 10px;
-}
+
 </style>

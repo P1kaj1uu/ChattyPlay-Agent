@@ -128,7 +128,7 @@ export default {
     }
   },
   created () {
-    console.info("%c欢迎您访问不见水星记的网站，预祝使用愉快！", "font-family: 'Microsoft YaHei'; font-size: 24px; color: #00BFFF; text-shadow: 1px 1px #D3D3D3;");
+    console.info("%c欢迎您访问不见水星记的网站，预祝使用愉快！\n\n%c       _oo0oo_\n      o8888888o\n      88\" . \"88\n      (| -_- |)\n      0\\  =  /0\n    ___/‘---’\\___\n  .' \\\\|     |// '.\n / \\\\|||  :  |||// \\\n/ _||||| -:- |||||- \\\n|   | \\\\\\  -  /// |   |\n| \\_|  ''\\---/''  |_/ |\n \\  .-\\__  '-'  ___/-. /\n'-.____'-.____\\<><>/.____.-'\n       '=---='\n\n   佛祖保佑，永无bug！", "font-family: 'Microsoft YaHei'; font-size: 24px; color: #00BFFF; text-shadow: 1px 1px #D3D3D3;", "font-size: 18px;color: green;");
     axios.get('https://ipapi.co/json/').then(res => {
       console.log(res.data)
       const { ip } = res.data

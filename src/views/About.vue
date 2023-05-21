@@ -29,7 +29,7 @@
           <ol>
             <li>1&nbsp;.&nbsp;该项目准备开源，已部署服务器。</li>
             <li>2&nbsp;.&nbsp;以后可能会尝试网站备案。</li>
-            <li style="font-weight: 600;">3&nbsp;.&nbsp;本站只提供影视解析服务，请勿用于任何商业用途。如有侵权，请联系我！</li>
+            <li style="font-weight: 600;">3&nbsp;.&nbsp;本站只提供提供音乐、影视解析和ChatGPT服务，请勿用于任何商业用途。如有侵权，请联系我！</li>
             <li style="font-weight: 600;">4&nbsp;.&nbsp;请不要黑我服务器！！！</li>
             <li style="font-weight: 600;">5&nbsp;.&nbsp;请不要入侵我服务器！！！</li>
             <li style="font-weight: 600;">6&nbsp;.&nbsp;请不要拿我服务器挖矿！！！</li>
