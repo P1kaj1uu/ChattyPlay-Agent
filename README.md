@@ -29,15 +29,16 @@
 - v2.3版本优化ChatGPT服务，检测自动换行，并支持上下文对话（2023.5.6-2023.5.7）
 - v2.4版本代仓本地的部分接口隐藏不对外开放（2023.5.7晚上）
 - v2.5版本输出代码高亮显示，流式处理EventStream，并支持会话存储（2023.5.13-2023.5.14）
-- v2.6版本接入文心一言基础服务，增加语音聊天、语音朗读功能（后续安排）
-- v2.7版本前端也做限流处理，增加验证功能，防止接口被恶意多次请求（后续安排）
-- v2.8版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（进行中）
+- v2.6版本接入文心一言基础服务，增加语音聊天、语音朗读功能（2023.5.20-2023.5.21）
+- v2.7版本前端也做限流处理，增加验证功能，防止接口被恶意多次请求（2023.5.24晚上）
+- v2.8版本优化加载效果，增加网站访问次数统计和版本更新提醒用户功能（2023.5.26-2023.5.27）
+- v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（进行中）
 - v3.0版本性能优化，项目重构，全新版本上线（待定安排中）
 
 
 ## 🔰 项目概述
 ✅ 技术栈
-- 前端：Vue2，Vuex，JQuery，Three.js，axios，fetch，路由前置全局守卫，MD5加密，验证码，Markdown语法解析，highlight代码高亮显示，处理EventStream流，PC端屏幕适配，组件库使用ElementUI和Layui
+- 前端：Vue2，Vuex，JQuery，Three.js，axios，fetch，路由前置全局守卫，MD5加密，验证码，网站访问次数统计，Markdown语法解析，highlight代码高亮显示，处理EventStream流，PC端屏幕适配，组件库使用ElementUI和Layui
 - 后端：Java，开发框架SpringBoot，数据库MySQL，中间件Redis，第三方API接入Openai-ChatGPT，核心技术包含拦截器、过滤器、本地缓存Caffeine LoadingCache、算法（双端队列 + 滑动窗口 + 轮询负载均衡等）、Stream流、全局异常处理器、定时任务、锁机制、Swagger
 - 部署：Nginx，服务器开代理模式
 
@@ -64,24 +65,29 @@
 ![image](https://user-images.githubusercontent.com/94435057/235587606-f84bdbcc-b67b-4790-93cc-c91d77ec9b6c.png)
 
 - ### 音乐页面
-![image](https://user-images.githubusercontent.com/94435057/235587997-5aba1a18-971d-4877-8cfe-ee2b468933b1.png)
-![image](https://user-images.githubusercontent.com/94435057/235588140-a94fbd95-8a50-490b-81b1-8b09eda44490.png)
-![image](https://user-images.githubusercontent.com/94435057/235588265-f59b1892-22a0-43d5-bebf-b0f17ad4b31e.png)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/a02a52f6-15e8-4503-922b-2af207419c15)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/1bbd4733-f5fa-43ed-bd4d-a2c30a5b8f52)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/1321776c-1942-4ab4-b911-5569759b80d3)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/0b7d8db6-d8ad-4e6e-a103-427e66deba33)
 
 
 - ### 观看页面
-![image](https://user-images.githubusercontent.com/94435057/235588373-daabfe47-1598-4d7b-b601-59b91e1289a1.png)
-![image](https://user-images.githubusercontent.com/94435057/235588574-5a6489f8-21ba-4cad-afbc-6874f7d3d136.png)
-![image](https://user-images.githubusercontent.com/94435057/235588619-e760c618-958d-4415-98af-dd9b5b1c01e3.png)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8d26a5d2-9cb9-4671-8612-a65e1dd1adda)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/c02fafa0-2f08-4f09-bb92-bf4480dcf7e2)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/2dc87edc-068e-48f4-8655-d7c05ff91086)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/0464986a-b635-4114-9b41-84e7786fdabb)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/43d7a201-0473-4d29-bc3c-d1fd03898e85)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/3f77676f-fd12-497e-ba5b-857429a60dbb)
 
 
 - ### 降重页面
-![image](https://user-images.githubusercontent.com/94435057/235587953-7f943f16-f127-4537-85fb-1a3e5c687d14.png)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05dc42f5-15ed-49e7-9141-dead78fd5a5b)
 
 
 - ### ChatGPT页面
-![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/205037a3-9430-4b2c-b7c7-f33f5acbdf91)
-![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/994ffb3d-3294-46d4-9ffa-cc155bf3172e)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/112e3eb6-158f-47e5-9bb4-7e104af38088)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/f219dc3a-2540-4c87-8ac3-1d030ca88f7e)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/d44844db-fd03-430c-8bc7-ebbbdf6abed2)
 
 
 ## ⚡ 网站性能
