@@ -64,6 +64,9 @@
 - ### 登录页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/9a994b55-b7af-4ee2-98b1-7ec3844be75b)
 
+- ### 404页面
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8b1bc61b-a5ff-4dcb-80e8-4459680f8da7)
+
 - ### 爱心跳动
 ![image](https://user-images.githubusercontent.com/94435057/235587606-f84bdbcc-b67b-4790-93cc-c91d77ec9b6c.png)
 
@@ -73,7 +76,6 @@
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/1321776c-1942-4ab4-b911-5569759b80d3)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/0b7d8db6-d8ad-4e6e-a103-427e66deba33)
 
-
 - ### 观看页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8d26a5d2-9cb9-4671-8612-a65e1dd1adda)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/c02fafa0-2f08-4f09-bb92-bf4480dcf7e2)
@@ -82,16 +84,13 @@
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/43d7a201-0473-4d29-bc3c-d1fd03898e85)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/3f77676f-fd12-497e-ba5b-857429a60dbb)
 
-
 - ### 降重页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05dc42f5-15ed-49e7-9141-dead78fd5a5b)
-
 
 - ### ChatGPT页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/112e3eb6-158f-47e5-9bb4-7e104af38088)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/f219dc3a-2540-4c87-8ac3-1d030ca88f7e)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/d44844db-fd03-430c-8bc7-ebbbdf6abed2)
-
 
 ## ⚡ 网站性能
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8bf28d51-e295-4eb7-bf81-d89ba65d2527)
