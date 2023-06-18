@@ -68,7 +68,7 @@
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8b1bc61b-a5ff-4dcb-80e8-4459680f8da7)
 
 - ### 爱心跳动
-![image](https://usercontent.github.com/user-images/94435057/235587606-f84bdbcc-b67b-4790-93cc-c91d77ec9b6c.png)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/02b9367e-0b6e-4cde-8157-36b5731aa518)
 
 - ### 音乐页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/a02a52f6-15e8-4503-922b-2af207419c15)
