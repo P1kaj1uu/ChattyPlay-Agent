@@ -33,7 +33,7 @@
 - v2.7版本前端也做限流处理，增加验证功能，防止接口被恶意多次请求（2023.5.24晚上）
 - v2.8版本优化加载效果，增加网站访问次数统计和版本更新提醒用户功能（2023.5.26-2023.5.27）
 - v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（2023.6.10-2023.6.20）
-- v3.0全新版本上线，接入亚马逊爬虫服务，发布浏览器插件（2023.7.24~）
+- v3.0全新版本上线，优化markdown代码块格式，并接入文生图、亚马逊爬虫服务，发布浏览器插件（2023.7.24-2023.8.7）
 
 
 ## 🔰 项目概述
@@ -68,11 +68,14 @@
 - ### 登录页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/9a994b55-b7af-4ee2-98b1-7ec3844be75b)
 
+
 - ### 404页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8b1bc61b-a5ff-4dcb-80e8-4459680f8da7)
 
+
 - ### 爱心跳动
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/02b9367e-0b6e-4cde-8157-36b5731aa518)
+
 
 - ### 音乐页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/a02a52f6-15e8-4503-922b-2af207419c15)
@@ -88,13 +91,24 @@
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/43d7a201-0473-4d29-bc3c-d1fd03898e85)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/3f77676f-fd12-497e-ba5b-857429a60dbb)
 
+
 - ### 降重页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05dc42f5-15ed-49e7-9141-dead78fd5a5b)
+
 
 - ### ChatGPT页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/112e3eb6-158f-47e5-9bb4-7e104af38088)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/f219dc3a-2540-4c87-8ac3-1d030ca88f7e)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/d44844db-fd03-430c-8bc7-ebbbdf6abed2)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/fe6d07d7-4564-458b-aa11-d05b1d7119ec)
+
+
+- ### 文生图页面
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/26a6ac68-a3c9-49f1-b53d-47582480b107)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/fcf5de85-6a43-42a0-88e7-ca1bc2d8e6bb)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05f02f4a-836a-4d68-879d-5b2d7264bf02)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/61f8d79d-13b6-4700-98e5-e316023c2e16)
+
 
 ## ⚡ 网站性能
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8bf28d51-e295-4eb7-bf81-d89ba65d2527)
