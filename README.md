@@ -3,15 +3,15 @@
 ## 📄 免责声明
 ### 本项目提供音乐、影视解析和ChatGPT服务，仅供学习使用，请勿用于任何商业用途。如你有更好的想法、建议、或不解的问题，欢迎提PR或Issues！如有侵权，请联系我！
 
-> License：VIP-Video-Parsing is licensed under the Apache-2.0 License. See the [LICENSE](https://github.com/P1kaj1uu/VIP-Video-Parsing/blob/master/LICENSE) file for more information.
+> License：VIP-Video-Parsing is licensed under the Apache-2.0 License. See the [LICENSE](https://githubfast.com/P1kaj1uu/VIP-Video-Parsing/blob/master/LICENSE) file for more information.
 
-> 项目描述详情信息可跳转WiKi：https://github.com/P1kaj1uu/VIP-Video-Parsing/wiki/%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3
+> 项目描述详情信息可跳转WiKi：https://githubfast.com/P1kaj1uu/VIP-Video-Parsing/wiki/%E4%BD%BF%E7%94%A8%E6%96%87%E6%A1%A3
 
-> 移动端适配进度已经完成45%，但可能要搁置一段时间，这段时间要论文降重和答辩
+> 移动端适配暂搁
 
 ## 🚀 在线体验
 - 体验地址：<a href="http://121.36.82.52:9200/" target="_blank">个人项目</a>
-- 备注：如使用ChatGPT服务，我的APIKey配额有限，希望大家能省点用谢谢！
+- 备注：如使用ChatGPT服务，我的APIKey配额有限，希望大家能省点用谢谢！（当前状态：服务器维护，正式版本于2023.8.13上线~
 
 ## 📖 版本迭代
 - v1.0版本已完成（2023.1.7凌晨）
@@ -32,14 +32,14 @@
 - v2.6版本接入文心一言基础服务，增加语音聊天、语音朗读功能（2023.5.20-2023.5.21）
 - v2.7版本前端也做限流处理，增加验证功能，防止接口被恶意多次请求（2023.5.24晚上）
 - v2.8版本优化加载效果，增加网站访问次数统计和版本更新提醒用户功能（2023.5.26-2023.5.27）
-- v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（进行中）
-- v3.0版本性能优化，项目重构，全新版本上线（待定安排中）
+- v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（2023.6.10-2023.6.20）
+- v3.0全新版本上线，优化markdown代码块格式，并接入文生图、亚马逊爬虫服务，发布浏览器插件（2023.7.24-2023.8.13）
 
 
 ## 🔰 项目概述
 ✅ 技术栈
 - 前端：Vue2，Vuex，JQuery，Three.js，axios，fetch，路由前置全局守卫，MD5加密，验证码，网站访问次数统计，Markdown语法解析，highlight代码高亮显示，处理EventStream流，PC端屏幕适配，组件库使用ElementUI和Layui
-- 后端：Java，开发框架SpringBoot，数据库MySQL，中间件Redis，第三方API接入Openai-ChatGPT，核心技术包含拦截器、过滤器、本地缓存Caffeine LoadingCache、算法（双端队列 + 滑动窗口 + 轮询负载均衡等）、Stream流、全局异常处理器、定时任务、锁机制、Swagger
+- 后端：Java，开发框架SpringBoot，数据库MySQL，中间件Redis，第三方API接入Openai-ChatGPT，接入文生图模型（MidJourney / Stable Diffusion Model），核心技术包含拦截器、过滤器、本地缓存Caffeine LoadingCache、算法（双端队列 + 滑动窗口 + 轮询负载均衡等）、Stream流、全局异常处理器、定时任务、锁机制、Swagger
 - 部署：Nginx，服务器开代理模式
 
 ✅ 音乐播放
@@ -59,16 +59,28 @@
 - 流式输出，会话存储管理
 - 语音聊天 + 语音播放
 
+✅ 文生图
+- 接入文生图模型（MidJourney / Stable Diffusion Model）
+- 支持大量多语言的AI绘图
+- 提供20+种生成的图片风格
+
 
 ## ➰ 效果展示
+- ### 检测页面
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/47f44a74-6901-4c0a-bd28-a69ff2423dae)
+
+
 - ### 登录页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/9a994b55-b7af-4ee2-98b1-7ec3844be75b)
+
 
 - ### 404页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8b1bc61b-a5ff-4dcb-80e8-4459680f8da7)
 
+
 - ### 爱心跳动
-![image](https://user-images.githubusercontent.com/94435057/235587606-f84bdbcc-b67b-4790-93cc-c91d77ec9b6c.png)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/02b9367e-0b6e-4cde-8157-36b5731aa518)
+
 
 - ### 音乐页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/a02a52f6-15e8-4503-922b-2af207419c15)
@@ -84,13 +96,24 @@
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/43d7a201-0473-4d29-bc3c-d1fd03898e85)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/3f77676f-fd12-497e-ba5b-857429a60dbb)
 
+
 - ### 降重页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05dc42f5-15ed-49e7-9141-dead78fd5a5b)
+
 
 - ### ChatGPT页面
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/112e3eb6-158f-47e5-9bb4-7e104af38088)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/f219dc3a-2540-4c87-8ac3-1d030ca88f7e)
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/d44844db-fd03-430c-8bc7-ebbbdf6abed2)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/fe6d07d7-4564-458b-aa11-d05b1d7119ec)
+
+
+- ### 文生图页面
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/26a6ac68-a3c9-49f1-b53d-47582480b107)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/fcf5de85-6a43-42a0-88e7-ca1bc2d8e6bb)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/05f02f4a-836a-4d68-879d-5b2d7264bf02)
+![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/61f8d79d-13b6-4700-98e5-e316023c2e16)
+
 
 ## ⚡ 网站性能
 ![image](https://github.com/P1kaj1uu/VIP-Video-Parsing/assets/94435057/8bf28d51-e295-4eb7-bf81-d89ba65d2527)
@@ -119,7 +142,7 @@
 
 <br />
 
-联系我：
+联系我（WeChat：Dveiklokk）：
 
 <img src="http://121.36.82.52:9200/img/wx.3e24f0f7.jpg" width="30%" height="30%">
 
