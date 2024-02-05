@@ -11,6 +11,7 @@
     "core-js": "^3.8.3",
     "element-ui": "^2.15.12",
     "highlight.js": "^11.8.0",
+    "ip-address": "^8.1.0",
     "js-md5": "^0.7.3",
     "lib-flexible": "^0.3.2",
     "markdown-it": "^13.0.1",
@@ -20,7 +21,8 @@
     "vue": "^2.6.14",
     "vue-puzzle-vcode": "^1.1.10",
     "vue-router": "^3.5.1",
-    "vuex": "^3.6.2"
+    "vuex": "^3.6.2",
+    "vuex-persistedstate": "^4.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",

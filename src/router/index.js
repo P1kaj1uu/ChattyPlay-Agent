@@ -47,6 +47,11 @@ const routes = [
         component: () => import(/* webpackChunkName: "chatgpt" */ '../views/GPT.vue')
       },
       {
+        path: 'textToImg',
+        name: 'textToImg',
+        component: () => import(/* webpackChunkName: "textToImg" */ '../views/TextToPhoto.vue')
+      },
+      {
         path: 'help',
         name: 'help',
         component: () => import(/* webpackChunkName: "help" */ '../views/Help.vue')

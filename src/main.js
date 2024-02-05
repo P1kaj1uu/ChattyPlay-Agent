@@ -6,6 +6,7 @@ import '@/utils/flexible'
 import './plugins/element.js'
 // 导入全局样式表
 import './assets/css/global.css'
+import './assets/css/markdown.css'
 // 导入樱花飘落特效
 import '@/plugins/sakura'
 

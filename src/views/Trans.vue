@@ -104,7 +104,7 @@ import md5 from 'js-md5'
 import axios from 'axios'
 
 export default {
-  name: 'TransView',
+  name: 'Trans',
   data() {
     return {
       flag: false,
@@ -160,7 +160,7 @@ export default {
       let methodTypes = this.transTypeList[this.num].method
       for (let i = 0; i < methodTypes.length; i++) {
         let mode = methodTypes[i].split(' ')
-        await axios.get('/api/trans/vip/translate', {
+        await axios.get('/trans/vip/translate', {
           params: {
             q: this.transText,
             from: mode[0],

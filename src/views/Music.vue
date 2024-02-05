@@ -103,7 +103,7 @@
 import axios from 'axios'
 
 export default {
-  name: 'WelcomeView',
+  name: 'Music',
   data() {
     return {
       // 查询关键字
@@ -220,13 +220,12 @@ export default {
 <style lang="less" scoped>
 
 .play_wrap {
-  width: 800px;
   height: 544px;
-  position: fixed;
+  position: absolute;
   left: 50%;
   top: 50%;
-  margin-left: -320px;
-  margin-top: -272px;
+  transform: translate(-50%, -55%);
+  cursor: pointer;
 }
 
 .search_bar {

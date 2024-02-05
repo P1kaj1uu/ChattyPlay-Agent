@@ -28,7 +28,10 @@ import {
     Message,
     MessageBox,
     Tooltip,
-    Loading 
+    Loading,
+    Backtop,
+    Image,
+    Slider
   } from 'element-ui'
   
   Vue.use(Button)
@@ -52,9 +55,13 @@ import {
   Vue.use(Option)
   Vue.use(Input)
   Vue.use(Tooltip)
+  Vue.use(Backtop)
+  Vue.use(Image)
+  Vue.use(Slider)
 
   Vue.prototype.$notify = Notification
   Vue.prototype.$message = Message
   Vue.prototype.$msgbox = MessageBox
   Vue.prototype.$confirm = MessageBox.confirm
+  Vue.prototype.$prompt = MessageBox.prompt
   Vue.prototype.$loading = Loading.service

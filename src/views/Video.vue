@@ -11,13 +11,13 @@
 		</el-breadcrumb>
 
 		<div class="layui-container wrap">
-			<div class="layui-row">
+			<div class="layui-row video-top">
 				<div class="layui-input-inline layui-form">
 					<select id="api" name="api">
 						<option value="">请选择解析接口</option>
 					</select>
 				</div>
-				<div class="layui-input-inline layui-show-sm-inline-block">
+				<div class="layui-input-inline layui-show-sm-inline-block video-url">
 					<input type="text" lay-verify="required|phone|number" class="layui-input url" name=""
 						placeholder="输入视频地址" />
 				</div>
@@ -30,7 +30,7 @@
 			</fieldset>
 
 			<div class="layui-row">
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">爱奇艺（可用-超推荐）</div>
 						<div class="layui-card-body">
@@ -41,7 +41,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">优酷（可用-超推荐）</div>
 						<div class="layui-card-body">
@@ -52,7 +52,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">腾讯视频（可用-超推荐）</div>
 						<div class="layui-card-body">
@@ -63,7 +63,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">芒果TV（可用-超推荐）</div>
 						<div class="layui-card-body">
@@ -77,7 +77,7 @@
 
 
 			<div class="layui-row">
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">哔哩哔哩（可用-超推荐）</div>
 						<div class="layui-card-body">
@@ -88,7 +88,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">韩剧TV（可能不得行）</div>
 						<div class="layui-card-body">
@@ -99,7 +99,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">OmoFun（可能不得行）</div>
 						<div class="layui-card-body">
@@ -110,7 +110,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">乐视TV</div>
 						<div class="layui-card-body">
@@ -123,7 +123,7 @@
 			</div>
 
 			<div class="layui-row">
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">土豆视频</div>
 						<div class="layui-card-body">
@@ -134,7 +134,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">1905</div>
 						<div class="layui-card-body">
@@ -145,7 +145,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">搜狐视频</div>
 						<div class="layui-card-body">
@@ -156,7 +156,7 @@
 					</div>
 				</div>
 
-				<div class="layui-col-md3">
+				<div class="layui-col-md6">
 					<div class="layui-card">
 						<div class="layui-card-header">PPTV聚力</div>
 						<div class="layui-card-body">
@@ -177,7 +177,7 @@ import { sleep } from '@/utils/sleep'
 import { getData } from '@/api/request'
 
 export default {
-  name: 'VideoView',
+  name: 'Video',
   created () {
     let isDisPlay = document.querySelector('.model')?.style.display === 'none'
     let notifyMessage = {
@@ -209,8 +209,11 @@ body {
 .wrap {
 	margin: 50px auto 50px;
 }
-.url {
-	width: 820px;
+.video-top {
+  display: flex;
+}
+.video-url {
+  flex: 1;
 }
 .video-website {
 	padding: 10px;
@@ -225,6 +228,6 @@ img {
 }
 .OtherImg {
 	width: 80px;
-    height: 50px;
+  height: 50px;
 }
 </style>

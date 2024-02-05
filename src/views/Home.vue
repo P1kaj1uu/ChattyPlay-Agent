@@ -7,63 +7,71 @@
     <!-- 头部区域 -->
     <el-header>
       <div>
-        <img src="@/assets/images/home/logo.png" class="webLogo" alt="logo">
+        <img src="@/assets/images/home/logo.png" class="webLogo" alt="logo" />
         <h3 style="user-select: none; cursor: pointer">ChattyPlay</h3>
       </div>
-      <a href="#" class="button button--bird" @click="ContactMeFn">
-        <div class="button__wrapper">
-          <span class="button__text">联系我</span>
-        </div>
-        <div class="birdBox">
-          <div class="bird wakeup">
-            <div class="bird__face"></div>
-          </div>
-          <div class="bird wakeup">
-            <div class="bird__face"></div>
-          </div>
-          <div class="bird">
-            <div class="bird__face"></div>
-          </div>
-        </div>
-      </a>
     </el-header>
     <!-- 页面主体区域 -->
     <el-container>
       <!-- 侧边栏 -->
       <el-aside width="200px">
         <el-menu
-          default-active="1"
+          @select="selectMenu"
+          :default-active="currentMenu"
           class="el-menu-vertical-demo"
           background-color="#333744"
           text-color="#fff"
           active-text-color="#409eff"
           router
         >
-          <el-menu-item index="1" :index="'/home/music'">
+          <el-menu-item :index="'/home/music'">
             <i class="el-icon-headset"></i>
             <span slot="title">音乐</span>
           </el-menu-item>
-          <el-menu-item index="2" :index="'/home/video'">
+          <el-menu-item :index="'/home/video'">
             <i class="el-icon-video-camera-solid"></i>
             <span slot="title">观看</span>
           </el-menu-item>
-          <el-menu-item index="3" :index="'/home/trans'">
+          <el-menu-item :index="'/home/trans'">
             <i class="el-icon-reading"></i>
             <span slot="title">降重</span>
           </el-menu-item>
-          <el-menu-item index="4" :index="'/home/chatgpt'">
+          <el-menu-item :index="'/home/chatgpt'">
             <i class="el-icon-s-promotion"></i>
             <span slot="title">GPT</span>
           </el-menu-item>
-          <el-menu-item index="5" :index="'/home/help'">
+          <el-menu-item :index="'/home/textToImg'">
+            <i class="el-icon-picture"></i>
+            <span slot="title">文图</span>
+          </el-menu-item>
+          <el-menu-item :index="'/home/help'">
             <i class="el-icon-question"></i>
             <span slot="title">帮助</span>
           </el-menu-item>
-          <el-menu-item index="6" :index="'/home/about'">
+          <el-menu-item :index="'/home/about'">
             <i class="el-icon-user-solid"></i>
             <span slot="title">关于</span>
           </el-menu-item>
         </el-menu>
+        <el-tooltip effect="dark" :content="tooltipContent" placement="right">
+          <div class="aside-fold" @click="asideFoldHandle">{{ foldText }}</div>
+        </el-tooltip>
+        <a href="#" class="button button--bird" @click="ContactMeFn">
+          <div class="button__wrapper">
+            <span class="button__text">联系我</span>
+          </div>
+          <div class="birdBox">
+            <div class="bird wakeup">
+              <div class="bird__face"></div>
+            </div>
+            <div class="bird wakeup">
+              <div class="bird__face"></div>
+            </div>
+            <div class="bird">
+              <div class="bird__face"></div>
+            </div>
+          </div>
+        </a>
       </el-aside>
       <el-container>
         <!-- 右侧内容主体 -->
@@ -71,15 +79,19 @@
           <!-- 路由占位符 -->
           <router-view></router-view>
         </el-main>
-        <el-footer style="font-family: 'Long Cang',cursive;" v-show="$route.path === '/' || $route.path === '/home/music'">
-          <div style="display: flex; justify-content: center;">
+        <el-footer
+          style="font-family: 'Long Cang', cursive"
+          v-show="$route.path === '/' || $route.path === '/home/music'"
+        >
+          <div style="display: flex; justify-content: center">
             <div>[ 来日方长</div>
             <div class="animated-icon">💗</div>
             <div>未来可期 ]</div>
           </div>
           <div>
-            <span id="busuanzi_container_site_pv" style="color: #f2ffff;">
-              您是第&nbsp;<span id="busuanzi_value_site_pv">***</span>&nbsp;位访问本网站的友友~
+            <span id="busuanzi_container_site_pv" style="color: #f2ffff">
+              您是第&nbsp;<span id="busuanzi_value_site_pv">***</span
+              >&nbsp;位访问本网站的友友~
             </span>
           </div>
           <div>© Copyright 2023 P1Kaj1uu. All Rights Reserved.</div>
@@ -101,12 +113,16 @@
         </div>
         <div style="text-align: center">
           <img
-            style="width: 65%; height: 55%; text-align: center; margin: 10px 0;"
+            style="width: 65%; height: 55%; text-align: center; margin: 10px 0"
             src="@/assets/images/home/wx.jpg"
           />
         </div>
         <div style="text-align: center">
-          <a href="https://githubfast.com/P1kaj1uu/VIP-Video-Parsing" style="font-size: 12px;" target="_blank">
+          <a
+            href="https://githubfast.com/P1kaj1uu/VIP-Video-Parsing"
+            style="font-size: 12px"
+            target="_blank"
+          >
             点击此处前往该项目的Github仓库（希望您可以给一个小小的star！）
           </a>
         </div>
@@ -116,39 +132,73 @@
 </template>
 
 <script>
-import axios from "axios";
+import axios from 'axios'
+import { mapState, mapMutations } from 'vuex'
+import { Address6 } from 'ip-address'
 
 export default {
-  name: 'HomeView',
+  name: 'Home',
   data() {
     return {
-      dialogVisible: false
+      dialogVisible: false,
+      tooltipContent: '收起侧边栏',
+      foldText: '<'
     }
   },
+  computed: {
+    ...mapState('slide', ['currentMenu'])
+  },
   methods: {
+    ...mapMutations('slide', ['setCurrentMenu']),
     // 联系我
     ContactMeFn() {
       this.dialogVisible = true
     },
-    handleClose() {
+    handleClose () {
       this.dialogVisible = false
-    }
+      this.$router.push(this.currentMenu)
+    },
+    selectMenu(index) {
+      this.setCurrentMenu(index)
+    },
+    asideFoldHandle() {
+      const foldDOM = document.querySelector('.aside-fold')
+      const mainDOM = document.querySelector('.el-main')
+      const footerDOM = document.querySelector('.el-footer')
+      if (this.foldText === '<') {
+        foldDOM.style.left = '0'
+        mainDOM.style.left = '0'
+        footerDOM.style.left = '0'
+      } else {
+        foldDOM.style.left = '200px'
+        mainDOM.style.left = '200px'
+        footerDOM.style.left = '200px'
+      }
+      this.foldText = this.foldText === '<' ? '>' : '<'
+      this.tooltipContent = this.foldText === '<' ? '收起侧边栏' : '展开侧边栏'
+    },
   },
-  created () {
-    axios.get('https://ipapi.co/json/').then(res => {
-      console.log(res.data)
-      const { ip } = res.data
-      this.$message({
-        message: `欢迎您访问本网站！当前访问IP地址：${ip} `,
-        type: 'success'
+  created() {
+    axios
+      .get('https://ipapi.co/json/')
+      .then((res) => {
+        console.log(res.data)
+        let { ip, version } = res.data
+        // 创建Address6对象
+        const address6 = new Address6(ip)
+        ip = version === 'IPv6' ? address6.to4().address : ip
+        this.$message({
+          message: `欢迎您访问本网站！当前访问IP地址：${ip} `,
+          type: 'success'
+        })
       })
-    }).catch(error => {
-      console.log(error)
-      this.$message({
-        message: `欢迎您访问本网站！`,
-        type: 'success'
+      .catch((error) => {
+        console.log(error)
+        this.$message({
+          message: `欢迎您访问本网站！`,
+          type: 'success'
+        })
       })
-    })
     if (document.querySelector('.el-notification')) {
       document.querySelector('.el-notification').style.display = 'none'
     }
@@ -195,7 +245,27 @@ export default {
   right: 0;
   top: 60px;
   bottom: 0;
-  overflow-y: scroll;
+}
+.aside-fold {
+  position: absolute;
+  top: 50%;
+  left: 200px;
+  z-index: 999;
+  width: 30px;
+  height: 60px;
+  text-align: center;
+  line-height: 60px;
+  cursor: pointer;
+  border-radius: 0 50% 50% 0;
+  font-weight: 700;
+  font-size: 20px;
+  color: #fff;
+  background: #333744;
+  border: 1px solid #333744;
+  user-select: none;
+}
+.aside-fold:hover {
+  background: blueviolet;
 }
 
 .el-footer {
@@ -233,13 +303,20 @@ export default {
 }
 
 @keyframes iconAnimate {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
   }
-  10%, 30% {
-    transform: scale(.9);
+  10%,
+  30% {
+    transform: scale(0.9);
   }
-  20%, 40%, 50%, 60%, 70%, 80% {
+  20%,
+  40%,
+  50%,
+  60%,
+  70%,
+  80% {
     transform: scale(1.1);
   }
 }
@@ -286,7 +363,7 @@ export default {
   border-radius: 40px;
   background: var(--main_color);
   position: relative;
-  margin-bottom: -30px;
+  margin-top: 100%;
 }
 
 .button__wrapper {

@@ -2,6 +2,7 @@
  * @Description: 封装GPT响应内容流式输出
  * @Author: 不见水星记（P1kaj1uu）
  */
+import Vue from 'vue'
 import { toBottom } from './messageToBottom'
 
 export const resolveStreamResponse = async (
@@ -26,15 +27,36 @@ export const resolveStreamResponse = async (
     const utf8Decoder = new TextDecoder('utf-8')
     let data = value ? utf8Decoder.decode(value, { stream: true }) : ''
     console.log(data)
+    const ids = data.replaceAll(`data: `, '')
+                    .replaceAll('[DONE]', '')
+                    .split('\n')
+                    .filter(item => item !== '')
+                    .filter(item => item !== undefined)[1]
+    if (Boolean(!localStorage.getItem('newChatId')) && Boolean(ids) && Boolean(JSON.parse(ids).newChatId)) {
+      localStorage.setItem('newChatId', JSON.parse(ids).newChatId)
+    }
     // 对字符串进行处理，将"data: "和"[DONE]"替换掉，然后使用split方法将字符串分割成一个个的JSON字符串
     // 使用map方法将每个JSON字符串解析为JS对象，然后遍历这些对象并使用onStreaming回调函数进行处理
     try {
-      data = data
+      /* data = data
         .replaceAll(`data: `, '')
         .replaceAll('[DONE]', '')
         .split('\n')
         .filter((_) => _ !== '')
         .map((_) => JSON.parse(_))
+      data.forEach((_) => onStreaming(_)) */
+      data = data
+        .replaceAll(`data: `, '')
+        .replaceAll('[DONE]', '')
+        .split('\n')
+        .filter(item => item !== '')
+        .map(item => {
+          if (item.indexOf('"content":') !== -1) {
+            const stringify = JSON.stringify(item)
+            return JSON.parse(stringify)
+          }
+        })
+        .filter(item => item !== undefined)
       data.forEach((_) => onStreaming(_))
     } catch (e) {
       onFailed(e)
@@ -46,7 +68,7 @@ export const resolveStreamResponse = async (
       button1.disabled = false
       button2.disabled = false
       toBottom()
-      onFinished()
+      onFinished(response)
       break
     } else {
       button1.disabled = true

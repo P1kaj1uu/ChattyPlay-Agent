@@ -1,0 +1,80 @@
+#chat-markdown ol {
+  padding-left: 2em;
+}
+#chat-markdown .hljs {
+  border-radius: 5px;
+  padding: 50px 15px 15px 15px;
+  position: relative;
+  overflow: auto;
+  background: #292b33;
+}
+#chat-markdown .hljs::-webkit-scrollbar {
+  height: 9px;
+}
+#chat-markdown .hljs::-webkit-scrollbar-track {
+  background-color: #fff;
+}
+
+#chat-markdown .hljs::-webkit-scrollbar-thumb {
+  background-color: #d8d8d8;
+  border-radius: 5px;
+}
+#chat-markdown .hljs .code-header {
+  display: flex;
+  justify-content: space-between;
+  height: 35px;
+  width: 100%;
+  background-color: rgb(50, 55, 65);
+  position: absolute;
+  left: 0;
+  top: 0;
+  border-radius: 5px 5px 0 0;
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;
+}
+#chat-markdown .hljs .code-header .copy {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  padding-right: 10px;
+  font-size: 12px;
+}
+#chat-markdown .hljs .code-header .copy img {
+  height: 19px;
+  width: 19px;
+}
+#chat-markdown .hljs .code-header .copy p {
+  color: #fff;
+}
+#chat-markdown .hljs .code-header .lang {
+  font-size: 12px;
+  height: 35px;
+  cursor: pointer;
+  color: #fff;
+  line-height: 35px;
+  padding-left: 15px;
+}
+#chat-markdown .hljs code {
+  font-family: SFMono-Regular,Menlo,Monaco,Consolas,monospace !important;
+}
+#chat-markdown .hljs code {
+  color: rgb(212, 212, 212);
+}
+#chat-markdown .hljs code span {
+  color: rgb(212, 212, 212);
+}
+#chat-markdown .hljs code .hljs-comment {
+  color: rgb(106, 153, 85);
+}
+#chat-markdown .hljs code .hljs-keyword {
+  color: rgb(86, 156, 214);
+}
+#chat-markdown .hljs code .function_ {
+  color: rgb(220, 220, 170);
+}
+#chat-markdown .hljs code .hljs-params {
+  color: rgb(156, 220, 254);
+}
+#chat-markdown .hljs code .class_ {
+  color: rgb(78, 201, 176);
+}

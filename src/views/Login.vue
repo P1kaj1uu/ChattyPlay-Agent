@@ -32,11 +32,7 @@
               autocomplete="off"
             ></el-input>
           </el-form-item>
-          <el-form-item
-            label="验证码"
-            prop="code"
-            style="border-bottom: 1px solid black; padding-bottom: 30px"
-          >
+          <el-form-item label="验证码" prop="code" style="padding-bottom: 30px">
             <el-input
               style="width: 55%"
               placeholder="请输入右侧的验证码"
@@ -53,6 +49,11 @@
               <VerifyCode ref="codeRef" :identifyCode="randomCode" />
             </div>
           </el-form-item>
+          <div class="loginOperate">
+            <div @click="retrieveHandle">忘记密码？</div>
+            <span>&nbsp;&nbsp;&nbsp;</span>
+            <div @click="registerHandle">立即注册！</div>
+          </div>
           <div class="loginExact">
             <div style="display: flex">
               <input ref="agreeRef" id="agree" type="checkbox" checked />
@@ -78,12 +79,8 @@
             </div>
           </div>
           <el-form-item class="login_btn">
-            <el-button type="success" @click="loginFn">登录</el-button>
-            <el-button
-              type="primary"
-              @click="$router.push('/home/music')"
-              >游客</el-button
-            >
+            <el-button type="success" @click="loginUserFn">登录</el-button>
+            <el-button type="primary" @click="loginPlayerFn">游客</el-button>
             <el-button type="info" @click="resetForm">重置</el-button>
           </el-form-item>
         </el-form>
@@ -92,24 +89,73 @@
     <div class="loginFooter">
       © Copyright 2023 P1Kaj1uu. All Rights Reserved.
     </div>
+
+    <el-dialog
+      width="35%"
+      title="找回密码"
+      :visible.sync="dialogForgetVisible"
+      :close-on-click-modal="false"
+      @close="closeForgetDialog"
+    >
+      <el-form :model="forgetForm" ref="forgetFormRef">
+        <el-form-item label="手机号" label-width="100">
+          <el-input
+            v-model="forgetForm.telephoneNumber"
+            placeholder="请输入注册时的手机号"
+            clearable
+            maxlength="11"
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="验证码" label-width="100">
+          <el-input
+            v-model="forgetForm.checkCode"
+            maxlength="4"
+            placeholder="请输入短信手机验证码"
+            clearable
+            autocomplete="off"
+          ></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" label-width="100">
+          <el-input
+            v-model="forgetForm.newPassword"
+            autocomplete="off"
+            clearable
+            placeholder="请输入您的新密码6-11位"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="dialogForgetVisible = false"
+          >确认重置密码</el-button
+        >
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import { mapState } from 'vuex'
 import VerifyCode from '@/components/VerifyCode.vue'
 import { setToken } from '@/utils/token'
 import { Heart } from '@/utils/model'
 import { sleep } from '@/utils/sleep'
 
 export default {
-  name: 'login',
+  name: 'Login',
   data() {
     return {
       loginForm: {
         username: 'P1Kaj1uu',
-        password: 'OWaGDragon',
+        password: 'OwaGDragon',
         code: '',
         randomCode: ''
+      },
+      dialogForgetVisible: false,
+      forgetForm: {
+        telephoneNumber: '',
+        checkCode: '',
+        newPassword: ''
       },
       // 登录表单校验规则
       loginFormRules: {
@@ -119,7 +165,6 @@ export default {
             message: '请输入您的ChattyPlay账号',
             trigger: 'blur'
           },
-          { min: 3, max: 10, message: '长度在 3 到 10 个字符', trigger: 'blur' }
         ],
         password: [
           {
@@ -127,13 +172,16 @@ export default {
             message: '请输入您的ChattyPlay密码',
             trigger: 'blur'
           },
-          { min: 6, max: 15, message: '长度在 6 到 15 个字符', trigger: 'blur' }
+          { min: 6, max: 11, message: '长度在 6 到 11 个字符', trigger: 'blur' }
         ],
         code: [
           { required: true, message: '请输入正确的验证码', trigger: 'blur' }
         ]
       }
     }
+  },
+  computed: {
+    ...mapState('slide', ['currentMenu'])
   },
   components: {
     VerifyCode
@@ -220,8 +268,34 @@ export default {
         })
       })
     },
-    // 当点击登录按钮时
-    loginFn() {
+    // 游客登录
+    loginPlayerFn() {
+      const urlMap = new Map([
+        ['/home/music', '/home/music'],
+        ['/home/video', '/home/video'],
+        ['/home/trans', '/home/trans'],
+        ['/home/chatgpt', '/home/chatgpt'],
+        ['/home/textToImg', '/home/textToImg'],
+        ['/home/help', '/home/help'],
+        ['/home/about', '/home/about']
+      ])
+      const urlItem = urlMap.get(this.currentMenu)
+      this.$router.push(urlItem)
+    },
+    // 忘记密码
+    retrieveHandle() {
+      this.dialogForgetVisible = true
+    },
+    closeForgetDialog() {
+      this.forgetForm.telephoneNumber = ''
+      this.forgetForm.checkCode = ''
+      this.forgetForm.newPassword = ''
+      this.dialogForgetVisible = false
+    },
+    // 用户注册
+    registerHandle() {},
+    // 用户登录
+    loginUserFn() {
       const isAgree = this.$refs.agreeRef.checked
       const isVerify =
         this.randomCode.toLowerCase() === this.loginForm.code.toLowerCase()
@@ -240,7 +314,7 @@ export default {
               return false
             } else {
               this.heartBeat()
-              this.$router.push('/home/music')
+              this.loginPlayerFn()
               setToken('Dveiklokk')
             }
           }
@@ -278,7 +352,7 @@ export default {
   );
   border-radius: 5px;
   opacity: 1.5;
-  position: absolute;
+  position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
@@ -329,19 +403,39 @@ export default {
   user-select: none;
   overflow: hidden;
   white-space: nowrap;
-  letter-spacing: .15em;
-  animation: typing 4s steps(30, end) infinite,
-             blink-caret 2s step-end infinite;
+  letter-spacing: 0.15em;
+  animation: typing 4s steps(30, end) infinite, blink-caret 2s step-end infinite;
 }
 
 @keyframes typing {
-  from { width: 0 }
-  to { width: 100% }
+  from {
+    width: 0;
+  }
+  to {
+    width: 100%;
+  }
 }
 
 @keyframes blink-caret {
-  from, to { border-color: transparent }
-  50% { border-color: #666 }
+  from,
+  to {
+    border-color: transparent;
+  }
+  50% {
+    border-color: #666;
+  }
+}
+.loginOperate {
+  display: flex;
+  position: absolute;
+  top: 68%;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+  color: rgb(238, 238, 238);
+}
+.loginOperate div:hover {
+  color: blue;
 }
 
 .loginExact {
@@ -349,6 +443,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-top: -15px;
+  border-top: 1px solid black;
 }
 /deep/ .el-form-item__label {
   width: 80px !important;

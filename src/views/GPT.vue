@@ -55,7 +55,9 @@
             >
               <img src="@/assets/images/gpt/trumpet.png" @click="playSoundFn" class="trumpetImg" alt="播放">
             </el-tooltip>
-            <div class="ai chat" v-html="markdown(item.content)"></div>
+            <div class="ai chat ai-content">
+              <div v-html="markdown(item.content)" id="chat-markdown"></div>
+            </div>
             <div class="infoAI-time">
               <img src="@/assets/images/gpt/chatgpt.jpg" />
               <span class="gptName">ChatGPT</span>
@@ -114,6 +116,7 @@
 </template>
 
 <script>
+import CopyGPTIcon from '@/assets/images/gpt/icon-copy-gpt.png'
 import VuePuzzleVcode from 'vue-puzzle-vcode'
 import Role from '@/components/Role'
 import { sleep } from '@/utils/sleep'
@@ -134,7 +137,7 @@ const initSession = [
 ]
 
 export default {
-  name: 'GPTView',
+  name: 'GPT',
   data() {
     return {
       gptValue: '',
@@ -165,6 +168,42 @@ export default {
         this.$message.warning('发送的消息不能为空哦~')
         return
       }
+      localStorage.getItem('GPTToken') ? this.gptSuccessVerify() : this.gptCheckModal()
+    },
+    // GPT验证码校验弹窗
+    gptCheckModal() {
+      this.$prompt('当前状态为未验证，请您输入本网站的ChatGPT验证码！详情可联系我wx：Dveiklokk（添加好友时请注明来意）', '验证身份', {
+        type: 'warning',
+        center: true,
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        inputPattern: /[\w!#$%&'*+/=?^_`{|}~-]+(?:\.[\w!#$%&'*+/=?^_`{|}~-]+)*@(?:[\w](?:[\w-]*[\w])?\.)+[\w](?:[\w-]*[\w])?/,
+        inputErrorMessage: '格式不正确'
+      })
+        .then(({ value }) => {
+          if (value !== '891523233@qq.com') {
+            this.$message({
+              type: 'error',
+              message: '验证码错误'
+            })
+          } else {
+            localStorage.setItem('GPTToken', value)
+            this.$message({
+              type: 'success',
+              message: '验证成功'
+            })
+            this.gptSuccessVerify()
+          }
+        })
+        .catch(() => {
+          this.$message({
+            type: 'info',
+            message: '取消验证'
+          })
+        })
+    },
+    // GPT验证码校验通过
+    gptSuccessVerify() {
       ++this.times
       if (localStorage.getItem('session_times') >= 12) {
         this.$message.warning('系统检测到当前环境异常，请先验证！')
@@ -203,23 +242,17 @@ export default {
     async getGPTResponse (content) {
       // 此处填入GPT3.5模型的接口
       const fetchPromise = fetch(
-        `GPT.URL`,
+        `URL`,
         {
           method: 'POST',
           headers: {
-            'content-type': 'application/json'
+            'content-type': 'application/json',
+            'Authorization': 'Bearer ziyu-ystf3oih4jkfwkiljzt6n8bx-64b8a44109959843bc8945cb',
           },
           body: JSON.stringify({
-            frequency_penalty: 0,
-            max_tokens: 1000,
-            messages: this.messages,
-            model: 'gpt-3.5-turbo',
-            n: 1,
-            presence_penalty: 0,
-            stop: '',
+            chatId: localStorage.getItem('newChatId') || '',
             stream: true,
-            temperature: 1,
-            top_p: 1
+            messages: [{"content": content, "role": "user"}]
           })
         }
       ).catch(() => {
@@ -238,15 +271,21 @@ export default {
       resolveStreamResponse(
         fetchPromise,
         (data) => {
-          message.content += data.choices.map((_) => _.delta.content).join('')
+          message.content += JSON.parse(data).choices[0].delta.content
+          this.toMessageBottom()
+          //message.content += data.choices.map((_) => _.delta.content).join('')
         },
         (err) => {
           message.content += '宝，我出错啦，这个问题我也不知道该怎么回答你呢，要不你慢一点，容我再想一想~（建议：清空会话记录试试...'
-          this.$message.error('出错啦~建议刷新页面后，再重新尝试')
+          this.$message.error('服务器出错啦~')
           console.log('错误！', err)
         },
-        () => {
+        (res) => {
           localStorage.setItem('session_cached', JSON.stringify(this.messages))
+          if (res.status && res.status === 500) {
+            message.content += 'APIKey余额不足~请联系我（wx：Dveiklokk）进行充值！'
+            this.$message.warning('APIKey余额不足')
+          }
         },
         document.querySelector('.sendImg'),
         document.querySelector('.clears')
@@ -268,6 +307,7 @@ export default {
             type: 'success',
             message: '清空成功'
           })
+          localStorage.removeItem('newChatId')
           this.messages = this.backupMessage
           this.setSessionCache()
         })
@@ -285,28 +325,34 @@ export default {
       return JSON.parse(localStorage.getItem('session_cached'))
     },
     // 解析markdown格式和代码高亮显示
-    markdown (content) {
+    markdown(content) {
       const md = new MarkdownIt({
-        highlight: function (str, lang) {
+        highlight: function(str, lang) {
           if (lang && hljs.getLanguage(lang)) {
             try {
               return (
-                '<pre class="hljs"><button class="CodesBlock" @click="copyCodeBlock">复制代码</button><code>' +
+                '<pre class="hljs"><div class="code-header"><div class="lang">' +
+                lang +
+                '</div><div class="copy"><img src="' +
+                CopyGPTIcon +
+                '" /><p>复制</p></div></div><code>' +
                 hljs.highlight(lang, str, true).value +
                 '</code></pre>'
               )
             } catch (__) {}
           }
           return (
-            '<pre class="hljs"><button class="CodesBlock" @click="copyCodeBlock">复制代码</button><code>' +
+            '<pre class="hljs"><div class="code-header"><div class="lang"></div><div class="copy" ><img src="' +
+            CopyGPTIcon +
+            '" /><p>复制</p></div></div><code>' +
             md.utils.escapeHtml(str) +
             '</code></pre>'
           )
-        }
+        },
       })
       const result = md.render(content)
       this.$nextTick(() => {
-        let elements = document.querySelectorAll('.CodesBlock')
+        let elements = document.querySelectorAll('.copy')
         elements.forEach(item => {
           item.addEventListener('click', this.copyCodeBlock)
         })
@@ -324,7 +370,6 @@ export default {
       input.forEach(item => {
         textarea.value += item.innerText || item.textContent
       })
-      textarea.value = textarea.value.replaceAll('复制代码', '')
       // 将隐藏的 <textarea> 元素添加到文档中，并选中其中的文本
       document.body.appendChild(textarea)
       textarea.select()
@@ -348,7 +393,7 @@ export default {
     },
     // 复制代码
     copyCodeBlock (e) {
-      const codes = e.target.nextElementSibling
+      const codes = e.target.parentNode.parentNode.nextElementSibling
       const text = codes.innerText || codes.textContent
       const textarea = document.createElement('textarea')
       textarea.value = text
@@ -431,23 +476,6 @@ export default {
 </script>
 
 <style lang="less" scoped>
-/deep/ .hljs {
-  position: relative;
-  padding: 10px;
-  background-color: #f6f8fa;
-}
-
-/deep/ .CodesBlock {
-  position: absolute;
-  top: 5px;
-  right: 5px;
-  cursor: pointer;
-  font-size: 15px;
-  background-color: #f6f8fa;
-}
-/deep/ .CodesBlock:hover {
-  color: pink;
-}
 .gptContainer {
   position: relative;
 }
@@ -667,6 +695,14 @@ export default {
     top: 50%;
     transform: translate(-50%, -50%);
   }
+}
+
+.ai-content {
+  font-size: 14px;
+  font-family: PingFangSC-Regular, PingFang SC;
+  font-weight: 400;
+  color: #292a2d;
+  line-height: 24px;
 }
 
 .loadEffect {
