@@ -42,7 +42,7 @@
 
 ## 最新版本V4.0（推荐）
 
-> 本地调试时，可注释掉限制调用控制台的代码。参照说明修改index.html、.env.development和.env.production文件。
+> 本地调试时，可注释掉限制调用控制台的代码。参照说明修改index.html、.env.development和.env.production文件。部署生产环境修改nginx.conf和docker-compose.yml文件。
 
 ## 🔰 项目概述
 
