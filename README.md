@@ -38,7 +38,7 @@
 - v2.8版本优化加载效果，增加网站访问次数统计和版本更新提醒用户功能（2023.5.26-2023.5.27）
 - v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（2023.6.10-2023.6.20）
 - v3.0全新版本上线，优化markdown代码块格式，并接入文生图、亚马逊爬虫服务，发布浏览器插件（2023.7.24-2023.8.13）
-- v4.0重构项目完成，修改相关的bug，页面结构样式重新设计，增加动漫漫画功能，优化用户体验，并完成移动端和PC端的适配，接入SDK、MCP、Agent等服务，同时系统整体架构将Vue2替换为React + TypeScript + Vite + Tailwind CSS + i18n国际化 + live2d看板娘 + nginx + Docker容器化管理（2025.12.16-2026.2.5）
+- v4.0重构项目完成，修改相关的bug，页面结构样式重新设计，增加动漫漫画功能，优化用户体验，并完成移动端和PC端的适配，添加版本检测弹窗更新功能，接入SDK、MCP、Agent等服务，同时系统整体架构将Vue2替换为React + TypeScript + Vite + Tailwind CSS + i18n国际化 + live2d看板娘 + nginx + Docker容器化管理（2025.12.16-2026.2.8）
 
 ## 最新版本V4.0（推荐）
 
@@ -56,6 +56,8 @@
 - MD5加密，验证码，网站访问次数统计
 - Markdown语法解析，highlight代码高亮显示
 - 处理EventStream流
+- 实时版本检测更新
+- 限制终端控制台调用
 - 组件库使用Antd
 - 接入fundebug SDK和OPen AI SDK
 - 接入MCP、Agent相关服务
@@ -107,6 +109,11 @@
 - ### 关于我
 
 <img width="1470" height="748" alt="Image" src="https://github.com/user-attachments/assets/75f8538a-432a-4dae-a4b3-37443b9df8f2" />
+
+- ### 版本检测
+
+<img width="734" height="674" alt="Image" src="https://github.com/user-attachments/assets/e2bc2706-b137-47bd-b24a-46585f6a9349" />
+<img width="1017" height="677" alt="Image" src="https://github.com/user-attachments/assets/464e4219-57ea-46bc-8267-8abbc90bc752" />
 
 - ### 登录页面
 

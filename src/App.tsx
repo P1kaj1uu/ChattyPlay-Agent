@@ -21,6 +21,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ClickEffect from './components/ClickEffect'
 import Live2DDashboard from './components/Live2DDashboard'
+import VersionUpdateModal from './components/VersionUpdateModal'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -188,6 +189,7 @@ const App: React.FC = () => {
   return (
     <ConfigProvider locale={zhCN}>
       <Router>
+        <VersionUpdateModal />
         <AppContent />
       </Router>
     </ConfigProvider>
