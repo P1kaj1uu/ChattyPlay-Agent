@@ -5,6 +5,8 @@ import styled from 'styled-components'
 let isGlobalStyleAdded = false
 // 全局初始化状态
 let isInitializing = false
+// Live2D 实例
+let oml2dInstance: any = null
 
 const Live2DContainer = styled.div<{ $visible: boolean }>`
   position: fixed;
@@ -49,21 +51,6 @@ const Live2DDashboard: React.FC<Live2DDashboardProps> = ({ isVisible }) => {
   const containerRef = useRef<HTMLDivElement>(null)
   const [loaded, setLoaded] = useState(false)
   const initRef = useRef(false)
-
-  // 监听 isVisible 变化
-  useEffect(() => {
-    console.log('看板娘可见性变化:', isVisible)
-
-    // 控制 oml2d-stage 的显示
-    const stage = document.getElementById('oml2d-stage')
-    if (stage) {
-      if (isVisible) {
-        stage.style.visibility = 'visible'
-      } else {
-        stage.style.visibility = 'hidden'
-      }
-    }
-  }, [isVisible])
 
   useEffect(() => {
     if (initRef.current || isInitializing) {
@@ -111,8 +98,8 @@ const Live2DDashboard: React.FC<Live2DDashboardProps> = ({ isVisible }) => {
         containerRef.current.appendChild(container)
 
         console.log('加载 Live2D 模型...')
-        // 初始化 Live2D
-        await loadOml2d({
+        // 初始化 Live2D 并保存实例
+        oml2dInstance = await loadOml2d({
           models: [
             {
               path: 'https://model.hacxy.cn/HK416-2-normal/model.json',
@@ -134,13 +121,6 @@ const Live2DDashboard: React.FC<Live2DDashboardProps> = ({ isVisible }) => {
             stage.style.setProperty('left', 'auto', 'important')
             stage.style.setProperty('right', '0', 'important')
             console.log('oml2d-stage 样式已修改')
-
-            // 根据当前页面状态设置显示
-            if (!isVisible) {
-              stage.style.visibility = 'hidden'
-            } else {
-              stage.style.visibility = 'visible'
-            }
           }
         }, 100)
 
@@ -164,6 +144,37 @@ const Live2DDashboard: React.FC<Live2DDashboardProps> = ({ isVisible }) => {
 
     return () => {
       isMounted = false
+
+      // 组件卸载时销毁 Live2D 实例并清理 DOM
+      if (oml2dInstance) {
+        console.log('组件卸载，销毁 Live2D 实例')
+        try {
+          if (oml2dInstance.destroy) {
+            oml2dInstance.destroy()
+          }
+        } catch (error) {
+          console.error('销毁 Live2D 失败:', error)
+        }
+        oml2dInstance = null
+      }
+
+      // 移除所有 oml2d 相关的 DOM 元素
+      // 先移除 canvas 等子元素
+      const canvases = document.querySelectorAll('#oml2d-stage canvas')
+      canvases.forEach(canvas => canvas.remove())
+
+      // 再移除 stage 元素
+      const stage = document.getElementById('oml2d-stage')
+      if (stage) {
+        stage.remove()
+        console.log('已移除 oml2d-stage 元素')
+      }
+
+      // 移除其他可能的 oml2d 元素
+      const oml2dElements = document.querySelectorAll('[id^="oml2d"]')
+      oml2dElements.forEach(el => el.remove())
+
+      console.log('Live2D 资源清理完成')
     }
   }, [])
 

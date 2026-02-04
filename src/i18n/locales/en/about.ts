@@ -1,0 +1,22 @@
+export default {
+  title: 'About Me (Looking for referrals~)',
+  name: '0x3f',
+  description: 'The ultimate invincible super explosive tyrannosaurus warrior',
+  contact: 'Contact',
+  wechat: 'WeChat: Dveiklokk',
+  internship: 'Internship Experience',
+  internship1: 'Bachelor\'s degree from non-double-first-class university, Master\'s from 211 double-first-class university',
+  internship2: 'Worked at Meituan, Huawei, Tencent',
+  awards: 'Awards',
+  award1: 'Software Engineer (Intermediate Level)',
+  award2: 'One software copyright, one patent application in progress',
+  award3: 'Journal papers, EI conference papers, deep learning related publications',
+  award4: 'CET-4, Computer Network Technology Level 3',
+  award5: 'National First Prize in Mathematical Modeling',
+  award6: 'National Third Prize in Lanqiao Cup Java, Provincial Second in Programming Competition',
+  award7: 'Provincial Second Prize in NETCCS and FLTRP English Competition',
+  award8: 'Provincial Second Prize in Innovation and Entrepreneurship Competition',
+  award9: 'University Scholarship, National Endeavor Scholarship',
+  supportMe: 'Support Me',
+  addMe: 'Add Me'
+}
