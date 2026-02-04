@@ -182,7 +182,8 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
       <Footer />
-      <Live2DDashboard isVisible={isHomePage} />
+      {/* 只在 /home 路由下渲染看板娘 */}
+      {isHomePage && <Live2DDashboard isVisible={true} />}
     </div>
   )
 }

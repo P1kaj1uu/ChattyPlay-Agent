@@ -1,0 +1,32 @@
+const common = {
+  chinese: '中文',
+  english: 'English',
+  logoutSuccess: '已退出登录',
+  loading: '加载中...',
+  submit: '提交',
+  cancel: '取消',
+  confirm: '确认',
+  search: '搜索',
+  delete: '删除',
+  edit: '编辑',
+  save: '保存',
+  back: '返回',
+  more: '更多',
+  close: '关闭',
+  refresh: '刷新',
+  copy: '复制',
+  copySuccess: '复制成功',
+  copyFailed: '复制失败',
+  download: '下载',
+  downloadSuccess: '下载成功',
+  downloadFailed: '下载失败',
+  clear: '清空',
+  settings: '设置',
+  generate: '生成',
+  generating: '生成中...',
+  siteVisits: '本站今日总访问量',
+  visitsUnit: '次',
+  copyright: '© Copyright 2023 P1Kaj1uu. All Rights Reserved.'
+}
+
+export default common
