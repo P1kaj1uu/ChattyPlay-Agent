@@ -14,7 +14,7 @@ const about = {
   award4: '英语四级、计算机三级网络技术',
   award5: '数学建模竞赛国一',
   award6: '蓝桥杯Java国三、计挑Java省二',
-  award7: 'NETCCS、外研社英语竞赛省二',
+  award7: 'NETCCS省一、外研社英语竞赛省二',
   award8: '创新创业大赛省二',
   award9: '校奖学金，国家励志奖学金',
   supportMe: '支持我',

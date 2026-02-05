@@ -5,16 +5,22 @@
     "name": "P1Kaj1uu",
     "email": "891523233@qq.com"
   },
-  "version": "1.0.0",
+  "version": "4.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:server": "tsx watch src/services/server.ts",
     "build": "tsc && vite build",
+    "start": "tsx src/services/server.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "worker:dev": "wrangler dev src/services/worker.ts",
+    "worker:deploy": "wrangler deploy",
+    "worker:tail": "wrangler tail"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
+    "@hono/node-server": "^1.19.9",
     "@types/three": "^0.182.0",
     "antd": "^5.12.0",
     "axios": "^1.6.0",
@@ -25,6 +31,7 @@
     "fundebug-revideo": "^0.8.0",
     "gsap": "^3.14.2",
     "highlight.js": "^11.9.0",
+    "hono": "^4.11.7",
     "i18next": "^25.8.0",
     "i18next-browser-languagedetector": "^8.2.0",
     "marked": "^11.1.0",
@@ -57,7 +64,9 @@
     "postcss": "^8.5.6",
     "sass-embedded": "^1.97.3",
     "tailwindcss": "^3.4.19",
+    "tsx": "^4.21.0",
     "typescript": "^5.2.2",
-    "vite": "^5.0.8"
+    "vite": "^5.0.8",
+    "wrangler": "^3.78.0"
   }
 }

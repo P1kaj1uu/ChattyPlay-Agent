@@ -1,0 +1,44 @@
+# Apache 配置文件 - 用于生产环境部署
+# 支持单页应用(SPA)路由和 API 代理
+
+# 启用代理模块
+<IfModule mod_proxy.c>
+  ProxyRequests Off
+  ProxyPreserveHost On
+
+  # API 代理到宝塔服务器 Hono 服务
+  ProxyPass /api http://123.60.91.107:3001/api
+  ProxyPassReverse /api http://123.60.91.107:3001/api
+</IfModule>
+
+# URL 重写规则
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+
+  # API 请求代理到宝塔服务器（使用 RewriteRule 作为备用方案）
+  RewriteRule ^api/(.*)$ http://123.60.91.107:3001/api/$1 [P,L]
+
+  # SPA 路由支持 - 所有非文件、非API请求返回 index.html
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule ^(.*)$ /index.html [L,QSA]
+</IfModule>
+
+# 缓存控制
+<IfModule mod_headers.c>
+  # 静态资源缓存
+  <FilesMatch "\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$">
+    Header set Cache-Control "max-age=31536000, public"
+  </FilesMatch>
+
+  # HTML 文件不缓存
+  <FilesMatch "\.html$">
+    Header set Cache-Control "no-cache, no-store, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Gzip 压缩
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript application/javascript application/json
+</IfModule>

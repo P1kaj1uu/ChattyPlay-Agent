@@ -403,6 +403,7 @@ const Video: React.FC = () => {
             style={{ flex: 1, minWidth: 300, borderRadius: '12px' }}
             onPressEnter={handleParse}
             size="large"
+            allowClear
           />
 
           <Button

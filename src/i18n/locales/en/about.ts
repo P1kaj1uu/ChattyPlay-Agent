@@ -14,7 +14,7 @@ export default {
   award4: 'CET-4, Computer Network Technology Level 3',
   award5: 'National First Prize in Mathematical Modeling',
   award6: 'National Third Prize in Lanqiao Cup Java, Provincial Second in Programming Competition',
-  award7: 'Provincial Second Prize in NETCCS and FLTRP English Competition',
+  award7: 'Provincial First Prize in NETCCS and Provincial Second Prize in FLTRP English Competition',
   award8: 'Provincial Second Prize in Innovation and Entrepreneurship Competition',
   award9: 'University Scholarship, National Endeavor Scholarship',
   supportMe: 'Support Me',

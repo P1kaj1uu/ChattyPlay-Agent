@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { message } from 'antd'
 import { CloseOutlined } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
@@ -47,11 +47,13 @@ const SearchBar = styled.div`
   }
 
   input {
-    width: 296px;
+    width: 100%;
+    max-width: 200px;
     height: 34px;
     border-radius: 17px;
     border: 0px;
-    background: rgba(255, 255, 255, 0.45) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23333" d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') 265px center no-repeat;
+    background: rgba(255, 255, 255, 0.45) url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path fill="%23333" d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z"/></svg>') right 10px center no-repeat;
+    padding-right: 35px;
     text-indent: 15px;
     outline: none;
     color: #333;
@@ -372,7 +374,9 @@ const LoadingCon = styled.div<{ show: boolean }>`
   }
 
   .loading-text {
+    padding: 0 20px;
     margin-top: 30px;
+    text-align: center;
     color: #333;
     font-size: 16px;
     animation: pulse 1.5s ease-in-out infinite;
@@ -426,7 +430,20 @@ const Music: React.FC = () => {
   const [currentId, setCurrentId] = useState<number | null>(null)
   const [loading, setLoading] = useState(false)
   const [hasMusic, setHasMusic] = useState(false)
+  const [screenWidth, setScreenWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1000)
   const audioRef = useRef<HTMLAudioElement>(null)
+
+  // 监听屏幕尺寸变化
+  useEffect(() => {
+    const handleResize = () => {
+      setScreenWidth(window.innerWidth)
+    }
+
+    window.addEventListener('resize', handleResize)
+    return () => {
+      window.removeEventListener('resize', handleResize)
+    }
+  }, [])
 
   // 搜索歌曲
   const searchMusic = async () => {
@@ -573,12 +590,12 @@ const Music: React.FC = () => {
             </SongList>
           </SongWrapper>
 
-          <LoadingCon show={(loading && !hasMusic) || (musicList.length >= 0 && hotComments.length === 0)}>
+          <LoadingCon show={((loading && !hasMusic) || (musicList.length >= 0 && hotComments.length === 0)) && (screenWidth >= 500 || musicList.length === 0)}>
             <div className="loading-disc" />
             <div className="loading-text">{t('music.description')}</div>
           </LoadingCon>
 
-          {hasMusic && (
+          {hasMusic && screenWidth >= 500 && (
             <CommentWrapper>
               <div className="title">{t('music.hotComments')}</div>
               <div className="comment-list">

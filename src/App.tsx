@@ -23,6 +23,7 @@ import Footer from './components/Footer'
 import ClickEffect from './components/ClickEffect'
 import Live2DDashboard from './components/Live2DDashboard'
 import VersionUpdateModal from './components/VersionUpdateModal'
+import { scrollToTop } from './utils/backTop'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -78,6 +79,7 @@ const AppContent: React.FC = () => {
 
     const timer = setTimeout(() => {
       NProgress.done()
+      scrollToTop()
     }, 500)
 
     return () => {
