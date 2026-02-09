@@ -1,4 +1,14 @@
-# ChattyPlay-Agent
+<h1 align="center">
+ <p>ChattyPlay-Agent</p>
+ <a href="https://trendshift.io/repositories/20110" target="_blank"><img src="https://trendshift.io/api/badge/repositories/13630" alt="ChattyPlay-Agent | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+ <p>
+  <img alt="Github Stargazers" src="https://img.shields.io/github/stars/P1Kaj1uu/ChattyPlay-Agent.svg?label=%e6%98%9f%e6%a0%87&logo=github&logoColor=white&labelColor=black&color=gold&style=for-the-badge&cacheSeconds=10">
+  <img alt="Github Forks" src="https://img.shields.io/github/forks/P1Kaj1uu/ChattyPlay-Agent?label=%e5%a4%8d%e5%88%bb&logo=github&logoColor=white&labelColor=black&color=grey&style=for-the-badge&cacheSeconds=10">
+   <img alt="Github Licence" src="https://img.shields.io/github/license/P1Kaj1uu/ChattyPlay-Agent?label=%e8%ae%b8%e5%8f%af&logo=github&logoColor=white&labelColor=black&color=grey&style=for-the-badge&cacheSeconds=10">
+  <br />
+  <img src="https://img.shields.io/badge/支持平台-Windows_|_Mac_|_Linux_|_iPhone_|_Android-blueviolet.svg?style=for-the-badge" alt="支持平台">
+ </p>
+</h1>
 
 ## 📄 免责声明
 
