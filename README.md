@@ -38,7 +38,7 @@
 - v2.8版本优化加载效果，增加网站访问次数统计和版本更新提醒用户功能（2023.5.26-2023.5.27）
 - v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（2023.6.10-2023.6.20）
 - v3.0全新版本上线，优化markdown代码块格式，并接入文生图、亚马逊爬虫服务，发布浏览器插件（2023.7.24-2023.8.13）
-- v4.0重构项目完成，修改相关的bug，页面结构样式重新设计，增加实时黄金及k线图、动漫漫画功能，优化用户体验，并完成移动端和PC端的适配，添加版本检测弹窗更新功能，接入SDK、MCP、Agent等服务，同时系统整体架构将Vue2替换为React + TypeScript + Hono + Vite + Tailwind CSS + i18n国际化 + live2d看板娘 + nginx + Docker容器化管理（2025.12.16-2026.2.8）
+- v4.0重构项目完成，修改相关的bug，页面结构样式重新设计，增加实时黄金及k线图、动漫漫画功能，优化用户体验，并完成移动端和PC端的适配，添加版本检测弹窗更新功能，接入SDK、MCP、Agent、谷歌和Github授权登录等服务，同时系统整体架构将Vue2替换为React + TypeScript + Hono + Vite + Tailwind CSS + i18n国际化 + live2d看板娘 + nginx + Docker容器化管理（2025.12.16-2026.2.9）
 
 ## 最新版本V4.0（推荐）
 
@@ -66,6 +66,7 @@
 - 组件库使用Antd
 - 接入fundebug SDK和OPen AI SDK
 - 接入MCP、Agent相关服务
+- 接入谷歌和Github授权登录
 
 后端：
 
@@ -129,7 +130,7 @@
 
 - ### 登录页面
 
-  ![image](https://github.com/user-attachments/assets/c7644661-252d-4caf-8316-88b8f8c5bcc0)
+ <img width="1032" height="758" alt="Image" src="https://github.com/user-attachments/assets/03351211-ce23-4e74-9859-a06c57f63fa2" />
 
 - ### 爱心跳动
 
