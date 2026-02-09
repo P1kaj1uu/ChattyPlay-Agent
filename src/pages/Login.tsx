@@ -7,6 +7,9 @@ import {
   EyeOutlined,
   EyeInvisibleOutlined
 } from '@ant-design/icons'
+import { useGoogleLogin } from '@react-oauth/google'
+import { FcGoogle } from 'react-icons/fc'
+import { FaGithub } from 'react-icons/fa'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -172,6 +175,69 @@ const Logo = styled.div`
   }
 `
 
+const OAuthDivider = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 24px 0;
+  color: #94a3b8;
+  font-size: 0.875rem;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, #e2e8f0, transparent);
+  }
+
+  &::before {
+    margin-right: 16px;
+  }
+
+  &::after {
+    margin-left: 16px;
+  }
+`
+
+const OAuthButtonContainer = styled.div`
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+`
+
+const OAuthButton = styled.button<{ variant: 'google' | 'github' }>`
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 44px;
+  border: 1px solid ${props => props.variant === 'google' ? '#dadce0' : '#d1d5db'};
+  border-radius: 8px;
+  background: ${props => props.variant === 'google' ? '#fff' : '#24292e'};
+  color: ${props => props.variant === 'github' ? '#fff' : '#3c4043'};
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0 16px;
+
+  &:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px ${props => props.variant === 'google' ? 'rgba(60, 64, 67, 0.3)' : 'rgba(36, 41, 46, 0.3)'};
+    border-color: ${props => props.variant === 'google' ? '#d3d3d3' : '#1a202c'};
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+`
+
 const Login: React.FC = () => {
   const { t } = useTranslation()
   const [form] = Form.useForm()
@@ -281,16 +347,62 @@ const Login: React.FC = () => {
     navigate('/home')
   }
 
-  const handleForgetPassword = () => {
-    message.info(t('login.forgetPasswordTip'))
-  }
-
-  const handleRegister = () => {
-    message.info(t('login.registerTip'))
-  }
-
   const handleReset = () => {
     form.resetFields()
+  }
+
+  // Google OAuth
+  const googleLogin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      console.log('Google Access Token:', tokenResponse)
+
+      // 获取用户信息
+      try {
+        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: {
+            Authorization: `Bearer ${tokenResponse.access_token}`
+          }
+        })
+        const userData = await response.json()
+        console.log('Google User Data:', userData)
+
+        // 保存登录状态
+        setToken()
+        localStorage.setItem('isLoggedIn', 'true')
+        localStorage.setItem('username', userData.name || 'Google User')
+        localStorage.setItem('email', userData.email || '')
+        localStorage.setItem('avatar', userData.picture || '')
+
+        message.success(t('login.loginSuccess'))
+        setShowHeartBeat(true)
+      } catch (error) {
+        console.error('Error fetching Google user info:', error)
+        message.error(t('login.loginFailed'))
+      }
+    },
+    onError: () => {
+      console.error('Google Login Failed')
+      message.error(t('login.loginFailed'))
+    },
+  })
+
+  // GitHub OAuth 处理
+  const handleGithubLogin = () => {
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID
+    if (!clientId || clientId === 'your_github_client_id_here') {
+      message.error('GitHub Client ID 未配置，请先配置')
+      return
+    }
+
+    // 构建 GitHub OAuth 授权 URL，直接回调到 /home
+    const redirectUri = window.location.origin + '/home'
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`
+
+    // 跳转到 GitHub 授权页面
+    window.location.href = githubAuthUrl
+    setToken()
+    localStorage.setItem('isLoggedIn', 'true')
+    localStorage.setItem('username', 'githubUser')
   }
 
   return (
@@ -377,19 +489,6 @@ const Login: React.FC = () => {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '20px'
-          }}>
-            <div style={{ cursor: 'pointer', fontSize: '0.85rem', color: '#64748b' }}>
-              <span onClick={handleForgetPassword}>{t('login.forgetPassword')}</span>
-              <span style={{ margin: '0 8px' }}>|</span>
-              <span onClick={handleRegister}>{t('login.register')}</span>
-            </div>
-          </div>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
             marginBottom: '20px',
             paddingTop: '16px',
             borderTop: '1px solid #e2e8f0'
@@ -435,6 +534,20 @@ const Login: React.FC = () => {
             </Space>
           </Form.Item>
         </Form>
+
+        {/* OAuth 第三方登录 */}
+        <OAuthDivider>{t('login.thirdPartyLoginTip')}</OAuthDivider>
+
+        <OAuthButtonContainer>
+          <OAuthButton variant="google" onClick={() => googleLogin()}>
+            <FcGoogle />
+            Google
+          </OAuthButton>
+          <OAuthButton variant="github" onClick={handleGithubLogin}>
+            <FaGithub />
+            GitHub
+          </OAuthButton>
+        </OAuthButtonContainer>
       </LoginBox>
       </LoginContainer>
       )}

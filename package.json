@@ -5,7 +5,7 @@
     "name": "P1Kaj1uu",
     "email": "891523233@qq.com"
   },
-  "version": "4.0.0",
+  "version": "4.0.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -21,6 +21,7 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@hono/node-server": "^1.19.9",
+    "@react-oauth/google": "^0.13.4",
     "@types/three": "^0.182.0",
     "antd": "^5.12.0",
     "axios": "^1.6.0",
@@ -41,6 +42,7 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-i18next": "^16.5.4",
+    "react-icons": "^5.5.0",
     "react-router-dom": "^6.22.0",
     "simplex-noise": "^4.0.3",
     "styled-components": "^6.1.0",

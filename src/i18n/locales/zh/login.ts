@@ -21,5 +21,6 @@ export default {
   guestLoginSuccess: '游客登录成功！',
   loginFailed: '登录失败，请重试',
   forgetPasswordTip: '忘记密码功能开发中...',
-  registerTip: '注册功能开发中...'
+  registerTip: '注册功能开发中...',
+  thirdPartyLoginTip: '或使用第三方账号登录'
 }

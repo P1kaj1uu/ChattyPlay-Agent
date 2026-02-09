@@ -21,5 +21,6 @@ export default {
   guestLoginSuccess: 'Guest login successful!',
   loginFailed: 'Login failed, please try again',
   forgetPasswordTip: 'Forgot password feature is under development...',
-  registerTip: 'Register feature is under development...'
+  registerTip: 'Register feature is under development...',
+  thirdPartyLoginTip: 'Or login with third-party account'
 }

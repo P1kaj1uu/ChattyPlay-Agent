@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 import { isAuthenticated } from './utils/token'
 import { ConfigProvider, Spin } from 'antd'
 import zhCN from 'antd/locale/zh_CN'
@@ -191,12 +192,16 @@ const AppContent: React.FC = () => {
 }
 
 const App: React.FC = () => {
+  const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || ''
+
   return (
     <ConfigProvider locale={zhCN}>
-      <Router>
-        <VersionUpdateModal />
-        <AppContent />
-      </Router>
+      <GoogleOAuthProvider clientId={googleClientId}>
+        <Router>
+          <VersionUpdateModal />
+          <AppContent />
+        </Router>
+      </GoogleOAuthProvider>
     </ConfigProvider>
   )
 }
