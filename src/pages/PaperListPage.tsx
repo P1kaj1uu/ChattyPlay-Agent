@@ -442,6 +442,11 @@ const PaperListPage: React.FC = () => {
     return links
   }
 
+  // 检测是否为移动端设备
+  const isMobileDevice = () => {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)
+  }
+
   // 筛选论文
   const filteredPapers = papers.filter(paper => {
     // 先按类型过滤
@@ -622,7 +627,7 @@ const PaperListPage: React.FC = () => {
                             </Tag>
                             
                             {/* 点赞数 */}
-                            {paper.upvotes >= 1 && (
+                            {paper.upvotes >= 20 && (
                               <Badge
                                 count={`🔥 ${formatNumber(paper.upvotes)}`}
                                 style={{ 
@@ -638,7 +643,7 @@ const PaperListPage: React.FC = () => {
                         </div>
 
                         {/* 关键词 */}
-                          {paper.ai_keywords && paper.ai_keywords.length > 0 && (
+                          {paper.ai_keywords && paper.ai_keywords.length > 0 && !isMobileDevice() && (
                             <div className="flex items-center overflow-auto mb-2" style={{ scrollbarWidth: 'none' }}>
                               {
                                 paper.ai_keywords.map((keyword, index) => (
@@ -647,6 +652,14 @@ const PaperListPage: React.FC = () => {
                                   </Tag>
                                 ))
                               }
+                            </div>
+                          )}
+                          {paper.ai_keywords && paper.ai_keywords.length > 0 && isMobileDevice() && (
+                            <div className="flex items-center overflow-auto mb-2" style={{ scrollbarWidth: 'none' }}>
+                              {/* 随机展示一个paper.ai_keywords的tag标签 */}
+                              <Tag key={0} color="cyan" className="text-xs">
+                                {paper.ai_keywords[Math.floor(Math.random() * paper.ai_keywords.length)]}
+                              </Tag>
                             </div>
                           )}
 
