@@ -25,6 +25,10 @@
     {
       "source": "/api/netease/:path*",
       "destination": "https://netease-cloud-music-api.fe-mm.com/:path*"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
