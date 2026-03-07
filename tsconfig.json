@@ -28,6 +28,6 @@
     "noFallthroughCasesInSwitch": true
   },
   "include": ["src"],
-  "exclude": ["src/services/server.ts", "src/services/worker.ts"],
+  "exclude": ["src/services/server.ts", "src/services/worker.ts", "src/goofish"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

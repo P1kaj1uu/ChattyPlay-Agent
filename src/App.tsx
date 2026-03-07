@@ -25,6 +25,16 @@ import Footer from './components/Footer'
 import ClickEffect from './components/ClickEffect'
 import Live2DDashboard from './components/Live2DDashboard'
 import VersionUpdateModal from './components/VersionUpdateModal'
+import { GoofishLayout } from './components/goofish'
+import Dashboard from './pages/goofish/Dashboard'
+import Accounts from './pages/goofish/Accounts'
+import { Conversations } from './pages/goofish/Conversations'
+import Orders from './pages/goofish/Orders'
+import AutoReply from './pages/goofish/AutoReply'
+import AutoSell from './pages/goofish/AutoSell'
+import Workflow from './pages/goofish/Workflow'
+import Logs from './pages/goofish/Logs'
+import Goods from './pages/goofish/Goods'
 import { scrollToTop } from './utils/backTop'
 
 // 公开路由
@@ -183,6 +193,18 @@ const AppContent: React.FC = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
           <Route path="/papers" element={<PaperListPage />} />
+          {/* Goofish 闲鱼管理模块 */}
+          <Route path="/goofish" element={<GoofishLayout />}>
+            <Route index element={<Dashboard />} />
+            <Route path="accounts" element={<Accounts />} />
+            <Route path="conversations" element={<Conversations />} />
+            <Route path="orders" element={<Orders />} />
+            <Route path="goods" element={<Goods />} />
+            <Route path="autoreply" element={<AutoReply />} />
+            <Route path="autosell" element={<AutoSell />} />
+            <Route path="workflow" element={<Workflow />} />
+            <Route path="logs" element={<Logs />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

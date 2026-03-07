@@ -3,8 +3,99 @@ import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import { logger } from 'hono/logger'
 import { networkInterfaces } from 'os'
+import { createNodeWebSocket } from '@hono/node-ws'
+import { initDatabase, closeDatabase } from '../goofish/db'
+import { ClientManager } from '../goofish/websocket'
+import { fetchUserHead, handleOrderMessage, fetchAndUpdateOrderDetail } from '../goofish/services'
+import { messageStore, conversationStore, setClientManager } from '../goofish/api'
+import { createLogger, cleanOldLogs, setLogLevel, LogLevel } from '../goofish/core/logger'
+import { LOG_CONFIG } from '../goofish/core/constants'
+import { createStatusRoutes } from '../goofish/api/routes'
+import { createWSPushHandler } from '../goofish/api/routes/ws-push.route'
+import { createAccountRoutes } from '../goofish/api/routes/accounts'
+import { createGoodsRoutes } from '../goofish/api/routes/goods'
+import { createMessageRoutes } from '../goofish/api/routes/messages'
+import { createConversationRoutes } from '../goofish/api/routes/conversations'
+import { createLogsRoutes } from '../goofish/api/routes/logs'
+import { createAutoReplyRoutes } from '../goofish/api/routes/autoreply'
+import { createOrderRoutes } from '../goofish/api/routes/order.route'
+import { createAutoSellRoutes } from '../goofish/api/routes/autosell'
+import { createWorkflowRoutes } from '../goofish/api/routes/workflow.route'
 
+const goofishLogger = createLogger('Goofish:Integration')
 const app = new Hono()
+
+// WebSocket 支持
+const nodeWS = createNodeWebSocket({ app })
+const { upgradeWebSocket, injectWebSocket } = nodeWS
+
+// Goofish ClientManager
+let clientManager: ClientManager
+
+// 初始化 Goofish
+async function initGoofish() {
+  goofishLogger.info('初始化 Goofish 服务...')
+
+  // 设置日志级别
+  setLogLevel(LOG_CONFIG.LEVEL as LogLevel)
+
+  // 清理过期日志
+  cleanOldLogs(LOG_CONFIG.RETENTION_DAYS)
+
+  // 初始化数据库
+  initDatabase()
+
+  // 创建客户端管理器
+  clientManager = new ClientManager(async (accountId, msg) => {
+    goofishLogger.info(`收到新消息: ${msg.senderName}: ${msg.content}`)
+    messageStore.add(msg)
+    conversationStore.addIncoming(accountId, msg)
+
+    // 处理订单状态消息
+    if (msg.isOrderMessage && msg.orderId) {
+      goofishLogger.info(`订单消息: orderId=${msg.orderId}`)
+      handleOrderMessage(accountId, msg.orderId, msg.chatId)
+      fetchOrderDetailAsync(accountId, msg.orderId)
+    }
+
+    // 异步获取用户头像（不阻塞消息处理）
+    fetchUserAvatarAsync(accountId, msg.chatId, msg.senderId)
+  })
+
+  // 设置 API 客户端管理器引用
+  setClientManager(clientManager)
+
+  // 从数据库加载并启动所有启用的账号
+  await clientManager.startAll()
+
+  goofishLogger.info('Goofish 服务初始化完成')
+}
+
+// 异步获取用户头像
+async function fetchUserAvatarAsync(accountId: string, chatId: string, userId: string) {
+  try {
+    const { userHead } = await fetchUserHead(accountId, userId)
+    if (userHead?.avatar) {
+      conversationStore.updateUserAvatar(accountId, chatId, userHead.avatar)
+    }
+  } catch (e) {
+    goofishLogger.debug(`获取用户头像失败: ${e}`)
+  }
+}
+
+// 异步获取订单详情
+async function fetchOrderDetailAsync(accountId: string, orderId: string) {
+  try {
+    const client = clientManager.getClient(accountId)
+    if (!client) {
+      goofishLogger.warn(`获取订单详情失败: 账号 ${accountId} 客户端不存在`)
+      return
+    }
+    await fetchAndUpdateOrderDetail(client, orderId)
+  } catch (e) {
+    goofishLogger.debug(`获取订单详情失败: ${e}`)
+  }
+}
 
 // 获取局域网 IP 地址
 function getLocalIP(): string {
@@ -32,7 +123,7 @@ app.use('/*', cors({
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   credentials: true,
-  maxAge: 86400, // 24小时预检缓存
+  maxAge: 86400,
 }))
 
 // 日志中间件
@@ -46,6 +137,9 @@ app.use('/*', async (c, next) => {
   c.header('X-Response-Time', `${duration}ms`)
 })
 
+// WebSocket 推送端点
+app.get('/ws', upgradeWebSocket(() => createWSPushHandler(() => clientManager)))
+
 // 健康检查
 app.get('/health', (c) => {
   return c.json({
@@ -57,7 +151,7 @@ app.get('/health', (c) => {
 })
 
 // API 路由信息
-app.get('/api', (c) => {
+app.get('/api/info', (c) => {
   return c.json({
     message: 'API Proxy Server',
     version: '4.0.0',
@@ -65,13 +159,36 @@ app.get('/api', (c) => {
     endpoints: {
       '/health': 'Health check endpoint',
       '/api/translate': 'Baidu Translate API proxy',
-      '/api/kuaiken/*': 'Kuaikan Manhua API proxy (PC)',
-      '/api/kuaiken-m/*': 'Kuaikan Manhua API proxy (Mobile)',
-      '/api/netease/*': 'Netease Cloud Music API proxy'
+      '/api/kuaikan/*': 'Kuaikan Manhua API proxy (PC)',
+      '/api/kuaikan-m/*': 'Kuaikan Manhua API proxy (Mobile)',
+      '/api/netease/*': 'Netease Cloud Music API proxy',
+      '/ws': 'WebSocket endpoint',
+      '/api/accounts': 'Goofish account management',
+      '/api/conversations': 'Goofish conversations',
+      '/api/orders': 'Goofish orders',
+      '/api/autoreply': 'Auto reply rules',
+      '/api/autosell': 'Auto sell rules',
+      '/api/workflows': 'Workflow management',
+      '/api/logs': 'System logs',
+      '/api/info': 'This endpoint',
     },
     timestamp: new Date().toISOString()
   })
 })
+
+// Goofish 路由（必须在代理中间件之前注册）
+const getClientManager = () => clientManager
+app.route('/', createStatusRoutes(getClientManager))
+app.route('/api', createStatusRoutes(getClientManager))
+app.route('/api/accounts', createAccountRoutes(getClientManager))
+app.route('/api/goods', createGoodsRoutes(getClientManager))
+app.route('/api/messages', createMessageRoutes(getClientManager))
+app.route('/api/conversations', createConversationRoutes())
+app.route('/api/logs', createLogsRoutes())
+app.route('/api/autoreply', createAutoReplyRoutes())
+app.route('/api/orders', createOrderRoutes(getClientManager))
+app.route('/api/autosell', createAutoSellRoutes())
+app.route('/api/workflows', createWorkflowRoutes())
 
 // 代理配置映射
 const PROXY_CONFIG: Record<string, {
@@ -119,6 +236,14 @@ const PROXY_CONFIG: Record<string, {
 
 // 匹配代理目标（优先匹配最长路径）
 function matchProxyTarget(path: string): { prefix: string; config: typeof PROXY_CONFIG[keyof typeof PROXY_CONFIG] } | null {
+  // 排除 Goofish 路由
+  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/ws']
+  for (const route of goofishRoutes) {
+    if (path.startsWith(route)) {
+      return null
+    }
+  }
+
   const sortedPrefixes = Object.keys(PROXY_CONFIG).sort((a, b) => b.length - a.length)
   for (const prefix of sortedPrefixes) {
     if (path.startsWith(prefix)) {
@@ -137,9 +262,19 @@ function rewritePath(path: string, prefix: string, replacement: string): string 
 const cache = new Map<string, { data: ArrayBuffer; expiry: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5分钟
 
-// 代理中间件
-app.all('/api/*', async (c) => {
+// 代理中间件（必须在所有 goofish 路由之后注册）
+app.all('/api/*', async (c, next) => {
   const path = c.req.path
+
+  // 检查是否是 goofish 路由，如果是则跳过代理处理，让下一个处理程序处理
+  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/api/info']
+  for (const route of goofishRoutes) {
+    if (path.startsWith(route)) {
+      // 这是一个 goofish 路由，让下一个处理程序处理
+      return next()
+    }
+  }
+
   const matched = matchProxyTarget(path)
 
   if (!matched) {
@@ -266,8 +401,16 @@ app.notFound((c) => {
     message: `Route ${c.req.method} ${c.req.path} not found`,
     availableRoutes: [
       'GET /health',
-      'GET /api',
-      'ALL /api/*',
+      'GET /ws',
+      'GET /api/info',
+      '/api/accounts/*',
+      '/api/conversations/*',
+      '/api/orders/*',
+      '/api/autoreply/*',
+      '/api/autosell/*',
+      '/api/workflows/*',
+      '/api/logs/*',
+      'ALL /api/* (proxy)',
     ],
   }, 404)
 })
@@ -284,20 +427,49 @@ app.onError((err, c) => {
 
 // 启动服务器
 const port = Number(process.env.PORT) || 3001
-const hostname = '0.0.0.0' // 允许真机通过局域网 IP 访问
+const hostname = '0.0.0.0'
 
 console.log('\n' + '='.repeat(50))
-console.log(`Hono Proxy Server`)
+console.log(`Hono Proxy Server with Goofish`)
 console.log('='.repeat(50))
 console.log(`Environment: ${isDev ? 'development' : 'production'}`)
 console.log(`Local access:   http://localhost:${port}`)
 console.log(`Network access: http://${localIP}:${port}`)
-console.log(`API info:       http://${localIP}:${port}/api`)
+console.log(`API info:       http://${localIP}:${port}/api/info`)
 console.log(`Health check:   http://${localIP}:${port}/health`)
+console.log(`WebSocket:      ws://${localIP}:${port}/ws`)
 console.log('='.repeat(50) + '\n')
 
-serve({
-  fetch: app.fetch,
-  port,
-  hostname,
+// 初始化 Goofish 后启动服务器
+initGoofish().then(() => {
+  const server = serve({
+    fetch: app.fetch,
+    port,
+    hostname,
+  })
+
+  // 注入 WebSocket 支持
+  injectWebSocket(server)
+
+  // 优雅退出
+  process.on('SIGINT', () => {
+    goofishLogger.info('收到退出信号，正在断开连接...')
+    if (clientManager) {
+      clientManager.stopAll()
+    }
+    closeDatabase()
+    process.exit(0)
+  })
+
+  process.on('SIGTERM', () => {
+    goofishLogger.info('收到终止信号，正在断开连接...')
+    if (clientManager) {
+      clientManager.stopAll()
+    }
+    closeDatabase()
+    process.exit(0)
+  })
+}).catch((err) => {
+  console.error('Failed to initialize Goofish:', err)
+  process.exit(1)
 })

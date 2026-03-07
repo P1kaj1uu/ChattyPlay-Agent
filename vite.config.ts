@@ -15,7 +15,7 @@ function honoServerPlugin() {
         shell: true
       })
 
-      console.log('\x1b[36m%s\x1b[0m', 'Hono Proxy Server started')
+      console.log('\x1b[36m%s\x1b[0m', 'Hono Proxy Server with Goofish started')
 
       // Vite 服务器关闭时也关闭 Hono 服务器
       return () => {
@@ -54,12 +54,16 @@ export default defineConfig({
     host: '0.0.0.0', // 允许真机通过局域网 IP 访问
     port: 3000,
     open: true,
-    // 代理配置：开发环境下将 /api 请求转发到 Hono 服务器
+    // 代理配置：开发环境下将 /api 请求转发到后端服务器
     proxy: {
       '/api': {
         target: 'http://localhost:3001',
         changeOrigin: true,
         rewrite: (path) => path
+      },
+      '/ws': {
+        target: 'ws://localhost:3001',
+        ws: true
       },
       '/health': {
         target: 'http://localhost:3001',
