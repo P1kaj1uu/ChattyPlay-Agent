@@ -13,7 +13,8 @@ const nav = {
   logout: '退出',
   language: '语言',
   navigationMenu: '导航菜单',
-  goofish: '闲鱼'
+  goofish: '闲鱼',
+  worker: '监工'
 }
 
 export default nav

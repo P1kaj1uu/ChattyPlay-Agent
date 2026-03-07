@@ -14,7 +14,8 @@ import {
   ReadOutlined,
   GlobalOutlined,
   GoldOutlined,
-  AndroidOutlined
+  AndroidOutlined,
+  RobotOutlined
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -168,6 +169,8 @@ const Navbar: React.FC = () => {
     { key: '/gold', label: t('nav.gold'), icon: <GoldOutlined /> },
     { key: '/gpt', label: t('nav.chatgpt'), icon: <MessageOutlined /> },
     { key: '/text-to-photo', label: t('nav.textToPhoto'), icon: <PictureOutlined /> },
+    // 如果是移动端，不显示监工菜单项
+    ...(isMobile ? [] : [{ key: '/worker', label: t('nav.worker'), icon: <RobotOutlined /> }]),
     { key: '/about', label: t('nav.about'), icon: <UserOutlined /> }
   ]
 

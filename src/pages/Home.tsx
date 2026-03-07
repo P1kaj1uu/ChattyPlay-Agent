@@ -11,6 +11,7 @@ import {
   BookOutlined,
   GoldOutlined,
   AndroidOutlined,
+  RobotOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -214,6 +215,12 @@ const Home: React.FC = () => {
       description: t('home.features.cartoon.description'),
       icon: <ReadOutlined />,
       path: '/cartoon'
+    },
+    {
+      title: t('home.features.worker.title'),
+      description: t('home.features.worker.description'),
+      icon: <RobotOutlined />,
+      path: '/worker'
     },
     {
       title: t('home.features.textToPhoto.title'),

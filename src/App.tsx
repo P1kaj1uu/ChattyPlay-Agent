@@ -36,6 +36,7 @@ import Workflow from './pages/goofish/Workflow'
 import Logs from './pages/goofish/Logs'
 import Goods from './pages/goofish/Goods'
 import { scrollToTop } from './utils/backTop'
+import WorkerAgent from './pages/WorkerAgent'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -206,6 +207,7 @@ const AppContent: React.FC = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
           <Route path="/papers" element={<PaperListPage />} />
+          <Route path="/worker" element={<WorkerAgent />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>
             <Route index element={<Dashboard />} />

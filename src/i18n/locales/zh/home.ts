@@ -41,6 +41,10 @@ const home = {
     goofish: {
       title: '闲鱼助手',
       description: '提供闲鱼平台的自动交易、自动回复、自动监控等功能，助您轻松买卖二手物品'
+    },
+    worker: {
+      title: 'Agent监工',
+      description: '监控和管理您的智能Agent，在线查看Agent运行状态，及时处理异常情况，模拟打工人的工作状态，确保Agent高效稳定运行'
     }
   },
   footer: {

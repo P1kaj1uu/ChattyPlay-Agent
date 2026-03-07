@@ -41,6 +41,10 @@ export default {
     goofish: {
       title: 'Goofish Assistant',
       description: 'Provides automatic trading, automatic reply, automatic monitoring and other functions on the Goofish platform, helping you easily buy and sell second-hand items'
+    },
+    worker: {
+      title: 'Agent Supervisor',
+      description: 'Monitor and manage your intelligent Agents, view their operational status online, handle exceptions promptly, simulate the work status of employees, and ensure Agents operate efficiently and stably'
     }
   },
   footer: {

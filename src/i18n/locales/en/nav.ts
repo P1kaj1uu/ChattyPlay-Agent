@@ -13,7 +13,8 @@ const nav = {
   logout: 'Logout',
   language: 'Language',
   navigationMenu: 'Navigation Menu',
-  goofish: 'Goofish'
+  goofish: 'Goofish',
+  worker: 'Worker'
 }
 
 export default nav
