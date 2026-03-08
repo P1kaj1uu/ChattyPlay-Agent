@@ -402,9 +402,9 @@ const PaperListPage: React.FC = () => {
     if (isMobileDevice()) {
       let viewerUrl = ''
       try {
-        viewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`
-      } catch (error) {
         viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`
+      } catch (error) {
+        viewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`
       }
       setCurrentPdfUrl(viewerUrl)
       setCurrentPaperTitle(paperTitle)
