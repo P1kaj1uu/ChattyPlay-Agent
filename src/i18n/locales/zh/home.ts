@@ -45,6 +45,10 @@ const home = {
     worker: {
       title: 'Agent监工',
       description: '监控和管理您的智能Agent，在线查看Agent运行状态，及时处理异常情况，模拟打工人的工作状态，确保Agent高效稳定运行'
+    },
+    markmap: {
+      title: '思维导图',
+      description: '将文本内容转换为思维导图，帮助您更好地组织和理解信息，提高工作效率，可将生成的思维导图保存为图片或Markdown格式，方便分享和使用'
     }
   },
   footer: {

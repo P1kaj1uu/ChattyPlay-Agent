@@ -8,6 +8,7 @@ const nav = {
   trans: 'Paper Rewriter',
   textToPhoto: 'Text to Photo',
   gold: 'Live Gold',
+  aimarkmap: 'Mind Map',
   about: 'About',
   login: 'Login',
   logout: 'Logout',

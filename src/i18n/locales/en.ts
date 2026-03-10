@@ -17,6 +17,7 @@ import notFound from './en/notFound'
 import gold from './en/gold'
 import help from './en/help'
 import goofish from './en/goofish'
+import aimarkmap from './en/aimarkmap'
 
 export default {
   translation: {
@@ -38,6 +39,7 @@ export default {
     notFound,
     gold,
     help,
-    goofish
+    goofish,
+    aimarkmap
   }
 }

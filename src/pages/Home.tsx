@@ -11,7 +11,8 @@ import {
   BookOutlined,
   GoldOutlined,
   AndroidOutlined,
-  RobotOutlined
+  RobotOutlined,
+  NodeIndexOutlined
 } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -203,6 +204,12 @@ const Home: React.FC = () => {
       description: t('home.features.chatgpt.description'),
       icon: <MessageOutlined />,
       path: '/gpt'
+    },
+    {
+      title: t('home.features.markmap.title'),
+      description: t('home.features.markmap.description'),
+      icon: <NodeIndexOutlined />,
+      path: '/markmap'
     },
     {
       title: t('home.features.gold.title'),

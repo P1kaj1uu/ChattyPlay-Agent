@@ -45,6 +45,10 @@ export default {
     worker: {
       title: 'Agent Supervisor',
       description: 'Monitor and manage your intelligent Agents, view their operational status online, handle exceptions promptly, simulate the work status of employees, and ensure Agents operate efficiently and stably'
+    },
+    markmap: {
+      title: 'Mind Map',
+      description: 'Convert text content into mind maps, helping you better organize and understand information, improve work efficiency, and save generated mind maps as images or Markdown format for easy sharing and use'
     }
   },
   footer: {

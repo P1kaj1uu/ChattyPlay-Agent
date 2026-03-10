@@ -38,6 +38,7 @@ import Goods from './pages/goofish/Goods'
 import { scrollToTop } from './utils/backTop'
 import { isMobileDevice } from './utils/isMobile'
 import WorkerAgent from './pages/WorkerAgent'
+import Markmap from './pages/Markmap'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -208,6 +209,7 @@ const AppContent: React.FC = () => {
           <Route path="/help" element={<Help />} />
           <Route path="/about" element={<About />} />
           <Route path="/papers" element={<PaperListPage />} />
+          <Route path="/markmap" element={<Markmap />} />
           <Route path="/worker" element={<WorkerAgent />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>

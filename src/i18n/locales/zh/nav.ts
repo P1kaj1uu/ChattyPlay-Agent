@@ -8,6 +8,7 @@ const nav = {
   trans: '论文降重',
   textToPhoto: '绘图',
   gold: '黄金',
+  aimarkmap: '导图',
   about: '关于',
   login: '登录',
   logout: '退出',
