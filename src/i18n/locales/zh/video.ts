@@ -1,4 +1,6 @@
 export default {
+  tabParse: '视频解析',
+  tabDownload: '视频下载',
   title: '视频解析',
   description: '输入视频链接即可在线播放，支持各大视频平台',
   placeholder: '请输入视频链接',
@@ -33,5 +35,13 @@ export default {
   pptv: 'PPTV聚力',
   movie1905: '1905电影网',
   hjtv: '韩剧TV',
-  omofun: 'OmoFun'
+  omofun: 'OmoFun',
+  douyin: '抖音',
+  xiaohongshu: '小红书',
+  downloadTitle: '去水印下载视频',
+  downloadDescription: '支持B站、抖音、小红书等多个平台',
+  downloadPlaceholder: '在这里粘贴视频链接 (支持抖音、小红书、B站等多个平台)',
+  extracting: '解析中...',
+  extractVideo: '提取视频',
+  downloadFormat: '下载格式',
 }

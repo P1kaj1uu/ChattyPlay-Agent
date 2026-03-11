@@ -19,6 +19,22 @@
   ],
   "rewrites": [
     {
+      "source": "/api/resolve/:path*",
+      "destination": "https://xiazaishipin.com/api/resolve/:path*"
+    },
+    {
+      "source": "/api/bilibili-download/:path*",
+      "destination": "https://xiazaishipin.com/api/bilibili-download/:path*"
+    },
+    {
+      "source": "/api/proxy-download/:path*",
+      "destination": "https://xiazaishipin.com/api/proxy-download/:path*"
+    },
+    {
+      "source": "/api/image-proxy",
+      "destination": "https://xiazaishipin.com/api/image-proxy"
+    },
+    {
       "source": "/api/translate/:path*",
       "destination": "https://fanyi-api.baidu.com/api/trans/vip/translate/:path*"
     },

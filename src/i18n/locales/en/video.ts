@@ -1,4 +1,6 @@
 export default {
+  tabParse: 'Video Parse',
+  tabDownload: 'Video Download',
   title: 'Video Parse',
   description: 'Enter video link to play online, supports major video platforms',
   placeholder: 'Enter video link',
@@ -33,5 +35,13 @@ export default {
   pptv: 'PPTV',
   movie1905: '1905 Movie',
   hjtv: 'HJTV',
-  omofun: 'OmoFun'
+  omofun: 'OmoFun',
+  douyin: 'Douyin',
+  xiaohongshu: 'Xiaohongshu',
+  downloadTitle: 'Download Video Without Watermark',
+  downloadDescription: 'Supports Bilibili, Douyin, Xiaohongshu and more platforms',
+  downloadPlaceholder: 'Paste video link here (supports Douyin, Xiaohongshu, Bilibili, etc.)',
+  extracting: 'Extracting...',
+  extractVideo: 'Extract Video',
+  downloadFormat: 'Download Format',
 }

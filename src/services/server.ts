@@ -190,6 +190,238 @@ app.route('/api/orders', createOrderRoutes(getClientManager))
 app.route('/api/autosell', createAutoSellRoutes())
 app.route('/api/workflows', createWorkflowRoutes())
 
+// 视频下载API代理
+app.post('/api/resolve', async (c) => {
+  const targetUrl = 'https://xiazaishipin.com/api/resolve'
+
+  try {
+    const body = await c.req.json()
+    console.log('[Video API] 解析请求:', body.url?.substring(0, 50))
+
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': 'https://xiazaishipin.com/',
+        'Origin': 'https://xiazaishipin.com',
+        'Accept': 'application/json, text/plain, */*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      body: JSON.stringify(body),
+    })
+
+    const responseData = await response.json()
+    console.log('[Video API] 解析成功:', responseData.title)
+
+    // 将thumbnail URL替换为代理URL
+    if (responseData.thumbnail) {
+      responseData.thumbnail = `/api/image-proxy?url=${encodeURIComponent(responseData.thumbnail)}`
+    }
+
+    return c.json(responseData, response.status as any)
+  } catch (error) {
+    console.error('[Video API] 错误:', error)
+    return c.json({
+      error: '视频解析失败',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// 图片代理 - 绕过防盗链
+app.get('/api/image-proxy', async (c) => {
+  const imageUrl = c.req.query('url')
+
+  if (!imageUrl) {
+    return c.json({ error: 'Missing url parameter' }, 400)
+  }
+
+  try {
+    console.log('[Image Proxy] 代理图片:', imageUrl.substring(0, 80))
+
+    const response = await fetch(imageUrl, {
+      headers: {
+        'Referer': 'https://www.bilibili.com/',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch image: ${response.status}`)
+    }
+
+    const imageBuffer = await response.arrayBuffer()
+    const contentType = response.headers.get('Content-Type') || 'image/jpeg'
+
+    return new Response(imageBuffer, {
+      headers: {
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400', // 缓存1天
+      },
+    })
+  } catch (error) {
+    console.error('[Image Proxy] 错误:', error)
+    return c.json({
+      error: 'Failed to proxy image',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// B站视频下载代理
+app.post('/api/bilibili-download', async (c) => {
+  const targetUrl = 'https://xiazaishipin.com/api/bilibili-download'
+
+  try {
+    const body = await c.req.json()
+    console.log('[Bilibili Download] 下载请求:', body.url?.substring(0, 50))
+
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': 'https://xiazaishipin.com/',
+        'Origin': 'https://xiazaishipin.com',
+        'Accept': '*/*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      body: JSON.stringify(body),
+    })
+
+    console.log('[Bilibili Download] 下载响应:', response.status, response.headers.get('content-type'))
+
+    // 检查响应类型
+    const contentType = response.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      // JSON响应 - 可能包含下载链接或错误信息
+      const jsonData = await response.json()
+      return c.json(jsonData)
+    } else {
+      // 视频文件响应 - 流式转发以支��前端进度显示
+      const reader = response.body?.getReader()
+
+      if (!reader) {
+        throw new Error('无法获取响应流')
+      }
+
+      // 创建一个新的 ReadableStream 来转发数据
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) {
+                controller.close()
+                break
+              }
+              controller.enqueue(value)
+            }
+          } catch (error) {
+            console.error('[Bilibili Download] 流传输错误:', error)
+            controller.error(error)
+          } finally {
+            reader.releaseLock()
+          }
+        }
+      })
+
+      return new Response(stream, {
+        status: response.status,
+        headers: {
+          'Content-Type': contentType,
+          'Content-Disposition': response.headers.get('Content-Disposition') || `attachment; filename="video.mp4"`,
+          'Content-Length': response.headers.get('Content-Length') || '',
+          'Cache-Control': 'no-cache',
+        },
+      })
+    }
+  } catch (error) {
+    console.error('[Bilibili Download] 错误:', error)
+    return c.json({
+      error: 'B站视频下载失败',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
+// 抖音和小红书视频下载代理
+app.post('/api/proxy-download', async (c) => {
+  const targetUrl = 'https://xiazaishipin.com/api/proxy-download'
+
+  try {
+    const body = await c.req.json()
+    console.log('[Douyin Download] 下载请求:', body.url?.substring(0, 50), 'filename:', body.filename)
+
+    const response = await fetch(targetUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Referer': 'https://xiazaishipin.com/',
+        'Origin': 'https://xiazaishipin.com',
+        'Accept': '*/*',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+      },
+      body: JSON.stringify(body),
+    })
+
+    console.log('[Douyin Download] 下载响应:', response.status, response.headers.get('content-type'))
+
+    // 检查响应类型
+    const contentType = response.headers.get('content-type') || ''
+
+    if (contentType.includes('application/json')) {
+      // JSON响应 - 可能包含错误信息
+      const jsonData = await response.json()
+      return c.json(jsonData)
+    } else {
+      // 视频文件响应 - 流式转发以支持前端进度显示
+      const reader = response.body?.getReader()
+
+      if (!reader) {
+        throw new Error('无法获取响应流')
+      }
+
+      // 创建一个新的 ReadableStream 来转发数据
+      const stream = new ReadableStream({
+        async start(controller) {
+          try {
+            while (true) {
+              const { done, value } = await reader.read()
+              if (done) {
+                controller.close()
+                break
+              }
+              controller.enqueue(value)
+            }
+          } catch (error) {
+            console.error('[Douyin Download] 流传输错误:', error)
+            controller.error(error)
+          } finally {
+            reader.releaseLock()
+          }
+        }
+      })
+
+      return new Response(stream, {
+        status: response.status,
+        headers: {
+          'Content-Type': contentType,
+          'Content-Disposition': response.headers.get('Content-Disposition') || `attachment; filename="${body.filename || 'video.mp4'}"`,
+          'Content-Length': response.headers.get('Content-Length') || '',
+          'Cache-Control': 'no-cache',
+        },
+      })
+    }
+  } catch (error) {
+    console.error('[Douyin Download] 错误:', error)
+    return c.json({
+      error: '抖音视频下载失败',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, 500)
+  }
+})
+
 // 代理配置映射
 const PROXY_CONFIG: Record<string, {
   target: string
@@ -265,12 +497,17 @@ const CACHE_TTL = 5 * 60 * 1000 // 5分钟
 // 代理中间件（必须在所有 goofish 路由之后注册）
 app.all('/api/*', async (c, next) => {
   const path = c.req.path
+  const method = c.req.method
+
+  // 添加调试日志
+  console.log(`[Proxy] ${method} ${path}`)
 
   // 检查是否是 goofish 路由，如果是则跳过代理处理，让下一个处理程序处理
   const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/api/info']
   for (const route of goofishRoutes) {
     if (path.startsWith(route)) {
       // 这是一个 goofish 路由，让下一个处理程序处理
+      console.log(`[Proxy] Skipping goofish route: ${path}`)
       return next()
     }
   }
@@ -278,6 +515,7 @@ app.all('/api/*', async (c, next) => {
   const matched = matchProxyTarget(path)
 
   if (!matched) {
+    console.log(`[Proxy] No proxy target found for: ${path}`)
     return c.json(
       {
         error: 'No proxy target found',
@@ -287,6 +525,8 @@ app.all('/api/*', async (c, next) => {
       404
     )
   }
+
+  console.log(`[Proxy] Matched target for ${path}:`, matched.prefix, '->', matched.config.target)
 
   const { prefix, config } = matched
   const { target, pathRewrite, timeout = 10000, headers: customHeaders = {} } = config
@@ -322,6 +562,11 @@ app.all('/api/*', async (c, next) => {
       body = await c.req.arrayBuffer()
     }
 
+    console.log(`[Proxy] Forwarding ${c.req.method} request to: ${targetUrl}`)
+    if (body) {
+      console.log(`[Proxy] Request body:`, new TextDecoder().decode(body))
+    }
+
     // 转发请求
     const response = await fetch(targetUrl, {
       method: c.req.method,
@@ -338,6 +583,8 @@ app.all('/api/*', async (c, next) => {
     })
 
     clearTimeout(timeoutId)
+
+    console.log(`[Proxy] Response status: ${response.status} ${response.statusText}`)
 
     // 获取响应内容
     const responseData = await response.arrayBuffer()
