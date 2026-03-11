@@ -1,4 +1,3 @@
-import { handle } from '@hono/node-server/vercel'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 
@@ -194,4 +193,9 @@ app.post('/api/proxy-download', async (c) => {
   }
 })
 
-export default handle(app)
+export default app
+
+// Vercel Edge Runtime 配置
+export const config = {
+  runtime: 'edge',
+}
