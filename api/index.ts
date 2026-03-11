@@ -194,8 +194,3 @@ app.post('/api/proxy-download', async (c) => {
 })
 
 export default app
-
-// Vercel Edge Runtime 配置
-export const config = {
-  runtime: 'edge',
-}
