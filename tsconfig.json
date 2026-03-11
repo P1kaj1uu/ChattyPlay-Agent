@@ -27,7 +27,7 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "api"],
   "exclude": ["src/services/server.ts", "src/services/worker.ts", "src/goofish"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
