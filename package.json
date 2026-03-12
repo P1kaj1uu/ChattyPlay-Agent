@@ -5,7 +5,7 @@
     "name": "P1Kaj1uu",
     "email": "891523233@qq.com"
   },
-  "version": "4.2.0",
+  "version": "4.3.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
