@@ -258,7 +258,7 @@ const GPT: React.FC = () => {
       // 调用流式 API
       const stream = await openai.chat.completions.create(
         {
-          model: 'deepseek-chat',
+          model: 'deepseek-v3-2-251201',
           messages: [
             {
               role: 'system',

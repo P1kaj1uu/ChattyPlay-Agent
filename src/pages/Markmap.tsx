@@ -283,7 +283,7 @@ const Markmap: React.FC = () => {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${deepseekKey}` },
             body: JSON.stringify({
-              model: 'deepseek-chat',
+              model: 'deepseek-v3-2-251201',
               messages: [{ role: 'user', content: aiPromptTemplate.replace('{{CONTENT}}', content) }],
               max_tokens: 2000,
               temperature: 0.6 + i * 0.15,
