@@ -12,7 +12,7 @@
 
 ## 📄 免责声明
 
-### 本项目提供音乐、影视解析、实时黄金及K线图、动漫漫画、Hugging Face论文和ChatGPT相关服务，仅供学习使用，请勿用于任何商业用途。如你有更好的想法、建议、或不解的问题，欢迎提PR或Issues！如有侵权，请联系我！
+### 本项目提供音乐、影视解析下载、实时黄金及K线图、动漫漫画、Hugging Face论文、思维导图、闲鱼助手和ChatGPT相关服务，仅供学习使用，请勿用于任何商业用途。如你有更好的想法、建议、或不解的问题，欢迎提PR或Issues！如有侵权，请联系我！
 
 > License：ChattyPlay-Agent is licensed under the Apache-2.0 License. See the [LICENSE](https://github.com/P1kaj1uu/ChattyPlay-Agent/blob/master/LICENSE) file for more information.
 
@@ -22,7 +22,7 @@
 
 ## 🚀 在线体验
 
-- 体验地址：<a href="http://123.60.91.107:9501/" target="_blank">在线体验</a>（服务器带宽低，访问可能略有卡顿，敬请谅解）
+- 体验地址：<a href="https://chatty-play-agent.vercel.app" target="_blank">在线体验</a>（需要科学上网工具访问）
 - 视频预览：<a href="https://www.bilibili.com/video/BV1DmFYzbEQp/?share_source=copy_web&vd_source=1c9f57ed1dd7f17c0142ea7c34926f1e" target="_blank">录频视频</a>
 - 备注：如使用ChatGPT服务，我的APIKey配额有限，希望大家能省点用谢谢！
 
@@ -49,8 +49,12 @@
 - v2.9版本整体优化代码，修复bug，并抽离封装部分函数和组件，降低复杂度，实现高内聚低耦合（2023.6.10-2023.6.20）
 - v3.0全新版本上线，优化markdown代码块格式，并接入文生图、亚马逊爬虫服务，发布浏览器插件（2023.7.24-2023.8.13）
 - v4.0重构项目完成，修改相关的bug，页面结构样式重新设计，增加实时黄金及k线图、动漫漫画和Hugging Face论文功能，优化用户体验，并完成移动端和PC端的适配，添加版本检测弹窗更新功能，接入SDK、MCP、Agent、谷歌和Github授权登录等服务，同时系统整体架构将Vue2替换为React + TypeScript + Hono + Vite + Tailwind CSS + i18n国际化 + live2d看板娘 + nginx + Docker容器化管理（2025.12.16-2026.2.10）
+- v4.1闲鱼助手，可自动回复、自动发货等（2026.2.26-2026.3.7）
+- v4.2思维导图和Markdown格式预览及编辑，导出图片。论文PDF预览及AI问答（2026.3.9-2026.3.11）
+- v4.3解析下载无水印1080P视频（2026.3.13-2026.3.14）
+- v4.4封装浏览器指纹SDK、GIF图片埋点SDK，接入Google Analytics分析工具（2026.3.15-2026.3.16）
 
-## 最新版本V4.0（推荐）
+## 最新版本V4.4（推荐）
 
 > 本地调试时，可注释掉限制调用控制台的代码。参照说明修改package.json、email.config.js、index.html、.env.development、.env.production和docker-compose.yml文件。
 
@@ -75,20 +79,14 @@
 - 限制终端控制台调用
 - 组件库使用Antd
 - 接入fundebug SDK和OPen AI SDK
-- Hugging Face今日论文和热搜论文
+- Hugging Face今日论文和热搜论文、预览PDF及对PDF的AI解答
 - 接入MCP、Agent相关服务
 - 接入谷歌和Github授权登录
-
-后端：
-
-- Python 3.10+，开发框架FastAPI，数据库MySQL + SQLAlchemy ORM + Alembic迁移，中间件Redis
-- 第三方API接入Openai-ChatGPT（langchain框架流式对话），接入文生图模型（Stable Diffusion diffusers / MidJourney API replicate）
-- Middleware中间件拦截器、装饰器过滤器、本地缓存cachetools（TTLCache/LRUCache）
-- 算法使用collections.deque双端队列 + 滑动窗口限流算法 + Round-robin轮询负载均衡
-- asyncio异步流 + aiohttp + yield生成器流式输出
-- @app.exception_handler全局异常处理器，APScheduler定时任务调度，asyncio.Lock/Redis分布式锁，Pydantic数据验证
-- Swagger UI交互式文档
-- Nginx反向代理，Docker容器化
+- 闲鱼助手，可自动回复、自动发货等
+- 思维导图和Markdown格式预览及编辑，导出图片
+- 解析下载无水印1080P视频
+- 封装浏览器指纹SDK、GIF图片埋点SDK
+- 接入Google Analytics分析工具
 
 ✅ 音乐播放
 
@@ -101,6 +99,7 @@
 - 无需会员，可在线解析视频，解析速度快
 - 包含海量视频资源，提供多个可用的解析接口
 - 支持全屏、倍速播放，画质超清及以上
+- 解析下载无水印1080P视频
 
 ✅ 实时黄金
 
@@ -113,6 +112,14 @@
 
 - Hugging Face今日论文和热搜论文
 - 筛选论文，项目主页，代码地址，arXiv论文等
+- PC端和移动端适配预览论文PDF
+- 对论文PDF进行AI解答
+
+✅ 思维导图
+
+- 生成对应内容的思维导图和Markdown内容，可导出SVG图片和PNG图片
+- 支持拖拽、放大、缩小、全屏
+- 适配PC端和移动端
 
 ✅ ChatGPT
 
@@ -147,6 +154,8 @@
 - ### 登录页面
 
  <img width="1032" height="758" alt="Image" src="https://github.com/user-attachments/assets/03351211-ce23-4e74-9859-a06c57f63fa2" />
+<img width="1413" height="708" alt="Image" src="https://github.com/user-attachments/assets/19d1df96-4fad-4c22-b720-10d1deed48b3" />
+<img width="1276" height="659" alt="Image" src="https://github.com/user-attachments/assets/9570cfd9-8189-4e5e-b3d0-9f3ab81b888e" />
 
 - ### 爱心跳动
 
@@ -167,6 +176,25 @@
 <img width="1470" height="789" alt="Image" src="https://github.com/user-attachments/assets/a7bf05d8-f5d3-419c-b0ee-0013e925b00e" />
 <img width="1470" height="789" alt="Image" src="https://github.com/user-attachments/assets/54fdfd8b-35c7-4e8e-839e-0df12beb02ef" />
 <img width="695" height="776" alt="Image" src="https://github.com/user-attachments/assets/956e3d33-c4b4-471f-b004-6beac7bc32a2" />
+<img width="1470" height="795" alt="Image" src="https://github.com/user-attachments/assets/b26084b3-1a26-4b21-8fc5-e38b9ad50540" />
+<img width="1470" height="719" alt="Image" src="https://github.com/user-attachments/assets/02f91f09-9d14-4cd3-a101-8d004ef1cebb" />
+<img width="493" height="720" alt="Image" src="https://github.com/user-attachments/assets/e4b9f98a-b053-47bc-94a5-32cc615314ce" />
+
+- ### 论文文献
+
+<img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/29a0ba7d-13de-425a-9de3-fe1d272a140f" />
+<img width="1470" height="793" alt="Image" src="https://github.com/user-attachments/assets/26c8630a-4329-48d6-bad6-9846a708fcef" />
+<img width="1470" height="795" alt="Image" src="https://github.com/user-attachments/assets/8d08a59c-b673-430e-99de-0230ed0db149" />
+<img width="675" height="779" alt="Image" src="https://github.com/user-attachments/assets/ec888e37-8bb5-42ba-bbb6-10ef2123fd39" />
+<img width="664" height="721" alt="Image" src="https://github.com/user-attachments/assets/0063a312-700c-46a8-ae34-f601b53fecf9" />
+<img width="699" height="709" alt="Image" src="https://github.com/user-attachments/assets/ff1eeb84-337e-4b9d-87b7-a37e2ffa4125" />
+
+- ### 思维导图
+
+<img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/0d3008fd-f418-4925-85c1-90d87928f850" />
+<img width="1470" height="797" alt="Image" src="https://github.com/user-attachments/assets/fae232f3-1a1d-4092-ad2d-ab9eb99bb79f" />
+<img width="495" height="726" alt="Image" src="https://github.com/user-attachments/assets/b6182a74-9197-4fd6-bca2-eeb23741b1af" />
+<img width="498" height="724" alt="Image" src="https://github.com/user-attachments/assets/f40703e9-7f68-4aa5-88ba-3a07a29c02b0" />
 
 - ### 动漫漫画
 
@@ -183,13 +211,6 @@
 <img width="1470" height="795" alt="Image" src="https://github.com/user-attachments/assets/b17a1d6d-d8e8-48f6-96f6-a49968d4be71" />
 <img width="660" height="700" alt="Image" src="https://github.com/user-attachments/assets/41da09a3-8c84-434c-a001-fc81b5624217" />
 
-- ### 论文文献
-
-<img width="1470" height="792" alt="Image" src="https://github.com/user-attachments/assets/ef306516-24ae-4dc9-8d3a-02cd86d7bbef" />
-<img width="1470" height="795" alt="Image" src="https://github.com/user-attachments/assets/8d08a59c-b673-430e-99de-0230ed0db149" />
-<img width="675" height="779" alt="Image" src="https://github.com/user-attachments/assets/ec888e37-8bb5-42ba-bbb6-10ef2123fd39" />
-<img width="699" height="709" alt="Image" src="https://github.com/user-attachments/assets/ff1eeb84-337e-4b9d-87b7-a37e2ffa4125" />
-
 - ### ChatGPT页面
 
 <img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/d47c6638-b2e5-4b86-b973-61717c6c207a" />
@@ -203,6 +224,11 @@
 <img width="1470" height="791" alt="Image" src="https://github.com/user-attachments/assets/a243878b-838d-464a-8953-98342ed1c8b4" />
 <img width="671" height="791" alt="Image" src="https://github.com/user-attachments/assets/004c7a1a-4f48-4e5d-a918-ad3168ef2170" />
 
+- ### 闲鱼助手
+
+<img width="1470" height="793" alt="Image" src="https://github.com/user-attachments/assets/f2502814-f88b-44ee-94a3-47b0180b6e1e" />
+<img width="487" height="716" alt="Image" src="https://github.com/user-attachments/assets/a4d1de7e-6375-4d4d-b10c-749c14b21449" />
+
 - ### 文生图页面
 
 <img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/95ca9824-d33a-4d51-ab72-9c9df4f80df5" />
@@ -213,16 +239,18 @@
 <img width="1470" height="716" alt="Image" src="https://github.com/user-attachments/assets/7db6a99a-b7f6-4771-93a5-0a4bf6ebd68d" />
 <img width="487" height="724" alt="Image" src="https://github.com/user-attachments/assets/a4cf7de6-5962-4e03-b77b-28944c584989" />
 
+- ### Agent监工
+
+<img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/d17c4478-a912-4db5-8572-1ac021b05a3d" />
+
 - ### 404页面
 
 <img width="1470" height="792" alt="Image" src="https://github.com/user-attachments/assets/efd0425b-1879-42a1-9c1e-eb71baea8bfe" />
 
 ## ⚡ 网站性能
 
+<img width="1470" height="793" alt="Image" src="https://github.com/user-attachments/assets/468c753d-5f3f-43ff-b3d0-e86a66064319" />
 <img width="1373" height="788" alt="Image" src="https://github.com/user-attachments/assets/b159956b-599a-439a-a05c-33cd25def60a" />
-<img width="1470" height="841" alt="Image" src="https://github.com/user-attachments/assets/18ce8a21-ce36-4ffe-9b9f-9dbff9ee54ea" />
-<img width="1470" height="802" alt="Image" src="https://github.com/user-attachments/assets/7745822c-c876-4df2-b41f-275b210e77b8" />
-<img width="1470" height="752" alt="Image" src="https://github.com/user-attachments/assets/ea6d74f8-74e0-4500-947f-99ec171c7c93" />
 <img width="1470" height="755" alt="Image" src="https://github.com/user-attachments/assets/746890e5-d67b-491f-af1f-957b0f832040" />
 
 <details>
