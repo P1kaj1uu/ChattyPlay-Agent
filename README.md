@@ -61,6 +61,7 @@
 ## 🛠️ 系统架构
 
 <img width="1345" height="750" alt="Image" src="https://github.com/user-attachments/assets/c52fe4e9-a04c-4712-b635-a7191712cbf4" />
+<img width="1345" height="750" alt="Image" src="https://github.com/user-attachments/assets/30aa8602-e8c0-4e0c-8165-0a4061f39d64" />
 
 ## 🔰 项目概述
 
