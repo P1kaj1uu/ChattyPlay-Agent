@@ -21,6 +21,7 @@ import { createAutoReplyRoutes } from '../goofish/api/routes/autoreply'
 import { createOrderRoutes } from '../goofish/api/routes/order.route'
 import { createAutoSellRoutes } from '../goofish/api/routes/autosell'
 import { createWorkflowRoutes } from '../goofish/api/routes/workflow.route'
+import { authRoute } from '../goofish/api/routes/auth.route'
 
 const goofishLogger = createLogger('Goofish:Integration')
 const app = new Hono()
@@ -170,6 +171,7 @@ app.get('/api/info', (c) => {
       '/api/autosell': 'Auto sell rules',
       '/api/workflows': 'Workflow management',
       '/api/logs': 'System logs',
+      '/api/auth': 'User authentication (login, register)',
       '/api/info': 'This endpoint',
     },
     timestamp: new Date().toISOString()
@@ -189,6 +191,7 @@ app.route('/api/autoreply', createAutoReplyRoutes())
 app.route('/api/orders', createOrderRoutes(getClientManager))
 app.route('/api/autosell', createAutoSellRoutes())
 app.route('/api/workflows', createWorkflowRoutes())
+app.route('/api/auth', authRoute)
 
 // 视频下载API代理
 app.post('/api/resolve', async (c) => {
@@ -468,8 +471,8 @@ const PROXY_CONFIG: Record<string, {
 
 // 匹配代理目标（优先匹配最长路径）
 function matchProxyTarget(path: string): { prefix: string; config: typeof PROXY_CONFIG[keyof typeof PROXY_CONFIG] } | null {
-  // 排除 Goofish 路由
-  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/ws']
+  // 排除 Goofish 路由和认证路由
+  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/api/auth', '/ws']
   for (const route of goofishRoutes) {
     if (path.startsWith(route)) {
       return null
@@ -503,7 +506,7 @@ app.all('/api/*', async (c, next) => {
   console.log(`[Proxy] ${method} ${path}`)
 
   // 检查是否是 goofish 路由，如果是则跳过代理处理，让下一个处理程序处理
-  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/api/info']
+  const goofishRoutes = ['/api/accounts', '/api/goods', '/api/messages', '/api/conversations', '/api/logs', '/api/autoreply', '/api/orders', '/api/autosell', '/api/workflows', '/api/status', '/api/info', '/api/auth']
   for (const route of goofishRoutes) {
     if (path.startsWith(route)) {
       // 这是一个 goofish 路由，让下一个处理程序处理
@@ -657,6 +660,7 @@ app.notFound((c) => {
       '/api/autosell/*',
       '/api/workflows/*',
       '/api/logs/*',
+      '/api/auth/*',
       'ALL /api/* (proxy)',
     ],
   }, 404)

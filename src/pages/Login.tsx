@@ -5,7 +5,7 @@ import {
   LockOutlined,
   KeyOutlined,
   EyeOutlined,
-  EyeInvisibleOutlined
+  EyeInvisibleOutlined,
 } from '@ant-design/icons'
 import { useGoogleLogin } from '@react-oauth/google'
 import { FcGoogle } from 'react-icons/fc'
@@ -17,6 +17,7 @@ import VerifyCode from '../components/VerifyCode'
 import HeartBeat from '../components/HeartBeat'
 import { logoImage } from '@/utils/images'
 import { setToken } from '@/utils/token'
+import { isMobileDevice } from '@/utils/isMobile'
 
 // 创建气泡组件
 const Bubble = styled.div<{ size: number; left: number; delay: number; popped: boolean }>`
@@ -238,13 +239,29 @@ const OAuthButton = styled.button<{ variant: 'google' | 'github' }>`
   }
 `
 
+const ModeSwitch = styled.div`
+  text-align: center;
+  margin-top: 16px;
+  color: #667eea;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: color 0.2s;
+
+  &:hover {
+    color: #764ba2;
+    text-decoration: underline;
+  }
+`
+
 const Login: React.FC = () => {
   const { t } = useTranslation()
-  const [form] = Form.useForm()
+  const [loginForm] = Form.useForm()
+  const [registerForm] = Form.useForm()
   const [verifyCode, setVerifyCode] = useState('')
   const [loading, setLoading] = useState(false)
   const [isAgreed, setIsAgreed] = useState(true)
   const [showHeartBeat, setShowHeartBeat] = useState(false)
+  const [isLoginMode, setIsLoginMode] = useState(true)
   const navigate = useNavigate()
   const [bubbles, setBubbles] = useState(() =>
     Array.from({ length: 15 }, () => ({
@@ -303,7 +320,7 @@ const Login: React.FC = () => {
     if (!isCodeValid) {
       message.error(t('login.verifyCodeError'))
       generateVerifyCode()
-      form.setFieldsValue({ code: '' })
+      loginForm.setFieldsValue({ code: '' })
       return
     }
 
@@ -314,33 +331,95 @@ const Login: React.FC = () => {
 
     setLoading(true)
     try {
-      // 模拟登录过程
-      await new Promise(resolve => setTimeout(resolve, 1500))
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password
+        })
+      })
 
-      // 保存登录状态和 token
-      setToken()
-      localStorage.setItem('isLoggedIn', 'true')
-      localStorage.setItem('username', values.username)
+      const data = await response.json()
 
-      message.success(t('login.loginSuccess'))
-      // 显示心跳动画
-      setShowHeartBeat(true)
-    } catch (error) {
-      message.error(t('login.loginFailed'))
+      if (data.success) {
+        // 保存登录状态和 token
+        setToken(data.token)
+        localStorage.setItem('isLoggedIn', 'true')
+        localStorage.setItem('username', data.user.username)
+        localStorage.setItem('userId', data.user.id.toString())
+        if (data.user.avatar) {
+          localStorage.setItem('avatar', data.user.avatar)
+        }
+
+        message.success(t('login.loginSuccess'))
+        if (!isMobileDevice()) {
+          setShowHeartBeat(true)
+        } else {
+          setShowHeartBeat(false)
+          navigate('/home')
+        }
+      } else {
+        message.error(data.message || t('login.loginFailed'))
+      }
+    } catch (error: any) {
+      console.error('Login error:', error)
+      message.error(error.message || t('login.loginFailed'))
     } finally {
       setLoading(false)
     }
   }
 
-  const handleGuestLogin = () => {
-    // 游客登录也保存状态和 token
-    setToken()
-    localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('username', '游客')
-    message.success(t('login.guestLoginSuccess'))
-    // 游客访问不显示心跳动画，直接跳转到首页
-    setShowHeartBeat(false)
-    handleHeartBeatComplete()
+  const handleRegister = async (values: any) => {
+    const isCodeValid = values.code?.toUpperCase() === verifyCode.toUpperCase()
+
+    if (!isCodeValid) {
+      message.error(t('login.verifyCodeError'))
+      generateVerifyCode()
+      registerForm.setFieldsValue({ code: '' })
+      return
+    }
+
+    if (!isAgreed) {
+      message.error(t('login.agreeRequired'))
+      return
+    }
+
+    if (values.password !== values.confirmPassword) {
+      message.error(t('login.confirmPasswordMismatch'))
+      return
+    }
+
+    setLoading(true)
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          username: values.username,
+          password: values.password,
+          email: values.email
+        })
+      })
+
+      const data = await response.json()
+
+      if (data.success) {
+        message.success(t('login.registerSuccess'))
+        toggleMode()
+      } else {
+        message.error(data.message || t('login.registerFailed'))
+      }
+    } catch (error: any) {
+      console.error('Register error:', error)
+      message.error(error.message || t('login.registerFailed'))
+    } finally {
+      setLoading(false)
+    }
   }
 
   const handleHeartBeatComplete = () => {
@@ -348,7 +427,16 @@ const Login: React.FC = () => {
   }
 
   const handleReset = () => {
-    form.resetFields()
+    loginForm.resetFields()
+    registerForm.resetFields()
+    generateVerifyCode()
+  }
+
+  const toggleMode = () => {
+    setIsLoginMode(!isLoginMode)
+    loginForm.resetFields()
+    registerForm.resetFields()
+    generateVerifyCode()
   }
 
   // Google OAuth
@@ -422,134 +510,259 @@ const Login: React.FC = () => {
           ))}
 
           <LoginBox>
-        <Logo>
-          <img src={logoImage} alt="Logo" />
-          <h3>ChattyPlay</h3>
-        </Logo>
+            <Logo>
+              <img src={logoImage} alt="Logo" />
+              <h3>ChattyPlay</h3>
+            </Logo>
 
-        <Form
-          form={form}
-          onFinish={handleLogin}
-          layout="vertical"
-          initialValues={{
-            username: 'P1Kaj1uu',
-            password: 'OwaGDragon'
-          }}
-        >
-          <Form.Item
-            name="username"
-            label={t('login.account')}
-            rules={[{ required: true, message: t('login.accountRequired') }]}
-          >
-            <Input
-              prefix={<UserOutlined />}
-              placeholder={t('login.accountPlaceholder')}
-              size="large"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="password"
-            label={t('login.password')}
-            rules={[
-              { required: true, message: t('login.passwordRequired') },
-              { min: 6, max: 11, message: t('login.passwordLength') }
-            ]}
-          >
-            <Input.Password
-              prefix={<LockOutlined />}
-              placeholder={t('login.passwordPlaceholder')}
-              size="large"
-              iconRender={(visible) => (
-                visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
-              )}
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="code"
-            label={t('login.verifyCode')}
-            rules={[{ required: true, message: t('login.verifyCodeRequired') }]}
-          >
-            <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-              <Input
-                prefix={<KeyOutlined />}
-                placeholder={t('login.verifyCodePlaceholder')}
-                size="large"
-                maxLength={4}
-                style={{ flex: 1 }}
-              />
-              <div style={{ cursor: 'pointer', userSelect: 'none' }} onClick={generateVerifyCode}>
-                <VerifyCode code={verifyCode} />
-              </div>
-            </div>
-          </Form.Item>
-
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: '20px',
-            paddingTop: '16px',
-            borderTop: '1px solid #e2e8f0'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Checkbox
-                checked={isAgreed}
-                onChange={(e) => setIsAgreed(e.target.checked)}
+            {isLoginMode ? (
+              <Form
+                form={loginForm}
+                onFinish={handleLogin}
+                layout="vertical"
               >
-                {t('login.agree')}
-              </Checkbox>
-            </div>
-          </div>
+                <Form.Item
+                  name="username"
+                  label={t('login.account')}
+                  rules={[{ required: true, message: t('login.accountRequired') }]}
+                >
+                  <Input
+                    prefix={<UserOutlined />}
+                    placeholder={t('login.accountPlaceholder')}
+                    size="large"
+                    autoComplete="off"
+                  />
+                </Form.Item>
 
-          <Form.Item style={{ marginBottom: '12px' }}>
-            <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={loading}
-                style={{
-                  flex: 1,
-                  height: '44px',
-                  fontSize: '0.95rem',
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  border: 'none'
-                }}
-              >
-                {t('login.loginBtn')}
-              </Button>
-              <Button
-                onClick={handleGuestLogin}
-                style={{ flex: 1, height: '44px', fontSize: '0.95rem' }}
-              >
-                {t('login.guestBtn')}
-              </Button>
-              <Button
-                onClick={handleReset}
-                style={{ flex: 1, height: '44px', fontSize: '0.95rem' }}
-              >
-                {t('login.resetBtn')}
-              </Button>
-            </Space>
-          </Form.Item>
-        </Form>
+                <Form.Item
+                  name="password"
+                  label={t('login.password')}
+                  rules={[
+                    { required: true, message: t('login.passwordRequired') },
+                    { min: 6, max: 20, message: t('login.passwordLength') }
+                  ]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder={t('login.passwordPlaceholder')}
+                    size="large"
+                    iconRender={(visible) => (
+                      visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+                    )}
+                  />
+                </Form.Item>
 
-        {/* OAuth 第三方登录 */}
-        <OAuthDivider>{t('login.thirdPartyLoginTip')}</OAuthDivider>
+                <Form.Item
+                  name="code"
+                  label={t('login.verifyCode')}
+                  rules={[{ required: true, message: t('login.verifyCodeRequired') }]}
+                >
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <Input
+                      prefix={<KeyOutlined />}
+                      placeholder={t('login.verifyCodePlaceholder')}
+                      size="large"
+                      maxLength={4}
+                      style={{ flex: 1 }}
+                    />
+                    <div style={{ cursor: 'pointer', userSelect: 'none' }} onClick={generateVerifyCode}>
+                      <VerifyCode code={verifyCode} />
+                    </div>
+                  </div>
+                </Form.Item>
 
-        <OAuthButtonContainer>
-          <OAuthButton variant="google" onClick={() => googleLogin()}>
-            <FcGoogle />
-            Google
-          </OAuthButton>
-          <OAuthButton variant="github" onClick={handleGithubLogin}>
-            <FaGithub />
-            GitHub
-          </OAuthButton>
-        </OAuthButtonContainer>
-      </LoginBox>
-      </LoginContainer>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                  paddingTop: '16px',
+                  borderTop: '1px solid #e2e8f0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Checkbox
+                      checked={isAgreed}
+                      onChange={(e) => setIsAgreed(e.target.checked)}
+                    >
+                      {t('login.agree')}
+                    </Checkbox>
+                  </div>
+                </div>
+
+                <Form.Item style={{ marginBottom: '12px' }}>
+                  <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={loading}
+                      style={{
+                        flex: 1,
+                        height: '44px',
+                        fontSize: '0.95rem',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        border: 'none'
+                      }}
+                    >
+                      {t('login.loginBtn')}
+                    </Button>
+                    <Button
+                      onClick={handleReset}
+                      style={{ flex: 1, height: '44px', fontSize: '0.95rem' }}
+                    >
+                      {t('login.resetBtn')}
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            ) : (
+              <Form
+                form={registerForm}
+                onFinish={handleRegister}
+                layout="vertical"
+              >
+                <Form.Item
+                  name="username"
+                  label={t('login.account')}
+                  rules={[
+                    { required: true, message: t('login.accountRequired') },
+                    { min: 3, max: 20, message: t('login.usernameLength') }
+                  ]}
+                >
+                  <Input
+                    prefix={<UserOutlined />}
+                    placeholder={t('login.accountPlaceholder')}
+                    size="large"
+                    autoComplete="off"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="password"
+                  label={t('login.password')}
+                  rules={[
+                    { required: true, message: t('login.passwordRequired') },
+                    { min: 6, max: 20, message: t('login.passwordLengthRegister') }
+                  ]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder={t('login.passwordPlaceholder')}
+                    size="large"
+                    iconRender={(visible) => (
+                      visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+                    )}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="confirmPassword"
+                  label={t('login.confirmPassword')}
+                  dependencies={['password']}
+                  rules={[
+                    { required: true, message: t('login.confirmPasswordRequired') },
+                    ({ getFieldValue }) => ({
+                      validator(_, value) {
+                        if (!value || getFieldValue('password') === value) {
+                          return Promise.resolve()
+                        }
+                        return Promise.reject(new Error(t('login.confirmPasswordMismatch')))
+                      },
+                    }),
+                  ]}
+                >
+                  <Input.Password
+                    prefix={<LockOutlined />}
+                    placeholder={t('login.confirmPasswordPlaceholder')}
+                    size="large"
+                    iconRender={(visible) => (
+                      visible ? <EyeOutlined /> : <EyeInvisibleOutlined />
+                    )}
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="code"
+                  label={t('login.verifyCode')}
+                  rules={[{ required: true, message: t('login.verifyCodeRequired') }]}
+                >
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <Input
+                      prefix={<KeyOutlined />}
+                      placeholder={t('login.verifyCodePlaceholder')}
+                      size="large"
+                      maxLength={4}
+                      style={{ flex: 1 }}
+                    />
+                    <div style={{ cursor: 'pointer', userSelect: 'none' }} onClick={generateVerifyCode}>
+                      <VerifyCode code={verifyCode} />
+                    </div>
+                  </div>
+                </Form.Item>
+
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '20px',
+                  paddingTop: '16px',
+                  borderTop: '1px solid #e2e8f0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Checkbox
+                      checked={isAgreed}
+                      onChange={(e) => setIsAgreed(e.target.checked)}
+                    >
+                      {t('login.agree')}
+                    </Checkbox>
+                  </div>
+                </div>
+
+                <Form.Item style={{ marginBottom: '12px' }}>
+                  <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
+                    <Button
+                      type="primary"
+                      htmlType="submit"
+                      loading={loading}
+                      style={{
+                        flex: 1,
+                        height: '44px',
+                        fontSize: '0.95rem',
+                        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                        border: 'none'
+                      }}
+                    >
+                      {t('login.registerBtn')}
+                    </Button>
+                    <Button
+                      onClick={handleReset}
+                      style={{ flex: 1, height: '44px', fontSize: '0.95rem' }}
+                    >
+                      {t('login.resetBtn')}
+                    </Button>
+                  </Space>
+                </Form.Item>
+              </Form>
+            )}
+
+            <ModeSwitch onClick={toggleMode}>
+              {isLoginMode ? t('login.switchToRegister') : t('login.switchToLogin')}
+            </ModeSwitch>
+
+            {/* OAuth 第三方登录 */}
+            <OAuthDivider>{t('login.thirdPartyLoginTip')}</OAuthDivider>
+
+            <OAuthButtonContainer>
+              <OAuthButton variant="google" onClick={() => googleLogin()}>
+                <FcGoogle />
+                Google
+              </OAuthButton>
+              <OAuthButton variant="github" onClick={handleGithubLogin}>
+                <FaGithub />
+                GitHub
+              </OAuthButton>
+            </OAuthButtonContainer>
+          </LoginBox>
+        </LoginContainer>
       )}
     </>
   )

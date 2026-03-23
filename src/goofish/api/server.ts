@@ -17,6 +17,7 @@ import {
   createOrderRoutes,
   createAutoSellRoutes,
   createWorkflowRoutes,
+  authRoute,
 } from "./routes";
 import { createDevMessageRoutes } from "./routes/dev-messages.route";
 import { createWSPushHandler } from "./routes/ws-push.route";
@@ -84,6 +85,7 @@ export function createApp() {
   app.route("/api/orders", createOrderRoutes(getClientManager));
   app.route("/api/autosell", createAutoSellRoutes());
   app.route("/api/workflows", createWorkflowRoutes());
+  app.route("/api/auth", authRoute);
 
   // 开发环境才注册调试路由
   if (ENV.IS_DEV) {

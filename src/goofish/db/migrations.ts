@@ -212,6 +212,28 @@ function createSettingsTables() {
   `)
 }
 
+// 创建 ChattyPlay 用户表
+function createChattyplayUserTables() {
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS chattyplay_user (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT UNIQUE NOT NULL,
+      password TEXT NOT NULL,
+      email TEXT UNIQUE,
+      avatar TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      updated_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      last_login TEXT
+    )
+  `)
+
+  // 创建索引
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_chattyplay_user_username
+    ON chattyplay_user(username)`)
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_chattyplay_user_email
+    ON chattyplay_user(email)`)
+}
+
 // 创建自动发货表
 function createAutoSellTables() {
   db.exec(`
@@ -341,6 +363,7 @@ export function runMigrations() {
   createUserAvatarTables()
   createOrderTables()
   createSettingsTables()
+  createChattyplayUserTables()
   createAutoSellTables()
   createWorkflowTables()
 
