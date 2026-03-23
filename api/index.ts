@@ -13,7 +13,6 @@ const JWT_SECRET = 'chattyplay-jwt-secret-2024'
 const PASSWORD_SECRET = 'chattyplay-secret-key-2024'
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000 // 7天
 
-// 简单的内存用户存储（生产环境应使用真实数据库）
 interface User {
   id: number
   username: string
@@ -33,7 +32,6 @@ interface UserWithoutPassword {
   last_login?: string
 }
 
-// 使用环境变量或简单的内存存储
 let users: User[] = []
 let userIdCounter = 1
 
