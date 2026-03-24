@@ -1,7 +1,6 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import CryptoJS from 'crypto-js'
-import { Redis } from '@upstash/redis'
 
 const app = new Hono()
 
@@ -14,78 +13,109 @@ const JWT_SECRET = 'chattyplay-jwt-secret-2024'
 const PASSWORD_SECRET = 'chattyplay-secret-key-2024'
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000 // 7天
 
-// Redis 客户端初始化
-function createRedisClient() {
-  const restUrl = process.env.UPSTASH_REDIS_REST_URL
-  const restToken = process.env.UPSTASH_REDIS_REST_TOKEN
-
-  const url = restUrl
-  const token = restToken
-
-  if (!url || !token) {
-    console.warn('Redis 未配置，用户数据将仅存储在内存中（重启后会丢失）')
-    return null
-  }
-
-  return new Redis({ url, token })
-}
-
-// Redis 实例
-const redis = createRedisClient()
+// Redis 配置
+const REDIS_REST_URL = process.env.UPSTASH_REDIS_REST_URL
+const REDIS_REST_TOKEN = process.env.UPSTASH_REDIS_REST_TOKEN
 
 // 用户计数器 key
 const USER_COUNTER_KEY = 'user:id_counter'
 // 用户 Hash key prefix
 const USER_HASH_PREFIX = 'user:'
+// 用户名索引 key
+const USERNAME_INDEX_KEY = 'user:username_index'
 
-// Redis 辅助函数
+// ============ Redis HTTP API 调用函数 ============
 
-async function getNextUserId(): Promise<number> {
-  if (!redis) return -1
-  const id = await redis.incr(USER_COUNTER_KEY)
-  return id as number
+interface RedisResult {
+  result?: any
+  error?: string
+}
+
+async function redisCommand(command: string[]): Promise<RedisResult> {
+  if (!REDIS_REST_URL || !REDIS_REST_TOKEN) {
+    return { error: 'Redis 未配置' }
+  }
+
+  try {
+    const response = await fetch(`${REDIS_REST_URL}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${REDIS_REST_TOKEN}`
+      },
+      body: JSON.stringify(command)
+    })
+
+    if (!response.ok) {
+      return { error: `Redis 请求失败: ${response.status}` }
+    }
+
+    const data = await response.json()
+    return { result: data.result }
+  } catch (error) {
+    return { error: `Redis 连接错误: ${error instanceof Error ? error.message : '未知错误'}` }
+  }
+}
+
+// Redis 操作函数
+async function getNextUserId(): Promise<number | null> {
+  const { result, error } = await redisCommand(['INCR', USER_COUNTER_KEY])
+  if (error || result === null) return null
+  return result as number
 }
 
 async function getUserById(id: number): Promise<User | null> {
-  if (!redis) return null
-  const data = await redis.hgetall(`${USER_HASH_PREFIX}${id}`)
-  if (!data || Object.keys(data).length === 0) return null
-  return data as unknown as User
+  const { result, error } = await redisCommand(['HGETALL', `${USER_HASH_PREFIX}${id}`])
+  if (error || !result || result.length === 0) return null
+
+  // HGETALL 返回 [key1, val1, key2, val2, ...] 格式
+  const user: any = {}
+  for (let i = 0; i < result.length; i += 2) {
+    user[result[i]] = result[i + 1]
+  }
+  user.id = Number(user.id)
+  return user as User
 }
 
 async function getUserByUsername(username: string): Promise<User | null> {
-  if (!redis) return null
-  // 扫描所有用户查找用户名匹配的
-  const keys = await redis.keys(`${USER_HASH_PREFIX}*`)
-  for (const key of keys) {
-    const user = await redis.hgetall(key)
-    if (user && (user as any).username === username) {
-      return user as unknown as User
-    }
-  }
-  return null
+  // 从用户名索引获取用户 ID
+  const { result: userId, error } = await redisCommand(['HGET', USERNAME_INDEX_KEY, username])
+  if (error || !userId) return null
+  return getUserById(Number(userId))
 }
 
 async function getUserByEmail(email: string): Promise<User | null> {
-  if (!redis) return null
-  const keys = await redis.keys(`${USER_HASH_PREFIX}*`)
+  // 扫描查找邮箱匹配的用户（较慢但可行）
+  const { result: keys, error } = await redisCommand(['KEYS', `${USER_HASH_PREFIX}*`])
+  if (error || !keys || keys.length === 0) return null
+
   for (const key of keys) {
-    const user = await redis.hgetall(key)
-    if (user && (user as any).email === email) {
-      return user as unknown as User
+    const { result: emailVal, error: emailError } = await redisCommand(['HGET', key, 'email'])
+    if (!emailError && emailVal === email) {
+      return getUserById(Number(key.replace(USER_HASH_PREFIX, '')))
     }
   }
   return null
 }
 
 async function createUser(user: User): Promise<void> {
-  if (!redis) return
-  await redis.hset(`${USER_HASH_PREFIX}${user.id}`, user as any)
+  const { error } = await redisCommand([
+    'HMSET',
+    `${USER_HASH_PREFIX}${user.id}`,
+    'id', String(user.id),
+    'username', user.username,
+    'password', user.password,
+    'email', user.email || '',
+    'created_at', user.created_at
+  ])
+  if (error) throw new Error(error)
+
+  // 保存用户名索引
+  await redisCommand(['HSET', USERNAME_INDEX_KEY, user.username, String(user.id)])
 }
 
-async function updateUserField(id: number, field: string, value: any): Promise<void> {
-  if (!redis) return
-  await redis.hset(`${USER_HASH_PREFIX}${id}`, { [field]: value } as any)
+async function updateUserField(id: number, field: string, value: string): Promise<void> {
+  await redisCommand(['HSET', `${USER_HASH_PREFIX}${id}`, field, value])
 }
 
 // ============ 数据类型定义 ============
@@ -248,6 +278,13 @@ app.post('/api/auth/register', async (c) => {
 
     // 创建用户
     const userId = await getNextUserId()
+    if (userId === null) {
+      return c.json({
+        success: false,
+        message: '用户服务暂不可用，请检查 Redis 配置'
+      }, 500)
+    }
+
     const hashedPassword = hashPassword(password)
     const createdAt = new Date().toISOString()
 
