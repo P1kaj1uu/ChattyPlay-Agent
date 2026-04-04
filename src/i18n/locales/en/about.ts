@@ -10,7 +10,7 @@ export default {
   awards: 'Awards',
   award1: 'Software Engineer (Intermediate Level)',
   award2: 'One software copyright, one patent application in progress',
-  award3: 'CCF-C CAS one-zone TOP journal paper, EI conference publications, journal paper',
+  award3: 'CCF-C CAS one-zone TOP journal paper, CCF-B CAS two-zone journal paper, EI conference publications, journal paper',
   award4: 'CET-4, Computer Network Technology Level 3',
   award5: 'National First Prize in Mathematical Modeling',
   award6: 'National Third Prize in Lanqiao Cup Java, Provincial Second in Programming Competition',

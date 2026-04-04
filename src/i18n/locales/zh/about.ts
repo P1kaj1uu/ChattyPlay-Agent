@@ -10,7 +10,7 @@ const about = {
   awards: '获奖情况',
   award1: '软考中级软件设计师',
   award2: '软著一项，发明专利一项申请中',
-  award3: 'CCF-C中科院一区TOP期刊论文一篇，EI会议，学报',
+  award3: 'CCF-C中科院一区TOP期刊论文一篇，CCF-B中科院二区期刊论文一篇，EI会议，学报',
   award4: '英语四级、计算机三级网络技术',
   award5: '数学建模竞赛国一',
   award6: '蓝桥杯Java国三、计挑Java省二',
