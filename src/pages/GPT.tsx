@@ -16,6 +16,7 @@ import {
 import { useTranslation } from 'react-i18next'
 import OpenAI from 'openai'
 import { marked } from 'marked'
+import HCaptcha from '@hcaptcha/react-hcaptcha'
 import 'highlight.js/styles/github-dark.css'
 import '@/assets/css/ai.scss'
 
@@ -32,6 +33,12 @@ interface ChatMessage {
   content: string
   timestamp: number
   rating?: 'like' | 'dislike'
+}
+
+interface CaptchaPromise {
+  resolve: (token: string) => void
+  reject: (reason?: any) => void
+  timeoutId?: NodeJS.Timeout
 }
 
 const GPT: React.FC = () => {
@@ -51,6 +58,8 @@ const GPT: React.FC = () => {
   const abortControllerRef = useRef<AbortController | null>(null)
   const speechSynthesisRef = useRef<SpeechSynthesis | null>(null)
   const autoSendTriggerRef = useRef<string | null>(null)
+  const hcaptchaRef = useRef<any>(null)
+  const captchaPromiseRef = useRef<CaptchaPromise | null>(null)
 
   // 初始化 OpenAI 客户端（从环境变量读取配置）
   const openai = new OpenAI({
@@ -224,8 +233,27 @@ const GPT: React.FC = () => {
     if (!inputMessage.trim() || isStreaming) {
       return
     }
-
-    const userMessage = inputMessage.trim()
+    
+    try {
+      const token = await new Promise<string>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          if (captchaPromiseRef.current) {
+            reject(new Error('验证超时，请重试'))
+            captchaPromiseRef.current = null
+          }
+        }, 120000)
+        
+        captchaPromiseRef.current = { resolve, reject, timeoutId }
+        
+        if (hcaptchaRef.current) {
+          hcaptchaRef.current.execute()
+        } else {
+          reject(new Error('HCaptcha 组件未初始化'))
+        }
+      })
+      
+      console.log('验证通过，token:', token)
+      const userMessage = inputMessage.trim()
     const newMessages = [
       ...messages,
       {
@@ -351,6 +379,9 @@ If you need more detailed answers, please try again later or contact technical s
       window.history.replaceState({}, document.title, window.location.pathname)
       scrollToBottom()
     }
+
+    } catch (error) {}
+
   }
 
   useEffect(() => {
@@ -528,6 +559,29 @@ If you need more detailed answers, please try again later or contact technical s
       e.preventDefault()
       sendMessage()
     }
+  }
+
+  const handleVerify = (token: string) => {
+    console.log('hcaptcha验证成功', token)
+    if (captchaPromiseRef.current) {
+      if ((captchaPromiseRef.current as any).timeoutId) {
+        clearTimeout((captchaPromiseRef.current as any).timeoutId)
+      }
+      captchaPromiseRef.current.resolve(token)
+      captchaPromiseRef.current = null
+    }
+  }
+
+  const handleError = (err: any) => {
+    console.error('hcaptcha验证失败', err)
+    if (captchaPromiseRef.current) {
+      if ((captchaPromiseRef.current as any).timeoutId) {
+        clearTimeout((captchaPromiseRef.current as any).timeoutId)
+      }
+      captchaPromiseRef.current.reject(new Error('验证失败，请重试'))
+      captchaPromiseRef.current = null
+    }
+    message.error('验证失败，请重试')
   }
 
   return (
@@ -752,6 +806,18 @@ If you need more detailed answers, please try again later or contact technical s
               <span className="hidden md:inline">{isStreaming ? t('common.generating') : t('gpt.sendBtn')}</span>
             </Button>
           </div>
+
+          <HCaptcha
+            ref={hcaptchaRef}
+            sitekey={import.meta.env.VITE_HCAPTCHA_SITE_KEY}
+            onVerify={handleVerify}
+            onError={handleError}
+            onExpire={() => {
+              console.log('验证码过期')
+              message.warning('验证已过期，请重新验证')
+            }}
+            size="invisible"
+          />
         </div>
       </div>
     </div>
