@@ -54,8 +54,9 @@
 - v4.3解析下载无水印1080P视频（2026.3.13-2026.3.14）
 - v4.4封装浏览器指纹SDK、GIF图片埋点SDK，接入Google Analytics分析工具（2026.3.15-2026.3.16）
 - v4.5优化注册登录功能，jwt token无感刷新token，redis存储用户信息，cloudflare托管vercel（2026.3.22-2026.3.26）
+- v4.6新增hcaptcha防机器人验证码（2026.4.12）
 
-## 最新版本V4.5（推荐）
+## 最新版本V4.6（推荐）
 
 > 本地调试时，可注释掉限制调用控制台的代码。参照说明修改package.json、email.config.js、index.html、.env.development、.env.production和docker-compose.yml文件。
 
@@ -90,6 +91,7 @@
 - jwt token无感刷新token
 - redis存储用户信息
 - cloudflare托管vercel
+- hcaptcha防机器人验证码
 
 ✅ 音乐播放
 
@@ -218,6 +220,7 @@
 - ### ChatGPT页面
 
 <img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/d47c6638-b2e5-4b86-b973-61717c6c207a" />
+<img width="1470" height="791" alt="Image" src="https://github.com/user-attachments/assets/7378bfbc-f23a-44d5-b575-1f44c3c477e0" />
 <img width="1470" height="795" alt="Image" src="https://github.com/user-attachments/assets/56c03b75-1a42-4002-bc20-48c5661feec8" />
 <img width="701" height="770" alt="Image" src="https://github.com/user-attachments/assets/fa617f4c-cd29-4902-ada4-10cdff51637f" />
 
