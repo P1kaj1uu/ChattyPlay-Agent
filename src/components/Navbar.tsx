@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { Menu, Button, Drawer, message, Dropdown } from 'antd'
+import { Menu, Button, Drawer, message, Dropdown, Avatar } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   HomeOutlined,
@@ -11,7 +11,6 @@ import {
   LogoutOutlined,
   MenuOutlined,
   ReadOutlined,
-  GlobalOutlined,
   GoldOutlined,
   AndroidOutlined,
   RobotOutlined,
@@ -20,7 +19,7 @@ import {
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
-import { logoImage } from '@/utils/images'
+import { logoImage, translateImage } from '@/utils/images'
 import { isAuthenticated, removeToken } from '@/utils/token'
 
 const NavbarContainer = styled.nav`
@@ -114,6 +113,41 @@ const LogoutButton = styled(Button)`
   }
 `
 
+const UserAvatar = styled(Avatar)`
+  cursor: pointer;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+  }
+`
+
+const UserDropdownMenu = styled.div`
+  padding: 12px 16px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+  border: 1px solid rgba(102, 126, 234, 0.2);
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .user-label {
+    font-size: 12px;
+    color: #888;
+  }
+
+  .user-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+  }
+`
+
 const Navbar: React.FC = () => {
   const { t, i18n } = useTranslation()
   const location = useLocation()
@@ -121,6 +155,7 @@ const Navbar: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [username, setUsername] = useState<string>('')
 
   useEffect(() => {
     const checkMobile = () => {
@@ -143,6 +178,7 @@ const Navbar: React.FC = () => {
     const checkLoginStatus = () => {
       const loginStatus = localStorage.getItem('isLoggedIn')
       setIsLoggedIn(loginStatus === 'true')
+      setUsername(localStorage.getItem('username') || '')
     }
 
     checkLoginStatus()
@@ -151,6 +187,9 @@ const Navbar: React.FC = () => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'isLoggedIn') {
         setIsLoggedIn(e.newValue === 'true')
+      }
+      if (e.key === 'username') {
+        setUsername(e.newValue || '')
       }
     }
 
@@ -236,19 +275,36 @@ const Navbar: React.FC = () => {
             <Dropdown menu={{ items: languageItems }} placement="bottomRight">
               <Button
                 type="text"
-                icon={<GlobalOutlined />}
+                icon={<img src={translateImage} style={{ transform: 'scale(0.8)' }} />}
                 style={{ fontSize: '1.2rem' }}
               />
             </Dropdown>
             {isLoggedIn && (
-              <LogoutButton
-                type="default"
-                icon={<LogoutOutlined />}
-                onClick={handleLogout}
-                size="small"
-              >
-                {t('nav.logout')}
-              </LogoutButton>
+              <>
+                <LogoutButton
+                  type="default"
+                  icon={<LogoutOutlined />}
+                  onClick={handleLogout}
+                  size="small"
+                >
+                  {t('nav.logout')}
+                </LogoutButton>
+                <Dropdown
+                  menu={{ items: [] }}
+                  dropdownRender={() => (
+                    <UserDropdownMenu>
+                      <div className="user-info">
+                        <span className="user-label">{t('nav.user')}</span>
+                        <span className="user-name">{username}</span>
+                      </div>
+                    </UserDropdownMenu>
+                  )}
+                  placement="bottomRight"
+                  trigger={['hover']}
+                >
+                  <UserAvatar icon={<UserOutlined />} />
+                </Dropdown>
+              </>
             )}
             <Button
               type="text"
@@ -298,23 +354,40 @@ const Navbar: React.FC = () => {
           <Dropdown menu={{ items: languageItems }} placement="bottomRight">
             <Button
               type="text"
-              icon={<GlobalOutlined />}
+              icon={<img src={translateImage} style={{ transform: 'scale(0.8)' }} />}
               style={{ fontSize: '1.2rem' }}
             />
           </Dropdown>
 
           {isLoggedIn ? (
-            <LogoutButton
-              type="primary"
-              icon={<LogoutOutlined />}
-              onClick={handleLogout}
-              style={{
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                border: 'none'
-              }}
-            >
-              {t('nav.logout')}
-            </LogoutButton>
+            <>
+              <LogoutButton
+                type="primary"
+                icon={<LogoutOutlined />}
+                onClick={handleLogout}
+                style={{
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  border: 'none'
+                }}
+              >
+                {t('nav.logout')}
+              </LogoutButton>
+              <Dropdown
+                menu={{ items: [] }}
+                dropdownRender={() => (
+                  <UserDropdownMenu>
+                    <div className="user-info">
+                      <span className="user-label">{t('nav.user')}</span>
+                      <span className="user-name">{username}</span>
+                    </div>
+                  </UserDropdownMenu>
+                )}
+                placement="bottomRight"
+                trigger={['hover']}
+              >
+                <UserAvatar icon={<UserOutlined />} />
+              </Dropdown>
+            </>
           ) : (
             <Button
               type="primary"

@@ -15,7 +15,8 @@ const nav = {
   language: '语言',
   navigationMenu: '导航菜单',
   goofish: '闲鱼',
-  worker: '监工'
+  worker: '监工',
+  user: '当前用户：'
 }
 
 export default nav

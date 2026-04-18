@@ -457,7 +457,7 @@ const Login: React.FC = () => {
         // 保存登录状态
         setToken()
         localStorage.setItem('isLoggedIn', 'true')
-        localStorage.setItem('username', userData.name || 'Google User')
+        localStorage.setItem('username', userData.name || 'Google用户')
         localStorage.setItem('email', userData.email || '')
         localStorage.setItem('avatar', userData.picture || '')
 
@@ -490,7 +490,7 @@ const Login: React.FC = () => {
     window.location.href = githubAuthUrl
     setToken()
     localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('username', 'githubUser')
+    localStorage.setItem('username', 'Github用户')
   }
 
   return (

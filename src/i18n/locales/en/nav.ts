@@ -15,7 +15,8 @@ const nav = {
   language: 'Language',
   navigationMenu: 'Navigation Menu',
   goofish: 'Goofish',
-  worker: 'Worker'
+  worker: 'Worker',
+  user: 'Current User:'
 }
 
 export default nav

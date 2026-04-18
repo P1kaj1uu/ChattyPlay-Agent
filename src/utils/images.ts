@@ -6,9 +6,11 @@ import logoImg from '@/assets/images/logo.png'
 import meImg from '@/assets/images/me.jpg'
 import wxImg from '@/assets/images/wx.jpg'
 import payImg from '@/assets/images/wxPay.png'
+import translateImg from '@/assets/images/translate.png'
 
 // 导出所有图片
 export const logoImage = logoImg
 export const meImage = meImg
 export const wxImage = wxImg
 export const payImage = payImg
+export const translateImage = translateImg
