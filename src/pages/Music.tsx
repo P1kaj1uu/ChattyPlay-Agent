@@ -517,7 +517,7 @@ const Music: React.FC = () => {
     // 获取音乐URL
     const url = await fetchMusicUrl(musicId)
     if (!url) {
-      message.error(t('music.searchFailed'))
+      message.error(t('music.fetchMusicFailed'))
       setLoading(false)
       return
     }

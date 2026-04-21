@@ -11,5 +11,6 @@ export default {
   noResults: 'No results found',
   hotComments: 'Hot Comments',
   mvNotAvailable: 'MV is not available',
-  fetchMVFailed: 'Failed to fetch MV'
+  fetchMVFailed: 'Failed to fetch MV',
+  fetchMusicFailed: 'Failed to fetch music, please check network connection and try again',
 }

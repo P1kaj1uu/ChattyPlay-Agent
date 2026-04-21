@@ -11,5 +11,6 @@ export default {
   noResults: '未找到相关歌曲',
   hotComments: '热门留言',
   mvNotAvailable: '该MV暂无资源',
-  fetchMVFailed: '获取MV失败'
+  fetchMVFailed: '获取MV失败',
+  fetchMusicFailed: '获取歌曲失败，请检查网络连接后重试',
 }
