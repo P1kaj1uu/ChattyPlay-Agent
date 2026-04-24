@@ -1,6 +1,6 @@
 const about = {
   title: '关于我（求内推～）',
-  name: '不见水星记',
+  name: '不见水星记（研一',
   description: '宇宙终极无敌超级爆炸究极飞天帅比暴龙战士',
   contact: '联系方式',
   wechat: '微信号：Dveiklokk',
@@ -9,7 +9,7 @@ const about = {
   internship2: '曾在美团、华为、腾讯工作过',
   awards: '获奖情况',
   award1: '软考中级软件设计师',
-  award2: '软著一项，发明专利一项申请中',
+  award2: '发明专利两项，软件著作权两项',
   award3: 'CCF-C中科院一区TOP期刊论文一篇，CCF-B中科院二区期刊论文一篇，EI会议，学报',
   award4: '英语四级、计算机三级网络技术',
   award5: '数学建模竞赛国一',
