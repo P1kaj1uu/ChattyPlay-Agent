@@ -123,7 +123,7 @@ const LoginBox = styled.div`
     0 0 0 1px rgba(255, 255, 255, 0.5) inset;
   position: relative;
   z-index: 1;
-  padding: 32px;
+  padding: 12px 32px;
   animation: boxAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
   @keyframes boxAppear {
@@ -389,7 +389,7 @@ const Login: React.FC = () => {
         sitekey: TURNSTILE_SITE_KEY,
         theme: 'light',
         callback: (token: string) => {
-          console.log(`Turnstile verified for ${containerId}, token:`, token)
+          console.log(token)
         },
         'expired-callback': () => {
           console.log(`Turnstile token expired for ${containerId}`)
@@ -683,6 +683,7 @@ const Login: React.FC = () => {
                 form={loginForm}
                 onFinish={handleLogin}
                 layout="vertical"
+                style={{ marginBottom: '0' }}
               >
                 <Form.Item
                   name="username"
@@ -703,7 +704,7 @@ const Login: React.FC = () => {
                   rules={[
                     { required: true, message: t('login.passwordRequired') },
                     { min: 6, max: 20, message: t('login.passwordLength') }
-                  ]}
+                  ]}               
                 >
                   <Input.Password
                     prefix={<LockOutlined />}
@@ -738,8 +739,8 @@ const Login: React.FC = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '20px',
-                  paddingTop: '16px',
+                  marginBottom: '12px',
+                  paddingTop: '12px',
                   borderTop: '1px solid #e2e8f0'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -752,11 +753,11 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
                   <div ref={turnstileLoginRef} />
                 </div>
 
-                <Form.Item style={{ marginBottom: '12px' }}>
+                <Form.Item>
                   <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
                     <Button
                       type="primary"
@@ -786,6 +787,7 @@ const Login: React.FC = () => {
                 form={registerForm}
                 onFinish={handleRegister}
                 layout="vertical"
+                style={{ marginBottom: '0' }}
               >
                 <Form.Item
                   name="username"
@@ -884,8 +886,8 @@ const Login: React.FC = () => {
                   display: 'flex',
                   justifyContent: 'space-between',
                   alignItems: 'center',
-                  marginBottom: '20px',
-                  paddingTop: '16px',
+                  marginBottom: '12px',
+                  paddingTop: '12px',
                   borderTop: '1px solid #e2e8f0'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -898,11 +900,11 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px' }}>
                   <div ref={turnstileRegisterRef} />
                 </div>
 
-                <Form.Item style={{ marginBottom: '12px' }}>
+                <Form.Item style={{ marginBottom: '8px' }}>
                   <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
                     <Button
                       type="primary"
