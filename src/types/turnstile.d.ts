@@ -17,7 +17,7 @@ interface TurnstileConfig {
   'expired-callback'?: () => void
   'error-callback'?: () => void
   'before-callback'?: () => void
-  timeout-callback?: () => void
+  'timeout-callback'?: () => void
   theme?: 'light' | 'dark' | 'auto'
 }
 
