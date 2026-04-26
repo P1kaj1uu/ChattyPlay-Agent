@@ -55,8 +55,9 @@
 - v4.4封装浏览器指纹SDK、GIF图片埋点SDK，接入Google Analytics分析工具（2026.3.15-2026.3.16）
 - v4.5优化注册登录功能，jwt token无感刷新token，redis存储用户信息，cloudflare托管vercel（2026.3.22-2026.3.26）
 - v4.6新增hcaptcha防机器人验证码（2026.4.12）
+- v4.7新增cloudflare turnstile防恶意请求和爬虫（2026.4.25-2026.4.27）
 
-## 最新版本V4.6（推荐）
+## 最新版本V4.7（推荐）
 
 > 本地调试时，可注释掉限制调用控制台的代码。参照说明修改package.json、email.config.js、index.html、.env.development、.env.production和docker-compose.yml文件。
 
@@ -92,6 +93,7 @@
 - redis存储用户信息
 - cloudflare托管vercel
 - hcaptcha防机器人验证码
+- cloudflare turnstile防恶意请求和爬虫
 
 ✅ 音乐播放
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Form, Input, Button, Checkbox, message, Space } from 'antd'
 import {
   UserOutlined,
@@ -18,6 +18,9 @@ import HeartBeat from '../components/HeartBeat'
 import { logoImage } from '@/utils/images'
 import { setToken } from '@/utils/token'
 import { isMobileDevice } from '@/utils/isMobile'
+
+// Cloudflare Turnstile 配置
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || ''
 
 // 创建气泡组件
 const Bubble = styled.div<{ size: number; left: number; delay: number; popped: boolean }>`
@@ -253,6 +256,33 @@ const ModeSwitch = styled.div`
   }
 `
 
+// 添加 Turnstile 脚本加载
+const loadTurnstileScript = (): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    // 如果已经加载完成
+    if (window.turnstile) {
+      resolve()
+      return
+    }
+
+    // 检查是否已有脚本标签
+    const existingScript = document.querySelector('script[src*="challenges.cloudflare.com/turnstile"]')
+    if (existingScript) {
+      existingScript.addEventListener('load', () => resolve())
+      existingScript.addEventListener('error', () => reject())
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit'
+    script.async = true
+    script.defer = true
+    script.onload = () => resolve()
+    script.onerror = () => reject(new Error('Failed to load Turnstile script'))
+    document.head.appendChild(script)
+  })
+}
+
 const Login: React.FC = () => {
   const { t } = useTranslation()
   const [loginForm] = Form.useForm()
@@ -262,6 +292,10 @@ const Login: React.FC = () => {
   const [isAgreed, setIsAgreed] = useState(true)
   const [showHeartBeat, setShowHeartBeat] = useState(false)
   const [isLoginMode, setIsLoginMode] = useState(true)
+  const [turnstileReady, setTurnstileReady] = useState(false)
+  const turnstileLoginRef = useRef<HTMLDivElement>(null)
+  const turnstileRegisterRef = useRef<HTMLDivElement>(null)
+  const turnstileWidgetId = useRef<{ login: string | null; register: string | null }>({ login: null, register: null })
   const navigate = useNavigate()
   const [bubbles, setBubbles] = useState(() =>
     Array.from({ length: 15 }, () => ({
@@ -305,6 +339,25 @@ const Login: React.FC = () => {
     return () => clearInterval(popBubbles)
   }, [])
 
+  // 加载 Turnstile 脚本
+  useEffect(() => {
+    // 如果没有配置站点密钥，跳过加载
+    if (!TURNSTILE_SITE_KEY) {
+      console.warn('Turnstile site key not configured, skipping verification')
+      return
+    }
+
+    loadTurnstileScript()
+      .then(() => {
+        setTurnstileReady(true)
+      })
+      .catch((error) => {
+        console.warn('Failed to load Turnstile:', error)
+        // Turnstile 加载失败，允许用户继续登录（静默降级）
+        setTurnstileReady(true) // 设置为 true 避免一直等待
+      })
+  }, [])
+
   const generateVerifyCode = () => {
     const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
     let code = ''
@@ -312,6 +365,82 @@ const Login: React.FC = () => {
       code += chars.charAt(Math.floor(Math.random() * chars.length))
     }
     setVerifyCode(code)
+  }
+
+  // 初始化 Turnstile
+  const initTurnstile = (containerId: 'login' | 'register') => {
+    const container = containerId === 'login' ? turnstileLoginRef.current : turnstileRegisterRef.current
+    const widgetKey = containerId === 'login' ? 'login' : 'register'
+
+    if (!container || !window.turnstile) return
+
+    // 清除已有的 widget
+    if (turnstileWidgetId.current[widgetKey]) {
+      try {
+        window.turnstile.remove(turnstileWidgetId.current[widgetKey]!)
+      } catch (e) {
+        // ignore
+      }
+      turnstileWidgetId.current[widgetKey] = null
+    }
+
+    try {
+      const widgetId = window.turnstile.render(container, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'light',
+        callback: (token: string) => {
+          console.log(`Turnstile verified for ${containerId}, token:`, token)
+        },
+        'expired-callback': () => {
+          console.log(`Turnstile token expired for ${containerId}`)
+        },
+        // @ts-ignore
+        'error-callback': (err: any) => {
+          console.error(`Turnstile error for ${containerId}:`, err)
+        },
+      })
+      turnstileWidgetId.current[widgetKey] = widgetId
+    } catch (e) {
+      console.warn(`Turnstile render failed for ${containerId}:`, e)
+    }
+  }
+
+  // 当 Turnstile 准备好且容器存在时初始化
+  useEffect(() => {
+    if (turnstileReady && turnstileLoginRef.current) {
+      initTurnstile('login')
+    }
+  }, [turnstileReady, isLoginMode])
+
+  useEffect(() => {
+    if (turnstileReady && !isLoginMode && turnstileRegisterRef.current) {
+      initTurnstile('register')
+    }
+  }, [turnstileReady, isLoginMode])
+
+  // 获取 Turnstile token
+  const getTurnstileToken = (mode: 'login' | 'register'): string | null => {
+    const widgetId = turnstileWidgetId.current[mode]
+    if (window.turnstile && widgetId) {
+      try {
+        return window.turnstile.getResponse(widgetId)
+      } catch (e) {
+        return null
+      }
+    }
+    return null
+  }
+
+  // 重置 Turnstile
+  const resetTurnstile = (mode: 'login' | 'register') => {
+    const widgetId = turnstileWidgetId.current[mode]
+    if (window.turnstile && widgetId) {
+      try {
+        window.turnstile.reset(widgetId)
+      } catch (e) {
+        // ignore
+      }
+    }
   }
 
   const handleLogin = async (values: any) => {
@@ -329,6 +458,15 @@ const Login: React.FC = () => {
       return
     }
 
+    // 获取 Turnstile token
+    const turnstileToken = getTurnstileToken('login')
+
+    // 如果没有 token 且 Turnstile 已加载，说明用户未完成验证（仅生产环境检查）
+    if (!import.meta.env.DEV && turnstileReady && !turnstileToken) {
+      message.error('请完成人机验证')
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch('/api/auth/login', {
@@ -338,7 +476,8 @@ const Login: React.FC = () => {
         },
         body: JSON.stringify({
           username: values.username,
-          password: values.password
+          password: values.password,
+          ...(turnstileToken ? { 'cf-turnstile-response': turnstileToken } : {})
         })
       })
 
@@ -363,10 +502,13 @@ const Login: React.FC = () => {
         }
       } else {
         message.error(data.message || t('login.loginFailed'))
+        // 登录失败时重置 Turnstile
+        resetTurnstile('login')
       }
     } catch (error: any) {
       console.error('Login error:', error)
       message.error(error.message || t('login.loginFailed'))
+      resetTurnstile('login')
     } finally {
       setLoading(false)
     }
@@ -392,6 +534,15 @@ const Login: React.FC = () => {
       return
     }
 
+    // 获取 Turnstile token
+    const turnstileToken = getTurnstileToken('register')
+
+    // 如果没有 token 且 Turnstile 已加载，说明用户未完成验证（仅生产环境检查）
+    if (!import.meta.env.DEV && turnstileReady && !turnstileToken) {
+      message.error('请完成人机验证')
+      return
+    }
+
     setLoading(true)
     try {
       const response = await fetch('/api/auth/register', {
@@ -402,7 +553,8 @@ const Login: React.FC = () => {
         body: JSON.stringify({
           username: values.username,
           password: values.password,
-          email: values.email
+          email: values.email,
+          ...(turnstileToken ? { 'cf-turnstile-response': turnstileToken } : {})
         })
       })
 
@@ -413,10 +565,13 @@ const Login: React.FC = () => {
         toggleMode()
       } else {
         message.error(data.message || t('login.registerFailed'))
+        // 注册失败时重置 Turnstile
+        resetTurnstile('register')
       }
     } catch (error: any) {
       console.error('Register error:', error)
       message.error(error.message || t('login.registerFailed'))
+      resetTurnstile('register')
     } finally {
       setLoading(false)
     }
@@ -430,6 +585,9 @@ const Login: React.FC = () => {
     loginForm.resetFields()
     registerForm.resetFields()
     generateVerifyCode()
+    // 重置 Turnstile
+    resetTurnstile('login')
+    resetTurnstile('register')
   }
 
   const toggleMode = () => {
@@ -437,6 +595,11 @@ const Login: React.FC = () => {
     loginForm.resetFields()
     registerForm.resetFields()
     generateVerifyCode()
+    // 切换模式后重置对应的 Turnstile
+    setTimeout(() => {
+      resetTurnstile('login')
+      resetTurnstile('register')
+    }, 100)
   }
 
   // Google OAuth
@@ -589,6 +752,10 @@ const Login: React.FC = () => {
                   </div>
                 </div>
 
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <div ref={turnstileLoginRef} />
+                </div>
+
                 <Form.Item style={{ marginBottom: '12px' }}>
                   <Space style={{ width: '100%', justifyContent: 'center' }} size={8}>
                     <Button
@@ -680,6 +847,20 @@ const Login: React.FC = () => {
                   />
                 </Form.Item>
 
+                {/* 注册时添加邮箱字段（如果需要） */}
+                <Form.Item
+                  name="email"
+                  label={t('login.email') || '邮箱'}
+                  rules={[
+                    { type: 'email', message: t('login.emailInvalid') || '请输入有效的邮箱地址' }
+                  ]}
+                >
+                  <Input
+                    placeholder="your@email.com"
+                    size="large"
+                  />
+                </Form.Item>
+
                 <Form.Item
                   name="code"
                   label={t('login.verifyCode')}
@@ -715,6 +896,10 @@ const Login: React.FC = () => {
                       {t('login.agree')}
                     </Checkbox>
                   </div>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <div ref={turnstileRegisterRef} />
                 </div>
 
                 <Form.Item style={{ marginBottom: '12px' }}>

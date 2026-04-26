@@ -5,6 +5,7 @@
 import { Hono } from 'hono'
 import { register, login, getUserByToken } from '../../services/auth.service'
 import { createLogger } from '../../core/logger'
+import { verifyTurnstileToken } from '../../../services/turnstile'
 
 const logger = createLogger('AuthRoute')
 const authRoute = new Hono()
@@ -16,7 +17,20 @@ const authRoute = new Hono()
 authRoute.post('/register', async (c) => {
   try {
     const body = await c.req.json()
-    const { username, password, email } = body
+    const { username, password, email, 'cf-turnstile-response': turnstileToken } = body
+
+    const isDev = process.env.NODE_ENV !== 'production'
+
+    // 验证 Turnstile token（开发环境跳过）
+    if (turnstileToken && !isDev) {
+      const verifyResult = await verifyTurnstileToken(turnstileToken)
+      if (!verifyResult.success) {
+        return c.json({
+          success: false,
+          message: `人机验证失败: ${verifyResult.error}`,
+        }, 403)
+      }
+    }
 
     if (!username || !password) {
       return c.json({
@@ -49,7 +63,20 @@ authRoute.post('/register', async (c) => {
 authRoute.post('/login', async (c) => {
   try {
     const body = await c.req.json()
-    const { username, password } = body
+    const { username, password, 'cf-turnstile-response': turnstileToken } = body
+
+    const isDev = process.env.NODE_ENV !== 'production'
+
+    // 验证 Turnstile token（开发环境跳过）
+    if (turnstileToken && !isDev) {
+      const verifyResult = await verifyTurnstileToken(turnstileToken)
+      if (!verifyResult.success) {
+        return c.json({
+          success: false,
+          message: `人机验证失败: ${verifyResult.error}`,
+        }, 403)
+      }
+    }
 
     if (!username || !password) {
       return c.json({

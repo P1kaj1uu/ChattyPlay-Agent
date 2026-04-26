@@ -536,6 +536,42 @@
     semver "^7.5.3"
     tar "^7.4.0"
 
+"@monaco-editor/loader@^1.5.0":
+  version "1.7.0"
+  resolved "https://registry.npmmirror.com/@monaco-editor/loader/-/loader-1.7.0.tgz"
+  integrity sha512-gIwR1HrJrrx+vfyOhYmCZ0/JcWqG5kbfG7+d3f/C1LXk2EvzAbHSg3MQ5lO2sMlo9izoAZ04shohfKLVT6crVA==
+  dependencies:
+    state-local "^1.0.6"
+
+"@monaco-editor/react@^4.7.0":
+  version "4.7.0"
+  resolved "https://registry.npmmirror.com/@monaco-editor/react/-/react-4.7.0.tgz"
+  integrity sha512-cyzXQCtO47ydzxpQtCGSQGOC8Gk3ZUeBXFAxD+CWXYFo5OqZyZUonFl0DwUlTyAfRHntBfw2p3w4s9R6oe1eCA==
+  dependencies:
+    "@monaco-editor/loader" "^1.5.0"
+
+"@napi-rs/canvas-darwin-arm64@0.1.99":
+  version "0.1.99"
+  resolved "https://registry.npmmirror.com/@napi-rs/canvas-darwin-arm64/-/canvas-darwin-arm64-0.1.99.tgz"
+  integrity sha512-lupMDMy1+H38dhyCcLirOKKVUyzzlxi7j7rGPLI3vViMHOoPjcXO1b10ivy+ad+q6MiwHfoLjKTCoLke5ySOBg==
+
+"@napi-rs/canvas@^0.1.80", "@napi-rs/canvas@^0.1.96":
+  version "0.1.99"
+  resolved "https://registry.npmmirror.com/@napi-rs/canvas/-/canvas-0.1.99.tgz"
+  integrity sha512-zN4eQlK3eBf7aJBcTHZilpBH3tDekBzPMIWC8r0s94Ecl73XfOyFi4w7yKFMRVUT0lvNQjtOL8YSrwqQj6mZFg==
+  optionalDependencies:
+    "@napi-rs/canvas-android-arm64" "0.1.99"
+    "@napi-rs/canvas-darwin-arm64" "0.1.99"
+    "@napi-rs/canvas-darwin-x64" "0.1.99"
+    "@napi-rs/canvas-linux-arm-gnueabihf" "0.1.99"
+    "@napi-rs/canvas-linux-arm64-gnu" "0.1.99"
+    "@napi-rs/canvas-linux-arm64-musl" "0.1.99"
+    "@napi-rs/canvas-linux-riscv64-gnu" "0.1.99"
+    "@napi-rs/canvas-linux-x64-gnu" "0.1.99"
+    "@napi-rs/canvas-linux-x64-musl" "0.1.99"
+    "@napi-rs/canvas-win32-arm64-msvc" "0.1.99"
+    "@napi-rs/canvas-win32-x64-msvc" "0.1.99"
+
 "@nodelib/fs.scandir@2.1.5":
   version "2.1.5"
   resolved "https://registry.npmmirror.com/@nodelib/fs.scandir/-/fs.scandir-2.1.5.tgz"
@@ -823,7 +859,7 @@
   resolved "https://registry.npmmirror.com/@types/react-dom/-/react-dom-18.3.7.tgz"
   integrity sha512-MEe3UeoENYVFXzoXEWsvcpg6ZvlrFNlOQ7EOsvhI3CfAXwzPfO8Qwuxd40nepsYKqyyVQnTdEfv68q91yLcKrQ==
 
-"@types/react@*", "@types/react@^18.0.0", "@types/react@^18.2.43":
+"@types/react@*", "@types/react@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", "@types/react@^18.0.0", "@types/react@^18.2.43":
   version "18.3.27"
   resolved "https://registry.npmmirror.com/@types/react/-/react-18.3.27.tgz"
   integrity sha512-cisd7gxkzjBKU2GgdYrTdtQx1SORymWyaAFhaxQPK9bYO9ot3Y5OikQRvY0VYQtvwjeQnizCINJAenh/V7MK2w==
@@ -867,6 +903,11 @@
     "@webgpu/types" "*"
     fflate "~0.8.2"
     meshoptimizer "~0.22.0"
+
+"@types/trusted-types@^2.0.7":
+  version "2.0.7"
+  resolved "https://registry.npmmirror.com/@types/trusted-types/-/trusted-types-2.0.7.tgz"
+  integrity sha512-ScaPdn1dQczgbl0QFTeTOmVHFULt394XJgOQNoyVhZ6r2vLnMLJfBPd53SB52T/3G36VI1/g2MZaX0cwDuXsfw==
 
 "@types/webxr@^0.5.2", "@types/webxr@>=0.5.17":
   version "0.5.24"
@@ -1471,6 +1512,11 @@ classnames@^2.2.1, classnames@^2.2.3, classnames@^2.2.5, classnames@^2.2.6, clas
   resolved "https://registry.npmmirror.com/classnames/-/classnames-2.5.1.tgz"
   integrity sha512-saHYOzhIQs6wy2sVxTM6bUDsQO4F50V9RQ22qBpEdCW+I+/Wmke2HOl6lS6dTpdxVhb88/I6+Hs+438c3lfUow==
 
+clsx@^2.0.0:
+  version "2.1.1"
+  resolved "https://registry.npmmirror.com/clsx/-/clsx-2.1.1.tgz"
+  integrity sha512-eYm0QWBtUrBWZWG0d386OGAw16Z995PiOVo2B7bjWSbHedGl5e0ZWaq65kOGgUSNesEIDkB9ISbTg/JK9dhCZA==
+
 code-block-writer@^10.1.1:
   version "10.1.1"
   resolved "https://registry.npmmirror.com/code-block-writer/-/code-block-writer-10.1.1.tgz"
@@ -1659,6 +1705,11 @@ delayed-stream@~1.0.0:
   resolved "https://registry.npmmirror.com/delayed-stream/-/delayed-stream-1.0.0.tgz"
   integrity sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==
 
+dequal@^2.0.3:
+  version "2.0.3"
+  resolved "https://registry.npmmirror.com/dequal/-/dequal-2.0.3.tgz"
+  integrity sha512-0je+qPKHEMohvfRTCEo3CrPG6cAzAYgmzKyxRiYSSDkS6eGJdyVJm7WaYA5ECaAD9wLB2T4EEeymA5aFVcYXCA==
+
 detect-libc@^2.0.0, detect-libc@^2.0.3:
   version "2.1.2"
   resolved "https://registry.npmmirror.com/detect-libc/-/detect-libc-2.1.2.tgz"
@@ -1687,6 +1738,13 @@ doctrine@^3.0.0:
   integrity sha512-yS+Q5i3hBf7GBkd4KG8a7eBNNWNGLTaEwwYWUijIYM7zrlYDM0BFXHjjPWlWZ1Rg7UaddZeIDmi9jF3HmqiQ2w==
   dependencies:
     esutils "^2.0.2"
+
+dompurify@3.2.7:
+  version "3.2.7"
+  resolved "https://registry.npmmirror.com/dompurify/-/dompurify-3.2.7.tgz"
+  integrity sha512-WhL/YuveyGXJaerVlMYGWhvQswa7myDG17P7Vu65EWC05o8vfeNbvNf4d/BOvH99+ZW+LlQsc1GDKMa1vNK6dw==
+  optionalDependencies:
+    "@types/trusted-types" "^2.0.7"
 
 draco3d@^1.4.1:
   version "1.5.7"
@@ -2714,7 +2772,7 @@ lodash.merge@^4.6.2:
   resolved "https://registry.npmmirror.com/lodash.merge/-/lodash.merge-4.6.2.tgz"
   integrity sha512-0KpjqXRVvrYyCsX1swR/XTK0va6VQkQM6MNo7PqW77ByjAhoARA8EfrP1N4+KlKj8YS0ZUCtRT/YUuhyYDujIQ==
 
-loose-envify@^1.1.0:
+loose-envify@^1.0.0, loose-envify@^1.1.0:
   version "1.4.0"
   resolved "https://registry.npmmirror.com/loose-envify/-/loose-envify-1.4.0.tgz"
   integrity sha512-lyuxPGr/Wfhrlem2CL/UcnUc1zcqKAImBDzukY7Y5F/yQiNdko6+fRLevlw1HgMySw7f611UIY408EtxRSoK3Q==
@@ -2740,6 +2798,11 @@ magic-string@^0.25.3:
   dependencies:
     sourcemap-codec "^1.4.8"
 
+make-cancellable-promise@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmmirror.com/make-cancellable-promise/-/make-cancellable-promise-2.0.0.tgz"
+  integrity sha512-3SEQqTpV9oqVsIWqAcmDuaNeo7yBO3tqPtqGRcKkEo0lrzD3wqbKG9mkxO65KoOgXqj+zH2phJ2LiAsdzlogSw==
+
 make-dir@^2.1.0:
   version "2.1.0"
   resolved "https://registry.npmmirror.com/make-dir/-/make-dir-2.1.0.tgz"
@@ -2748,15 +2811,30 @@ make-dir@^2.1.0:
     pify "^4.0.1"
     semver "^5.6.0"
 
+make-event-props@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmmirror.com/make-event-props/-/make-event-props-2.0.0.tgz"
+  integrity sha512-G/hncXrl4Qt7mauJEXSg3AcdYzmpkIITTNl5I+rH9sog5Yw0kK6vseJjCaPfOXqOqQuPUP89Rkhfz5kPS8ijtw==
+
 marked@^11.1.0:
   version "11.2.0"
   resolved "https://registry.npmmirror.com/marked/-/marked-11.2.0.tgz"
   integrity sha512-HR0m3bvu0jAPYiIvLUUQtdg1g6D247//lvcekpHO1WMvbwDlwSkZAX9Lw4F4YHE1T0HaaNve0tuAWuV1UJ6vtw==
 
+marked@14.0.0:
+  version "14.0.0"
+  resolved "https://registry.npmmirror.com/marked/-/marked-14.0.0.tgz"
+  integrity sha512-uIj4+faQ+MgHgwUW1l2PsPglZLOLOT1uErt06dAPtx2kjteLAkbsd/0FiYg/MGS+i7ZKLb7w2WClxHkzOOuryQ==
+
 math-intrinsics@^1.1.0:
   version "1.1.0"
   resolved "https://registry.npmmirror.com/math-intrinsics/-/math-intrinsics-1.1.0.tgz"
   integrity sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==
+
+merge-refs@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmmirror.com/merge-refs/-/merge-refs-2.0.0.tgz"
+  integrity sha512-3+B21mYK2IqUWnd2EivABLT7ueDhb0b8/dGK8LoFQPrU61YITeCMn14F7y7qZafWNZhUEKb24cJdiT5Wxs3prg==
 
 merge2@^1.3.0, merge2@^1.4.1:
   version "1.4.1"
@@ -2875,6 +2953,14 @@ mkdirp@^1.0.4:
   resolved "https://registry.npmmirror.com/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
+"monaco-editor@>= 0.25.0 < 1":
+  version "0.55.1"
+  resolved "https://registry.npmmirror.com/monaco-editor/-/monaco-editor-0.55.1.tgz"
+  integrity sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==
+  dependencies:
+    dompurify "3.2.7"
+    marked "14.0.0"
+
 mri@1.2.0:
   version "1.2.0"
   resolved "https://registry.npmmirror.com/mri/-/mri-1.2.0.tgz"
@@ -2953,6 +3039,11 @@ node-gyp-build@^4.2.2:
   version "4.8.4"
   resolved "https://registry.npmmirror.com/node-gyp-build/-/node-gyp-build-4.8.4.tgz"
   integrity sha512-LA4ZjwlnUblHVgq0oBF3Jl/6h/Nvs5fzBLwdEF4nuxnFdsfajde4WfxtJr3CaiH+F6ewcIB/q4jQ4UzPyid+CQ==
+
+node-readable-to-web-readable-stream@^0.4.2:
+  version "0.4.2"
+  resolved "https://registry.npmmirror.com/node-readable-to-web-readable-stream/-/node-readable-to-web-readable-stream-0.4.2.tgz"
+  integrity sha512-/cMZNI34v//jUTrI+UIo4ieHAB5EZRY/+7OmXZgBxaWBMcW2tGdceIw06RFxWxrKZ5Jp3sI2i5TsRo+CBhtVLQ==
 
 node-releases@^2.0.27:
   version "2.0.27"
@@ -3118,6 +3209,21 @@ pathe@^2.0.3:
   version "2.0.3"
   resolved "https://registry.npmmirror.com/pathe/-/pathe-2.0.3.tgz"
   integrity sha512-WUjGcAqP1gQacoQe+OBJsFA7Ld4DyXuUIjZ5cc75cLHvJ7dtNsTugphxIADwspS+AraAUePCKrSVtPLFj/F88w==
+
+pdfjs-dist@^5.6.205:
+  version "5.6.205"
+  resolved "https://registry.npmmirror.com/pdfjs-dist/-/pdfjs-dist-5.6.205.tgz"
+  integrity sha512-tlUj+2IDa7G1SbvBNN74UHRLJybZDWYom+k6p5KIZl7huBvsA4APi6mKL+zCxd3tLjN5hOOEE9Tv7VdzO88pfg==
+  optionalDependencies:
+    "@napi-rs/canvas" "^0.1.96"
+    node-readable-to-web-readable-stream "^0.4.2"
+
+pdfjs-dist@5.4.296:
+  version "5.4.296"
+  resolved "https://registry.npmmirror.com/pdfjs-dist/-/pdfjs-dist-5.4.296.tgz"
+  integrity sha512-DlOzet0HO7OEnmUmB6wWGJrrdvbyJKftI1bhMitK7O2N8W2gc757yyYBbINy9IDafXAV9wmKr9t7xsTaNKRG5Q==
+  optionalDependencies:
+    "@napi-rs/canvas" "^0.1.80"
 
 picocolors@^1.1.1:
   version "1.1.1"
@@ -3656,7 +3762,7 @@ rc@^1.2.7:
     minimist "^1.2.0"
     strip-json-comments "~2.0.1"
 
-react-dom@*, react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.8, react-dom@>=16.8.0, react-dom@>=16.9.0:
+react-dom@*, "react-dom@^16.8.0 || ^17.0.0 || ^18.0.0 || ^19.0.0", react-dom@^18.2.0, "react-dom@>= 16.8.0", react-dom@>=16.0.0, react-dom@>=16.11.0, react-dom@>=16.8, react-dom@>=16.8.0, react-dom@>=16.9.0:
   version "18.3.1"
   resolved "https://registry.npmmirror.com/react-dom/-/react-dom-18.3.1.tgz"
   integrity sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==
@@ -3687,6 +3793,20 @@ react-is@^18.2.0:
   version "18.3.1"
   resolved "https://registry.npmmirror.com/react-is/-/react-is-18.3.1.tgz"
   integrity sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==
+
+react-pdf@^10.4.1:
+  version "10.4.1"
+  resolved "https://registry.npmmirror.com/react-pdf/-/react-pdf-10.4.1.tgz"
+  integrity sha512-kS/35staVCBqS29verTQJQZXw7RfsRCPO3fdJoW1KXylcv7A9dw6DZ3vJXC2w+bIBgLw5FN4pOFvKSQtkQhPfA==
+  dependencies:
+    clsx "^2.0.0"
+    dequal "^2.0.3"
+    make-cancellable-promise "^2.0.0"
+    make-event-props "^2.0.0"
+    merge-refs "^2.0.0"
+    pdfjs-dist "5.4.296"
+    tiny-invariant "^1.0.0"
+    warning "^4.0.0"
 
 react-refresh@^0.17.0:
   version "0.17.0"
@@ -4095,6 +4215,11 @@ stacktracey@^2.1.8:
     as-table "^1.0.36"
     get-source "^2.0.12"
 
+state-local@^1.0.6:
+  version "1.0.7"
+  resolved "https://registry.npmmirror.com/state-local/-/state-local-1.0.7.tgz"
+  integrity sha512-HTEHMNieakEnoe33shBYcZ7NX83ACUjCu8c40iOGEZsngj9zRnkqS9j1pqQPXwobB0ZcVTk27REb7COQ0UR59w==
+
 stoppable@1.1.0:
   version "1.1.0"
   resolved "https://registry.npmmirror.com/stoppable/-/stoppable-1.1.0.tgz"
@@ -4316,6 +4441,11 @@ time-span@4.0.0:
   dependencies:
     convert-hrtime "^3.0.0"
 
+tiny-invariant@^1.0.0:
+  version "1.3.3"
+  resolved "https://registry.npmmirror.com/tiny-invariant/-/tiny-invariant-1.3.3.tgz"
+  integrity sha512-+FbBPE1o9QAYvviau/qC5SE3caw21q3xkvWKBtja5vgqOWIHHJ3ioaq1VPfn/Szqctz2bU/oYeKd9/z5BL+PVg==
+
 tinyglobby@^0.2.11:
   version "0.2.15"
   resolved "https://registry.npmmirror.com/tinyglobby/-/tinyglobby-0.2.15.tgz"
@@ -4511,6 +4641,13 @@ void-elements@3.1.0:
   version "3.1.0"
   resolved "https://registry.npmmirror.com/void-elements/-/void-elements-3.1.0.tgz"
   integrity sha512-Dhxzh5HZuiHQhbvTW9AMetFfBHDMYpo23Uo9btPXgdYP+3T5S+p+jgNy7spra+veYhBP2dCSgxR/i2Y02h5/6w==
+
+warning@^4.0.0:
+  version "4.0.3"
+  resolved "https://registry.npmmirror.com/warning/-/warning-4.0.3.tgz"
+  integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==
+  dependencies:
+    loose-envify "^1.0.0"
 
 webidl-conversions@^3.0.0:
   version "3.0.1"

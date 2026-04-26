@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <link rel="icon" type="image/svg+xml" href="/public/icon.ico" />
+  <link rel="preconnect" href="https://challenges.cloudflare.com" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>ChattyPlay</title>
   <style>
@@ -154,6 +155,9 @@
 
   <!-- Fundebug 错误监控 -->
   <script async src="https://js.fundebug.cn/fundebug.2.8.8.min.js"></script>
+
+  <!-- Cloudflare Turnstile 反机器人验证 -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
   <!-- Fundebug 录屏插件 -->
   <script async src="https://js.fundebug.cn/fundebug.revideo.0.8.0.min.js"></script>
   <script>
