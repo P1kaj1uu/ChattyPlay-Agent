@@ -220,5 +220,10 @@ html {
 
 .ant-form .ant-form-item,
 [class*="ant-form-item"] {
-  margin-bottom: 0px !important;
+  margin-bottom: 2px !important;
+}
+
+.ant-form .ant-form-item-label,
+[class*="ant-form-item"] {
+  padding: 0px !important;
 }
