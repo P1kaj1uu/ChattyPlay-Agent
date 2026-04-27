@@ -151,7 +151,7 @@
 
 - ### 关于我
 
-<img width="1470" height="789" alt="Image" src="https://github.com/user-attachments/assets/c3b7152e-a498-4203-8039-06a40706068c" />
+<img width="1454" height="744" alt="Image" src="https://github.com/user-attachments/assets/1072f223-cf31-43d0-a371-e532bcc4a232" />
 
 - ### 版本检测
 
@@ -160,7 +160,7 @@
 
 - ### 登录页面
 
-<img width="1292" height="767" alt="Image" src="https://github.com/user-attachments/assets/0bcd7641-770c-4d2e-9c13-8af243acf816" />
+<img width="1214" height="763" alt="Image" src="https://github.com/user-attachments/assets/2a55a46d-af30-4122-b417-5425288ef3ac" />
 <img width="1312" height="791" alt="Image" src="https://github.com/user-attachments/assets/2714de5f-471c-40f5-af41-dbe4b21a3813" />
 <img width="1413" height="708" alt="Image" src="https://github.com/user-attachments/assets/19d1df96-4fad-4c22-b720-10d1deed48b3" />
 <img width="1276" height="659" alt="Image" src="https://github.com/user-attachments/assets/9570cfd9-8189-4e5e-b3d0-9f3ab81b888e" />

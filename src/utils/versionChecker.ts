@@ -73,12 +73,31 @@ export const getVersionInfo = (): VersionInfo => {
 
 /**
  * 处理版本更新后的清理工作
- * 清空 localStorage 并重新加载页面
+ * 清空 localStorage，保留之前的语言设置，然后重新加载页面
  */
 export const handleVersionUpdate = (): void => {
+  // 保留需要保留的键值
+  const preservedKeys = ['language', 'i18nextLng']
+  const preservedData: Record<string, string | null> = {}
+  
+  // 保存需要保留的数据
+  preservedKeys.forEach(key => {
+    const value = localStorage.getItem(key)
+    if (value !== null) {
+      preservedData[key] = value
+    }
+  })
+  
   // 清空所有 localStorage
   localStorage.clear()
-
+  
+  // 恢复需要保留的数据
+  Object.entries(preservedData).forEach(([key, value]) => {
+    if (value !== null) {
+      localStorage.setItem(key, value)
+    }
+  })
+  
   // 重新加载页面
   window.location.reload()
 }
