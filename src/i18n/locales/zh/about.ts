@@ -1,5 +1,6 @@
 const about = {
   title: '关于我（求内推～）',
+  role: '一名全栈技术的爱好者',
   name: '不见水星记（研一',
   description: '宇宙终极无敌超级爆炸究极飞天帅比暴龙战士',
   contact: '联系方式',
@@ -18,7 +19,18 @@ const about = {
   award8: '创新创业大赛省二',
   award9: '校奖学金，国家励志奖学金',
   supportMe: '支持我',
-  addMe: '添加我'
+  addMe: '添加我',
+  email: '邮箱：891523233@qq.com',
+  products: '精选商品',
+  loadingProducts: '加载商品中...',
+  autoDelivery: '自动发货',
+  stockShort: '库存紧张',
+  noProducts: '暂无商品',
+  digitalGoodsNotice: '数字商品购买须知',
+  importantNotice: '在本平台购买商品即表示您同意服务提供商协议，同时本商品为数字产品，售出后不支持退货换货。下单即视为您已全面了解商品信息，自愿承担相应风险。',
+  projectExperience: '项目经验',
+  technologyStack: '技术栈',
+  deliveryQuality: '用心交付',
 }
 
 export default about

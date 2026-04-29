@@ -1,5 +1,6 @@
 export default {
   title: 'About Me (Looking for referrals~)',
+  role: 'A full-stack technology enthusiast',
   name: '0x3f',
   description: 'The ultimate invincible super explosive tyrannosaurus warrior',
   contact: 'Contact',
@@ -18,5 +19,16 @@ export default {
   award8: 'Provincial Second Prize in Innovation and Entrepreneurship Competition',
   award9: 'University Scholarship, National Endeavor Scholarship',
   supportMe: 'Support Me',
-  addMe: 'Add Me'
+  addMe: 'Add Me',
+  email: 'Email: 891523233@qq.com',
+  products: 'Featured Products',
+  loadingProducts: 'Loading products...',
+  autoDelivery: 'Auto Delivery',
+  stockShort: 'Stock Shortage',
+  noProducts: 'No products available',
+  digitalGoodsNotice: 'Digital Goods Purchase Notice',
+  importantNotice: 'By purchasing products on this platform, you agree to the service provider\'s terms of service. The products are digital products, and once sold, they are not returnable or exchangeable. By placing an order, you acknowledge that you have fully understood the product information and voluntarily accept the risk associated with the purchase.',
+  projectExperience: 'Project Experience',
+  technologyStack: 'Technology Stack',
+  deliveryQuality: 'Delivery Quality',
 }
