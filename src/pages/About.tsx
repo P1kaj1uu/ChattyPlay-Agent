@@ -305,7 +305,7 @@ const NavigationButton = styled.button`
   }
 `
 
-// 美化后的商品卡片样式
+// 商品卡片样式
 const ProductCard = styled(Card)`
   border-radius: 16px;
   border: 1px solid rgba(102, 126, 234, 0.1);
@@ -807,9 +807,11 @@ const About: React.FC = () => {
         <Col xs={24} md={16} lg={10}>
           <AboutCard>
             <Card.Meta
-              title={<span style={{ fontSize: '18px' }}>📋 {t('about.contact')}</span>}
               description={
                 <div>
+                  <Title level={5} style={{ color: '#667eea' }}>
+                    📋 {t('about.contact')}
+                  </Title>
                   <ul style={{ paddingLeft: '20px', color: '#64748b', marginBottom: 24 }}>
                     <li style={{ marginBottom: 8 }}>{t('about.wechat')}</li>
                     <li>{t('about.email')}</li>
