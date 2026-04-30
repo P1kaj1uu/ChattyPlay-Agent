@@ -11,7 +11,6 @@ import {
   ClockCircleOutlined,
   CheckCircleOutlined,
   ThunderboltOutlined,
-  RocketOutlined,
   CustomerServiceOutlined,
   FileProtectOutlined,
 } from '@ant-design/icons'
@@ -732,7 +731,6 @@ const About: React.FC = () => {
   return (
     <PageContainer>
       <SectionTitle>
-        <RocketOutlined style={{ marginRight: 12 }} />
         {t('about.title')}
       </SectionTitle>
       
@@ -949,11 +947,19 @@ const About: React.FC = () => {
       {/* 商品详情弹窗 */}
       <DetailModal
         open={isDetailModalVisible}
-        onCancel={() => setIsDetailModalVisible(false)}
+        onCancel={() => {
+          setIsDetailModalVisible(false)
+          setSelectedProduct(null)
+          form.resetFields()
+        }}
         footer={null}
         width={580}
         centered
         title={null}
+        afterClose={() => {
+          form.resetFields()
+          setSelectedProduct(null)
+        }}
       >
         {selectedProduct && (
           <>
