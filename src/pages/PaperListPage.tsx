@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Card, Input, Button, Radio, RadioChangeEvent, Avatar, Tag, Skeleton, Tooltip, Badge, Dropdown, Image, Modal } from 'antd'
 import { 
   SearchOutlined, 
@@ -197,6 +198,7 @@ interface PaperDetail {
 
 const PaperListPage: React.FC = () => {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState<string>('daily');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [papers, setPapers] = useState<PaperDetail[]>([]);
@@ -570,6 +572,14 @@ const PaperListPage: React.FC = () => {
                 <Radio.Button value="trending" className="px-3 py-1 text-sm flex items-center">
                   <FireOutlined className="mr-1" /> {t('paper.hot')}
                 </Radio.Button>
+              </Radio.Group>
+              <Radio.Group
+                optionType="button"
+                buttonStyle="solid"
+                size="small"
+                className="bg-white rounded-lg flex mt-8 max-[700px]:hidden"
+              >
+                <Button type="primary" className="px-3 py-1 text-sm" onClick={() => navigate('/latex')}>{t('paper.gotoLatexEdit')}</Button>
               </Radio.Group>
             </div>
           </div>

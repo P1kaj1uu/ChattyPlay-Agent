@@ -39,6 +39,7 @@ import { scrollToTop } from './utils/backTop'
 import { isMobileDevice } from './utils/isMobile'
 import WorkerAgent from './pages/WorkerAgent'
 import Markmap from './pages/Markmap'
+import Latex from './pages/Latex'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -193,7 +194,8 @@ const AppContent: React.FC = () => {
       <main style={{
         flex: 1,
         paddingTop: '64px',
-        transition: 'padding-top 0.3s ease'
+        transition: 'padding-top 0.3s ease',
+        backgroundColor: '#f5f5f5'
       }}>
         <Routes>
           <Route path="/home" element={<Home />} />
@@ -210,6 +212,7 @@ const AppContent: React.FC = () => {
           <Route path="/about" element={<About />} />
           <Route path="/papers" element={<PaperListPage />} />
           <Route path="/markmap" element={<Markmap />} />
+          <Route path="/latex" element={<Latex />} />
           <Route path="/worker" element={<WorkerAgent />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>

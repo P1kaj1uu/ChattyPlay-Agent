@@ -1,0 +1,28 @@
+/* 覆盖 Ant Design Tree 组件的样式 */
+.ant-tree .ant-tree-node-content-wrapper,
+div.ant-tree .ant-tree-node-content-wrapper,
+[class*="ant-tree-node-content-wrapper"] {
+  display: flex !important;
+  flex: 1 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* 确保标题容器占满剩余空间 */
+.ant-tree .ant-tree-title,
+[class*="ant-tree-title"] {
+  flex: 1 !important;
+  min-width: 0 !important;
+  width: 100% !important;
+}
+
+/* 树节点整体占满宽度 */
+.ant-tree .ant-tree-treenode,
+[class*="ant-tree-treenode"] {
+  width: 100% !important;
+}
+
+/* 文件图标和内容容器 */
+.ant-tree-node-content-wrapper .ant-tree-iconEle {
+  flex-shrink: 0 !important;
+}

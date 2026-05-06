@@ -32,4 +32,5 @@ export default {
   hotApiError: 'Hot paper API returns data in an unexpected format',
   hotLoadError: 'Failed to load hot papers. Please try again later',
   paper: 'Paper',
+  gotoLatexEdit: 'Go to Latex Editor',
 }

@@ -18,6 +18,7 @@ import gold from './zh/gold'
 import help from './zh/help'
 import goofish from './zh/goofish'
 import aimarkmap from './zh/aimarkmap'
+import latex from './zh/latex'
 
 export default {
   translation: {
@@ -40,6 +41,7 @@ export default {
     gold,
     help,
     goofish,
-    aimarkmap
+    aimarkmap,
+    latex
   }
 }

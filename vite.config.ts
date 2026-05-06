@@ -61,6 +61,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path
       },
+      '/api/latex': {
+        target: 'http://localhost:3001',
+        changeOrigin: true,
+        rewrite: (path) => path
+      },
       '/ws': {
         target: 'ws://localhost:3001',
         ws: true
