@@ -635,4 +635,302 @@ app.post('/api/proxy-download', async (c) => {
   }
 })
 
+// ============ LaTeX 编译 API 代理 ============
+
+// LaTeX 编译 API 代理
+app.post('/api/latex/compile', async (c) => {
+  try {
+    const { code, compiler = 'xelatex', files = [] } = await c.req.json()
+
+    // 添加时间戳确保请求唯一性
+    const timestamp = new Date().toISOString()
+    console.log(`[${timestamp}] LaTeX 编译请求`)
+
+    if (!code || typeof code !== 'string') {
+      return c.json({
+        success: false,
+        error: '请提供有效的 LaTeX 代码'
+      }, 400)
+    }
+
+    console.log('LaTeX 编译请求:', {
+      compiler,
+      codeLength: code.length,
+      codePreview: code.substring(0, 100) + (code.length > 100 ? '...' : ''),
+      filesCount: files.length,
+      files: files.map((f: any) => ({ name: f.name, contentLength: f.content?.length }))
+    })
+
+    // 如果有图片文件，使用正确的 API 格式传递
+    const processedCode = code
+    if (files && files.length > 0) {
+      console.log('检测到图片文件，使用多文件资源格式')
+    }
+
+    // 检测是否包含中文字符
+    const hasChinese = /[一-龥]/.test(processedCode)
+    console.log('包含中文:', hasChinese)
+
+    // 如果包含中文，尝试使用专门处理中文的服务
+    if (hasChinese) {
+      console.log('检测到中文内容，使用特殊的中文处理方案')
+
+      // 方案1: 尝试使用 Overleaf-style API
+      try {
+        const overleafUrl = 'https://compile.overleaf.com/docs'
+
+        // 构建文件列表：主文件（图片已嵌入）
+        const requestFiles: any[] = [{
+          name: 'main.tex',
+          content: processedCode
+        }]
+
+        const response = await fetch(overleafUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            compiler: compiler,
+            files: requestFiles,
+            options: {
+              timeout: 60
+            }
+          }),
+        })
+
+        if (response.ok) {
+          const data = await response.json()
+          if (data.pdfs && data.pdfs['main.pdf']) {
+            const pdfData = data.pdfs['main.pdf']
+            const pdfBuffer = Buffer.from(pdfData, 'base64')
+
+            return new Response(pdfBuffer, {
+              headers: {
+                'Content-Type': 'application/pdf',
+                'Content-Disposition': 'attachment; filename="document.pdf"',
+                'Access-Control-Allow-Origin': '*',
+              },
+            })
+          }
+        }
+      } catch (error) {
+        console.error('Overleaf API 失败:', error)
+      }
+
+      // 方案2: 修改LaTeX代码以使用更通用的字体设置
+      console.log('尝试修改LaTeX代码以支持中文')
+      let modifiedCode = processedCode
+
+      // 如果代码中没有ctex相关包，添加中文支持
+      if (!processedCode.includes('ctex') && !processedCode.includes('CJK')) {
+        // 在documentclass后添加中文支持
+        modifiedCode = processedCode.replace(
+          /\\documentclass(\[[^\]]*\])?\{([^}]+)\}/,
+          (match: string, options: string, docclass: string) => {
+            if (docclass === 'ctexart') {
+              return match
+            }
+            return `\\documentclass${options || ''}{${docclass}}\n\\usepackage{CJKutf8}\n\\usepackage{CJK}`
+          }
+        )
+
+        // 在document环境中添加CJK支持
+        if (modifiedCode.includes('\\begin{document}')) {
+          modifiedCode = modifiedCode.replace(
+            '\\begin{document}',
+            '\\begin{document}\n\\begin{CJK*}{UTF8}{gbsn}'
+          )
+        }
+
+        if (modifiedCode.includes('\\end{document}')) {
+          modifiedCode = modifiedCode.replace(
+            '\\end{document}',
+            '\\end{CJK*}\n\\end{document}'
+          )
+        }
+      }
+
+      console.log('修改后的代码预览:', modifiedCode.substring(0, 200) + '...')
+
+      // 使用修改后的代码尝试编译
+      const latexApiUrl = 'https://latex.ytotech.com/builds/sync'
+
+      // 构建请求数据 - 使用正确的 resources 格式
+      const resources: any[] = [{
+        main: true,
+        content: modifiedCode
+      }]
+
+      // 添加附加文件（图片等）- 使用正确的格式
+      if (files && files.length > 0) {
+        for (const file of files) {
+          if (file.name && file.content) {
+            let base64Data = file.content
+            if (base64Data.startsWith('data:')) {
+              base64Data = base64Data.split(',')[1] || base64Data
+            }
+
+            resources.push({
+              path: file.name,
+              file: base64Data
+            })
+
+            console.log(`添加图片资源（中文处理）: ${file.name}`)
+          }
+        }
+      }
+
+      const requestData = {
+        compiler: compiler,
+        resources: resources
+      }
+
+      console.log('发送到 LaTeX API 的请求（中文处理）:', {
+        compiler,
+        codeLength: modifiedCode.length,
+        资源数量: resources.length,
+        包含图片: files && files.length > 0
+      })
+
+      const response = await fetch(latexApiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestData),
+      })
+
+      if (response.ok) {
+        const contentType = response.headers.get('content-type') || ''
+        if (contentType.includes('application/pdf')) {
+          const pdfBuffer = await response.arrayBuffer()
+          console.log('中文PDF生成成功，大小:', pdfBuffer.byteLength, '字节')
+
+          return new Response(pdfBuffer, {
+            headers: {
+              'Content-Type': 'application/pdf',
+              'Content-Disposition': 'attachment; filename="document.pdf"',
+              'Access-Control-Allow-Origin': '*',
+            },
+          })
+        }
+      }
+    }
+
+    // 非中文内容或中文处理失败，使用标准流程
+    const latexApiUrl = 'https://latex.ytotech.com/builds/sync'
+
+    // 构建请求数据 - 使用正确的 resources 格式
+    const resources: any[] = [{
+      main: true,
+      content: processedCode
+    }]
+
+    // 添加附加文件（图片等）- 使用正确的格式
+    if (files && files.length > 0) {
+      for (const file of files) {
+        if (file.name && file.content) {
+          let base64Data = file.content
+          if (base64Data.startsWith('data:')) {
+            base64Data = base64Data.split(',')[1] || base64Data
+          }
+
+          resources.push({
+            path: file.name,
+            file: base64Data
+          })
+
+          console.log(`添加图片资源: ${file.name}`)
+        }
+      }
+    }
+
+    const requestData = {
+      compiler: compiler,
+      resources: resources
+    }
+
+    console.log('发送到 LaTeX API 的请求:', {
+      compiler,
+      codeLength: processedCode.length,
+      资源数量: resources.length,
+      包含图片: files && files.length > 0
+    })
+
+    const response = await fetch(latexApiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(requestData),
+    })
+
+    console.log('API 响应状态:', response.status, response.statusText)
+
+    if (!response.ok) {
+      const errorText = await response.text()
+      console.error('LaTeX API 错误响应:', errorText)
+      console.error('请求体详情:', JSON.stringify(requestData, null, 2))
+      throw new Error(`LaTeX API 返回错误: ${response.status} ${response.statusText} - ${errorText}`)
+    }
+
+    const contentType = response.headers.get('content-type') || ''
+    console.log('响应内容类型:', contentType)
+
+    if (contentType.includes('application/pdf')) {
+      const pdfBuffer = await response.arrayBuffer()
+      console.log('PDF 生成成功，大小:', pdfBuffer.byteLength, '字节')
+
+      return new Response(pdfBuffer, {
+        headers: {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': 'attachment; filename="document.pdf"',
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        },
+      })
+    }
+
+    const errorText = await response.text()
+    console.error('非 PDF 响应:', errorText)
+    return c.json({
+      success: false,
+      error: `编译失败，服务器返回非 PDF 内容: ${errorText.substring(0, 200)}`
+    }, 500)
+
+  } catch (error) {
+    console.error('LaTeX 编译代理错误:', error)
+
+    const errorMessage = error instanceof Error ? error.message : '未知错误'
+    return c.json({
+      success: false,
+      error: `LaTeX 编译失败: ${errorMessage}`
+    }, 500)
+  }
+})
+
+// LaTeX 编译健康检查
+app.get('/api/latex/health', async (c) => {
+  try {
+    const testCode = '\\documentclass{article}\\begin{document}Hello World\\end{document}'
+    const response = await fetch(`https://latex.ytotech.com/builds/sync?content=${encodeURIComponent(testCode)}`, {
+      method: 'GET',
+    })
+
+    return c.json({
+      status: response.ok ? 'available' : 'unavailable',
+      statusCode: response.status,
+      timestamp: new Date().toISOString()
+    })
+  } catch (error) {
+    return c.json({
+      status: 'error',
+      error: error instanceof Error ? error.message : '未知错误',
+      timestamp: new Date().toISOString()
+    }, 503)
+  }
+})
+
 export default app
