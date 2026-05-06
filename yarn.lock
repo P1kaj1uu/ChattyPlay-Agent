@@ -2953,7 +2953,7 @@ mkdirp@^1.0.4:
   resolved "https://registry.npmmirror.com/mkdirp/-/mkdirp-1.0.4.tgz"
   integrity sha512-vVqVZQyf3WLx2Shd0qJ9xuvqgAyKPLAiqITEtqW0oIUjzo3PePDd6fW9iFz30ef7Ysp/oiWqbhszeGWW2T6Gzw==
 
-"monaco-editor@>= 0.25.0 < 1":
+monaco-editor@^0.55.1, "monaco-editor@>= 0.25.0 < 1":
   version "0.55.1"
   resolved "https://registry.npmmirror.com/monaco-editor/-/monaco-editor-0.55.1.tgz"
   integrity sha512-jz4x+TJNFHwHtwuV9vA9rMujcZRb0CEilTEwG2rRSpe/A7Jdkuj8xPKttCgOh+v/lkHy7HsZ64oj+q3xoAFl9A==
