@@ -56,8 +56,10 @@
 - v4.5优化注册登录功能，jwt token无感刷新token，redis存储用户信息，cloudflare托管vercel（2026.3.22-2026.3.26）
 - v4.6新增hcaptcha防机器人验证码（2026.4.12）
 - v4.7新增cloudflare turnstile防恶意请求和爬虫（2026.4.25-2026.4.27）
+- v4.8新增支付功能（2026.4.28-2026.4.29）
+- v4.9新增Latex编辑功能（2026.5.2-2026.5.8）
 
-## 最新版本V4.7（推荐）
+## 最新版本V4.9（推荐）
 
 > 本地调试时，可注释掉限制调用控制台的代码。参照说明修改package.json、email.config.js、index.html、.env.development、.env.production和docker-compose.yml文件。
 
@@ -94,6 +96,8 @@
 - cloudflare托管vercel
 - hcaptcha防机器人验证码
 - cloudflare turnstile防恶意请求和爬虫
+- 支付宝支付功能
+- Latex编辑，可替代overleaf使用
 
 ✅ 音乐播放
 
@@ -121,6 +125,13 @@
 - 筛选论文，项目主页，代码地址，arXiv论文等
 - PC端和移动端适配预览论文PDF
 - 对论文PDF进行AI解答
+
+✅ Latex编辑
+
+- 支持overleaf的90%功能，编译不受限制
+- 编辑本地保存，不会上传到服务器，信息安全
+- 支持导出PDF文件
+- 支持自定义模板
 
 ✅ 思维导图
 
@@ -151,7 +162,7 @@
 
 - ### 关于我
 
-<img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/c05da521-94b4-4bcc-8558-41c68abd6762" />
+<img width="1470" height="792" alt="Image" src="https://github.com/user-attachments/assets/8e34e58f-ea63-47ce-9070-09f63fe6564d" />
 <img width="1470" height="792" alt="Image" src="https://github.com/user-attachments/assets/0e293ff8-dedd-47a8-a51f-22f0211e944e" />
 <img width="1470" height="793" alt="Image" src="https://github.com/user-attachments/assets/32c04cc5-4a05-4b8e-962b-fbedcf0af228" />
 
@@ -198,6 +209,11 @@
 <img width="675" height="779" alt="Image" src="https://github.com/user-attachments/assets/ec888e37-8bb5-42ba-bbb6-10ef2123fd39" />
 <img width="664" height="721" alt="Image" src="https://github.com/user-attachments/assets/0063a312-700c-46a8-ae34-f601b53fecf9" />
 <img width="699" height="709" alt="Image" src="https://github.com/user-attachments/assets/ff1eeb84-337e-4b9d-87b7-a37e2ffa4125" />
+
+- ### Latex编辑
+
+<img width="1470" height="797" alt="Image" src="https://github.com/user-attachments/assets/d81e4592-e9b9-4e0e-8e2b-17ea6625fe0e" />
+<img width="495" height="724" alt="Image" src="https://github.com/user-attachments/assets/5c55ff60-53e4-40c3-8c1a-2148d78d2a00" />
 
 - ### 思维导图
 
