@@ -278,7 +278,7 @@
 
 - ### Agent监工
 
-<img width="1470" height="794" alt="Image" src="https://github.com/user-attachments/assets/d17c4478-a912-4db5-8572-1ac021b05a3d" />
+<img width="1470" height="716" alt="Image" src="https://github.com/user-attachments/assets/c8fa1f0c-da2a-4357-9aa4-7da65dd734b7" />
 
 - ### 404页面
 
