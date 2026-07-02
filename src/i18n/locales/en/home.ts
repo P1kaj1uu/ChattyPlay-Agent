@@ -53,7 +53,8 @@ export default {
   },
   footer: {
     slogan: '💗 The future is promising 💗',
-    thanks: 'Lightweight deployment, plug and play, seamless adaptation for PC and mobile devices! All-in-one platform for entertainment, AI, research, efficiency, and comics. Come to ChattyPlay and unlock a brand new one-stop experience～',
+    thanks: 'Thank you for using ChattyPlay! I am committed to providing you with more practical and interesting features. Stay tuned for future updates and improvements!',
+    description: 'Lightweight deployment, plug and play, seamless adaptation for PC and mobile devices! All-in-one platform for entertainment, AI, research, efficiency, and comics. Come to ChattyPlay and unlock a brand new one-stop experience～',
     quickNav: 'Quick Navigation',
     contact: 'Contact Me',
     welcome: 'Welcome to ChattyPlay! I am committed to providing you with more practical and interesting features. Stay tuned for future updates and improvements!',

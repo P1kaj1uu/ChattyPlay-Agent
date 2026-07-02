@@ -149,7 +149,7 @@ const Footer: React.FC = () => {
             <LogoImg src={logoImg} alt="ChattyPlay" />
             <BrandName>ChattyPlay</BrandName>
           </LogoRow>
-          <Slogan>{t('home.footer.thanks')}</Slogan>
+          <Slogan>{t('home.footer.description')}</Slogan>
           <br />
           <Slogan>{t('home.footer.welcome')}</Slogan>
         </BrandBlock>
