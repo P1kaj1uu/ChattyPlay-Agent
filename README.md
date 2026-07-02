@@ -78,6 +78,14 @@
 
 0元试用，优惠折扣码：0103，访问IPWO入口：https://www.ipwo.net/?ref=githubP1kaj1uu
 
+- 魔珐星云
+
+<img width="1500" height="397" alt="Image" src="https://github.com/user-attachments/assets/987f8c4f-53fc-40ac-9717-37231b70e47d" />
+
+### 魔珐星云搭载自研 LAM 文生 3D 多模态大模型，打造覆盖全终端的底层具身智能基础设施，适配数字人 AI 智能体、人形机器人开发、AR/VR 交互、多终端虚实场景落地及全行业数字化服务搭建，为企业、硬件厂商与开发者提供低延迟、高并发、轻量化部署的一站式 3D 具身 AI 技术支撑。
+
+注册填写邀请码：JMLAPNFDSL，免费领取 1000 积分奖励，访问魔珐星云入口：https://xingyun3d.com
+
 ## 🔰 项目概述
 
 ✅ 技术栈
