@@ -54,7 +54,7 @@ const home = {
   footer: {
     slogan: '💗 来日方长，未来可期 💗',
     thanks: '感谢您使用 ChattyPlay！我致力于为您提供更多实用且有趣的功能，敬请期待未来的更新与改进！',
-    description: '轻量化部署、开箱即用，PC 移动端无缝适配！影音、AI、科研、效率、漫画一体全能，来 ChattyPlay 解锁一站式全新体验吧～',
+    description: '影音、AI、科研、效率、漫画等一体全能，来 ChattyPlay 解锁一站式全新体验吧～',
     quickNav: '快捷导航',
     contact: '联系我',
     welcome: '欢迎交流：全栈开发、竞赛经历、技术成长、项目代做、商务合作、工作内推',
