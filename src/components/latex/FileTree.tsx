@@ -1,5 +1,5 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react'
-import { Tree, Input, Button, Modal, message, Dropdown, Popconfirm, Upload } from 'antd'
+import React, { useState, useMemo, useCallback, useEffect, useImperativeHandle, forwardRef } from 'react'
+import { Tree, Input, Button, Modal, message, Dropdown, Popconfirm, Upload, Tooltip } from 'antd'
 import type { DataNode, TreeProps } from 'antd/es/tree'
 import {
   FileTextOutlined,
@@ -11,8 +11,10 @@ import {
   MoreOutlined,
   FolderOutlined,
   FolderOpenOutlined,
+  FileZipOutlined,
 } from '@ant-design/icons'
 import type { MenuProps } from 'antd'
+import { unzip, strFromU8 } from 'fflate'
 import './tree.css'
 
 // 持久化的文件树存储，在模块级别保存
@@ -27,6 +29,10 @@ export interface FileNode {
   url?: string
   imageBlob?: Blob  // 真实图片 Blob
   imageUrl?: string // base64 预览 URL
+}
+
+export interface FileTreeRef {
+  replaceTree: (nodes: FileNode[]) => void
 }
 
 // File/Blob 转 base64
@@ -81,6 +87,95 @@ const isImageFile = (filename: string): boolean => {
   return /\.(png|jpg|jpeg|gif|svg|eps|bmp|webp)$/i.test(filename)
 }
 
+// fflate unzip 包装成 Promise
+const unzipPromise = (buf: Uint8Array): Promise<Record<string, Uint8Array>> => {
+  return new Promise((resolve, reject) => {
+    unzip(buf, (err, data) => (err ? reject(err) : resolve(data)))
+  })
+}
+
+// 将 zip 条目插入到 file tree 根节点
+const insertEntry = (root: FileNode, path: string, data: Uint8Array): void => {
+  // 同时兼容 macOS/Linux 的正斜杠和 Windows 的反斜杠
+  const parts = path.split(/[\\/]/).filter(Boolean)
+  // 跳过系统生成目录与隐藏文件
+  if (parts.length === 0) return
+  // macOS 资源目录
+  if (parts[0] === '__MACOSX') return
+  // 隐藏文件 / 目录（以 . 开头）
+  if (parts.some((p) => p.startsWith('.'))) return
+  // Windows 系统生成的垃圾文件
+  const fileName = parts[parts.length - 1]
+  if (/^(Thumbs\.db|ehthumbs\.db|desktop\.ini|\.DS_Store)$/i.test(fileName)) return
+
+  let cur = root
+  for (let i = 0; i < parts.length - 1; i++) {
+    const name = parts[i]
+    let next = cur.children!.find((c) => c.type === 'folder' && c.title === name)
+    if (!next) {
+      next = {
+        key: `fld-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        title: name,
+        type: 'folder',
+        children: [],
+      }
+      cur.children!.push(next)
+    }
+    cur = next
+  }
+
+  const isImg = isImageFile(fileName)
+  const blob = new Blob([data.buffer as ArrayBuffer])
+  let content: string | undefined
+  let imageUrl: string | undefined
+  if (isImg) {
+    imageUrl = URL.createObjectURL(blob)
+    content = undefined
+  } else {
+    try {
+      content = strFromU8(data)
+    } catch {
+      content = ''
+    }
+  }
+  cur.children!.push({
+    key: `zip-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    title: fileName,
+    type: getFileType(fileName),
+    content,
+    imageBlob: isImg ? blob : undefined,
+    imageUrl,
+  })
+}
+
+// 将 zip 二进制转换为 FileNode 数组（保留嵌套结构）
+const zipBufferToTree = async (buf: Uint8Array): Promise<FileNode[]> => {
+  const entries = await unzipPromise(buf)
+  const root: FileNode = {
+    key: 'zip-root',
+    title: 'root',
+    type: 'folder',
+    children: [],
+  }
+  for (const [path, data] of Object.entries(entries)) {
+    insertEntry(root, path, data)
+  }
+  return root.children || []
+}
+
+// 递归统计文件数量
+const countEntries = (nodes: FileNode[]): number => {
+  let total = 0
+  const walk = (ns: FileNode[]) => {
+    for (const n of ns) {
+      if (n.type !== 'folder') total++
+      if (n.children) walk(n.children)
+    }
+  }
+  walk(nodes)
+  return total
+}
+
 const initialFiles: FileNode[] = [
   {
     key: 'main',
@@ -127,6 +222,8 @@ interface FileTreeProps {
   selectedKey: string | null
   onSelectFile: (key: string, content: string, imageBlob?: Blob) => void  // 修改：添加 imageBlob 参数
   onImagesChange?: (images: Array<{ key: string; name: string; blob: Blob }>) => void  // 新增：图片文件变化时的回调
+  // 压缩包解压完成后的回调（父组件用来完全替代文件树）
+  onZipUploaded?: (rootNodes: FileNode[]) => void
 }
 
 interface TreeTitleProps {
@@ -247,7 +344,7 @@ const TreeNodeTitle: React.FC<TreeTitleProps> = ({
   )
 }
 
-const FileTree: React.FC<FileTreeProps> = ({ selectedKey, onSelectFile, onImagesChange }) => {
+const FileTree = forwardRef<FileTreeRef, FileTreeProps>(({ selectedKey, onSelectFile, onImagesChange, onZipUploaded }, ref) => {
   const [files, setFiles] = useState<FileNode[]>(() => {
     // 初始化时优先使用持久化的数据
     if (persistedFiles) return persistedFiles
@@ -516,10 +613,57 @@ const FileTree: React.FC<FileTreeProps> = ({ selectedKey, onSelectFile, onImages
     return false
   }, [currentFolderKey, addNodeToParent, expandedKeys, onSelectFile])
 
+  // 上传 zip 压缩包 - 解压后回调给父组件做整体替代
+  const handleZipUpload = useCallback(async (file: File) => {
+    if (!file.name.toLowerCase().endsWith('.zip')) {
+      message.error('请上传 .zip 压缩包文件')
+      return false
+    }
+
+    if (file.size > 50 * 1024 * 1024) {
+      message.error('压缩包大小不能超过 50MB')
+      return false
+    }
+
+    try {
+      message.loading({ content: '正在解压压缩包...', key: 'zip-extract', duration: 0 })
+      const buf = new Uint8Array(await file.arrayBuffer())
+      const rootNodes = await zipBufferToTree(buf)
+      message.destroy('zip-extract')
+
+      if (rootNodes.length === 0) {
+        message.warning('压缩包中没有可识别的文件')
+        return false
+      }
+
+      message.success(`解压完成，共 ${countEntries(rootNodes)} 个文件`)
+
+      // 通知父组件接管后续的完全替代流程
+      onZipUploaded?.(rootNodes)
+    } catch (err) {
+      message.destroy('zip-extract')
+      const errorMsg = err instanceof Error ? err.message : '未知错误'
+      message.error('解压失败：' + errorMsg)
+    }
+
+    return false
+  }, [onZipUploaded])
+
   // 调试用 - 移入生产后删除
   useEffect(() => {
     console.log('files updated:', JSON.stringify(files.map(f => ({ key: f.key, title: f.title }))))
   }, [files])
+
+  // 暴露给父组件的 imperative 方法
+  useImperativeHandle(ref, () => ({
+    replaceTree: (nodes: FileNode[]) => {
+      setFiles(nodes)
+      setExpandedKeys([])
+      setCurrentFolderKey(null)
+      setEditingKey(null)
+      setEditingName('')
+    },
+  }))
 
   const treeData = useMemo((): DataNode[] => {
     const build = (nodes: FileNode[]): DataNode[] => {
@@ -599,36 +743,54 @@ const FileTree: React.FC<FileTreeProps> = ({ selectedKey, onSelectFile, onImages
         }}
       >
         <span style={{ fontWeight: 600, color: '#333', flex: 1 }}>文件</span>
-        <Button
-          type="text"
-          icon={<FolderOutlined />}
-          size="small"
-          onClick={() => setIsAddFolderModalOpen(true)}
-          title="新建文件夹"
-          style={{ flexShrink: 0 }}
-        />
-        <Button
-          type="text"
-          icon={<PlusOutlined />}
-          size="small"
-          onClick={() => setIsAddModalOpen(true)}
-          title="新建文本文件"
-          style={{ flexShrink: 0 }}
-        />
-        <Upload
-          accept="image/png,image/jpg,image/jpeg,image/gif,image/svg,image/bmp,image/webp"
-          showUploadList={false}
-          beforeUpload={handleImageUpload}
-          customRequest={() => {}}
-        >
+        <Tooltip placement="top" title="新建文件夹">
           <Button
             type="text"
-            icon={<PictureOutlined />}
+            icon={<FolderOutlined />}
             size="small"
-            title="上传图片"
+            onClick={() => setIsAddFolderModalOpen(true)}
             style={{ flexShrink: 0 }}
-          />
-        </Upload>
+        />
+        </Tooltip>
+        <Tooltip placement="top" title="新建文本文件">
+          <Button
+            type="text"
+            icon={<PlusOutlined />}
+            size="small"
+            onClick={() => setIsAddModalOpen(true)}
+            style={{ flexShrink: 0 }}
+        />
+        </Tooltip>
+        <Tooltip placement="top" title="上传图片">
+          <Upload
+            accept="image/png,image/jpg,image/jpeg,image/gif,image/svg,image/bmp,image/webp"
+            showUploadList={false}
+            beforeUpload={handleImageUpload}
+            customRequest={() => {}}
+          >
+            <Button
+              type="text"
+              icon={<PictureOutlined />}
+              size="small"
+              style={{ flexShrink: 0 }}
+            />
+          </Upload>
+        </Tooltip>
+        <Tooltip placement="top" title="上传压缩包并解压文件">
+          <Upload
+            accept=".zip,application/zip,application/x-zip-compressed"
+            showUploadList={false}
+            beforeUpload={handleZipUpload}
+            customRequest={() => {}}
+          >
+            <Button
+              type="text"
+              icon={<FileZipOutlined />}
+              size="small"
+              style={{ flexShrink: 0 }}
+            />
+          </Upload>
+        </Tooltip>
       </div>
 
       <div style={{ flex: 1, overflow: 'auto', padding: '8px', minHeight: 0 }}>
@@ -688,6 +850,6 @@ const FileTree: React.FC<FileTreeProps> = ({ selectedKey, onSelectFile, onImages
       </Modal>
     </div>
   )
-}
+})
 
 export default FileTree

@@ -37,6 +37,7 @@
     "crypto-js": "^4.2.0",
     "echarts": "^6.0.0",
     "echarts-for-react": "^3.0.6",
+    "fflate": "^0.8.2",
     "fundebug-javascript": "^2.8.8",
     "fundebug-revideo": "^0.8.0",
     "gsap": "^3.14.2",

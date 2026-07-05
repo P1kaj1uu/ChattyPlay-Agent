@@ -1,35 +1,13 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { Button, message, Tooltip, Select, Radio } from 'antd'
+import { Button, message, Modal, Tooltip, Select, Radio } from 'antd'
 import { PlayCircleOutlined, FullscreenOutlined, FileTextOutlined, EditOutlined, EyeOutlined } from '@ant-design/icons'
-import FileTree from '@/components/latex/FileTree'
+import FileTree, { type FileTreeRef, type FileNode } from '@/components/latex/FileTree'
 import LatexEditor from '@/components/latex/LatexEditor'
 import PdfPreview from '@/components/latex/PdfPreview'
 import { compileLatex } from '@/services/latexApi'
 
-const Latex: React.FC = () => {
-  // 状态管理
-  const [selectedFileKey, setSelectedFileKey] = useState<string | null>('main')
-  const [selectedFileName, setSelectedFileName] = useState<string>('main.tex')
-  const [editorContent, setEditorContent] = useState<string>('')
-  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
-  const [isCompiling, setIsCompiling] = useState(false)
-  const [compileError, setCompileError] = useState<string | null>(null)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-  const [compiler, setCompiler] = useState<'xelatex' | 'pdflatex' | 'lualatex'>('xelatex')
-  const [isImage, setIsImage] = useState(false)
-  const [imageUrl, setImageUrl] = useState('')
-  const [imageFiles, setImageFiles] = useState<Array<{ key: string; name: string; blob: Blob }>>([])
-  
-  // 移动端视图切换：'files' | 'editor' | 'preview'
-  const [mobileView, setMobileView] = useState<'files' | 'editor' | 'preview'>('editor')
-
-  // 防抖定时器
-  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
-
-  // 初始加载默认内容
-  useEffect(() => {
-    // 提供英文和中文模板选择
-    const englishTemplate = `\\documentclass{article}
+// 英文模板
+const ENGLISH_TEMPLATE = `\\documentclass{article}
 \\usepackage[utf8]{inputenc}
 \\usepackage{amsmath}
 \\usepackage{graphicx}
@@ -68,7 +46,8 @@ This document demonstrates some basic LaTeX features.
 
 \\end{document}`
 
-    const chineseTemplate = `\\documentclass[UTF8]{ctexart}
+// 中文模板
+const CHINESE_TEMPLATE = `\\documentclass[UTF8]{ctexart}
 \\usepackage{xeCJK}
 \\setCJKmainfont{Noto Sans CJK SC}
 \\usepackage{graphicx}
@@ -107,16 +86,40 @@ E = mc^2
 
 \\end{document}`
 
-    // 存储中文模板供用户选择
-    localStorage.setItem('latex-chinese-template', chineseTemplate)
-    localStorage.setItem('latex-english-template', englishTemplate)
+const Latex: React.FC = () => {
+  // 状态管理
+  const [selectedFileKey, setSelectedFileKey] = useState<string | null>('main')
+  const [selectedFileName, setSelectedFileName] = useState<string>('main.tex')
+  const [editorContent, setEditorContent] = useState<string>('')
+  const [pdfBlob, setPdfBlob] = useState<Blob | null>(null)
+  const [isCompiling, setIsCompiling] = useState(false)
+  const [compileError, setCompileError] = useState<string | null>(null)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+  const [compiler, setCompiler] = useState<'xelatex' | 'pdflatex' | 'lualatex'>('xelatex')
+  const [isImage, setIsImage] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
+  const [imageFiles, setImageFiles] = useState<Array<{ key: string; name: string; blob: Blob }>>([])
+  
+  // 移动端视图切换：'files' | 'editor' | 'preview'
+  const [mobileView, setMobileView] = useState<'files' | 'editor' | 'preview'>('editor')
+
+  // 防抖定时器
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null)
+  // FileTree ref，用于调其 replaceTree
+  const fileTreeRef = useRef<FileTreeRef>(null)
+
+  // 初始加载默认内容
+  useEffect(() => {
+    // 持久化模板到 localStorage（zip 上传会清空，这里每次进入页面重置一次）
+    localStorage.setItem('latex-chinese-template', CHINESE_TEMPLATE)
+    localStorage.setItem('latex-english-template', ENGLISH_TEMPLATE)
 
     // 检查是否有保存的文件内容，如果有则加载，否则使用模板
     const savedContent = localStorage.getItem('latex-file-main')
     if (savedContent) {
       setEditorContent(savedContent)
     } else {
-      setEditorContent(englishTemplate)
+      setEditorContent(ENGLISH_TEMPLATE)
     }
   }, [])
 
@@ -152,19 +155,24 @@ E = mc^2
       if (result.success && result.pdfBlob) {
         setPdfBlob(result.pdfBlob)
         message.success('编译成功')
-        
+
         // 编译成功后自动切换到预览视图（移动端）
         if (window.innerWidth < 700) {
           setMobileView('preview')
         }
       } else {
-        setCompileError(result.error || '编译失败')
-        message.error(result.error || '编译失败')
+        // 不向后端原始错误暴露给用户，统一展示友好提示
+        console.warn('LaTeX 编译失败（后端返回）:', result.error)
+        const friendlyError = '当前 LaTeX 编译超时，请联系管理员开通会员'
+        setCompileError(friendlyError)
+        message.error(friendlyError)
       }
     } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : '编译请求失败'
-      setCompileError(errorMsg)
-      message.error(errorMsg)
+      // 异常情况同样不暴露原始错误
+      console.warn('LaTeX 编译请求异常:', err)
+      const friendlyError = '当前 LaTeX 编译超时，请联系管理员开通会员'
+      setCompileError(friendlyError)
+      message.error(friendlyError)
     } finally {
       setIsCompiling(false)
     }
@@ -220,6 +228,147 @@ E = mc^2
       setMobileView('editor')
     }
   }, [selectedFileKey, editorContent])
+
+  // 在文件树中查找指定标题的文件
+  const findNodeByTitle = useCallback((nodes: FileNode[], title: string): FileNode | null => {
+    for (const n of nodes) {
+      if (n.title.toLowerCase() === title) return n
+      if (n.children) {
+        const r = findNodeByTitle(n.children, title)
+        if (r) return r
+      }
+    }
+    return null
+  }, [])
+
+  // 找到第一个 .tex 文件
+  const findFirstTex = useCallback((nodes: FileNode[]): FileNode | null => {
+    for (const n of nodes) {
+      if (n.type === 'tex') return n
+      if (n.children) {
+        const r = findFirstTex(n.children)
+        if (r) return r
+      }
+    }
+    return null
+  }, [])
+
+  // 处理 zip 上传完成后的替代流程
+  const handleZipUploaded = useCallback((rootNodes: FileNode[]) => {
+    // 0. 先校验：解压后必须存在 .tex 文件，否则弹窗提示并不做任何改动
+    const entry =
+      findNodeByTitle(rootNodes, 'main.tex') ||
+      findNodeByTitle(rootNodes, 'index.tex') ||
+      findFirstTex(rootNodes)
+
+    if (!entry) {
+      Modal.warning({
+        title: '格式不正确',
+        content: '请上传符合 LaTeX 格式的文件夹压缩包',
+        okText: '我知道了',
+      })
+      return
+    }
+
+    // 1. 清理所有相关的 localStorage（保留模板本身，模板从常量读取）
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (
+        k &&
+        (k.startsWith('latex-file-') ||
+          k.startsWith('latex-image-') ||
+          k === 'latex-file-tree-v3')
+      ) {
+        keysToRemove.push(k)
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k))
+
+    // 2. 用 FileTree 的 replaceTree 替代文件树
+    fileTreeRef.current?.replaceTree(rootNodes)
+
+    // 3. 重置本地状态
+    setImageFiles([])
+    setPdfBlob(null)
+    setCompileError(null)
+    setIsImage(false)
+    setImageUrl('')
+    setSelectedFileKey(null)
+    setSelectedFileName('')
+    setEditorContent('')
+
+    // 4. 选中入口文件并加载
+    if (window.innerWidth < 700) {
+      setMobileView('editor')
+    }
+
+    if (entry.type === 'image') {
+      const url = entry.imageUrl || (entry.imageBlob ? URL.createObjectURL(entry.imageBlob) : '')
+      setSelectedFileKey(entry.key)
+      setSelectedFileName(entry.title)
+      setIsImage(true)
+      setImageUrl(url)
+    } else {
+      const content = entry.content || ''
+      setSelectedFileKey(entry.key)
+      setSelectedFileName(entry.title)
+      setEditorContent(content)
+    }
+    message.success(`已加载压缩包，入口：${entry.title}`)
+  }, [findNodeByTitle, findFirstTex])
+
+  // 应用模板：清空文件树，重建为单个 main.tex 并展示模板内容
+  const applyTemplate = useCallback((templateKey: 'english' | 'chinese') => {
+    const content = templateKey === 'english' ? ENGLISH_TEMPLATE : CHINESE_TEMPLATE
+
+    // 1. 清理所有相关的 localStorage（保留模板本身）
+    const keysToRemove: string[] = []
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i)
+      if (
+        k &&
+        (k.startsWith('latex-file-') ||
+          k.startsWith('latex-image-') ||
+          k === 'latex-file-tree-v3')
+      ) {
+        keysToRemove.push(k)
+      }
+    }
+    keysToRemove.forEach((k) => localStorage.removeItem(k))
+
+    // 2. 用单个 main.tex 替代文件树
+    const newNode: FileNode = {
+      key: 'main',
+      title: 'main.tex',
+      type: 'tex',
+      content,
+    }
+    fileTreeRef.current?.replaceTree([newNode])
+
+    // 3. 重置本地状态
+    setImageFiles([])
+    setPdfBlob(null)
+    setCompileError(null)
+    setIsImage(false)
+    setImageUrl('')
+
+    // 4. 选中并加载模板到编辑器
+    setSelectedFileKey('main')
+    setSelectedFileName('main.tex')
+    setEditorContent(content)
+    localStorage.setItem('latex-file-main', content)
+
+    if (window.innerWidth < 700) {
+      setMobileView('editor')
+    }
+
+    if (templateKey === 'english') {
+      message.success('已切换到英文模板')
+    } else {
+      message.warning('中文模板：编译可能需要更多时间，且显示效果取决于服务器字体支持')
+    }
+  }, [])
 
   // 全屏切换
   const toggleFullscreen = () => {
@@ -297,26 +446,14 @@ E = mc^2
             <>
               <Button
                 size="small"
-                onClick={() => {
-                  const englishTemplate = localStorage.getItem('latex-english-template')
-                  if (englishTemplate) {
-                    setEditorContent(englishTemplate)
-                    message.success('已切换到英文模板')
-                  }
-                }}
+                onClick={() => applyTemplate('english')}
               >
                 英文模板
               </Button>
 
               <Button
                 size="small"
-                onClick={() => {
-                  const chineseTemplate = localStorage.getItem('latex-chinese-template')
-                  if (chineseTemplate) {
-                    setEditorContent(chineseTemplate)
-                    message.warning('中文模板：编译可能需要更多时间，且显示效果取决于服务器字体支持')
-                  }
-                }}
+                onClick={() => applyTemplate('chinese')}
               >
                 中文模板
               </Button>
@@ -373,9 +510,11 @@ E = mc^2
             }}
           >
             <FileTree
+              ref={fileTreeRef}
               selectedKey={selectedFileKey}
               onSelectFile={handleSelectFile}
               onImagesChange={setImageFiles}
+              onZipUploaded={handleZipUploaded}
             />
           </div>
         )}
@@ -392,9 +531,11 @@ E = mc^2
             }}
           >
             <FileTree
+              ref={fileTreeRef}
               selectedKey={selectedFileKey}
               onSelectFile={handleSelectFile}
               onImagesChange={setImageFiles}
+              onZipUploaded={handleZipUploaded}
             />
           </div>
         )}
