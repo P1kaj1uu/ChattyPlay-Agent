@@ -1,0 +1,48 @@
+{
+  "title": "不见水星记的 Agent 办公区",
+  "refreshInterval": 30,
+  "agents": [
+    {
+      "id": "main",
+      "name": "技术总监",
+      "sprite": "agent-boss",
+      "sessionMatch": "oc_b2331eeae9ef02caf25c3d0bcc4add8c",
+      "role": "技术总监"
+    },
+    {
+      "id": "tech",
+      "name": "资深架构师",
+      "sprite": "agent-tech",
+      "sessionMatch": "oc_aefa4080bf40004cf7020d499b0963a3",
+      "role": "资深架构师"
+    },
+    {
+      "id": "admin",
+      "name": "高级开发工程师",
+      "sprite": "agent-admin",
+      "sessionMatch": "oc_4f0b4ed5fc44d0796a95ce3df753dcac",
+      "role": "高级开发工程师"
+    },
+    {
+      "id": "listing",
+      "name": "硬件工程师",
+      "sprite": "agent-listing",
+      "sessionMatch": "oc_401d7f1a0f57920cf17816a3d86eec82",
+      "role": "硬件工程师"
+    },
+    {
+      "id": "marketing",
+      "name": "测试工程师",
+      "sprite": "agent-marketing",
+      "sessionMatch": "oc_c60e92c74088c980420b4e5b1065472f",
+      "role": "测试工程师"
+    },
+    {
+      "id": "dev",
+      "name": "运维工程师",
+      "sprite": "agent-dev",
+      "sessionMatch": "oc_ff3cef9252a5903ed5d20826007dfbc5",
+      "role": "运维工程师"
+    }
+  ]
+}

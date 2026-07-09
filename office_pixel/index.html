@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>Agents Office</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Courier New", monospace;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        min-height: 100vh;
+        padding: 10px;
+        overflow-x: hidden;
+      }
+
+      .pixel {
+        image-rendering: pixelated;
+        image-rendering: crisp-edges;
+      }
+
+      .wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* ── Office 缩放容器 ── */
+      .office-wrapper {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 960 / 580;
+        max-width: 960px;
+        margin: 0 auto;
+      }
+
+      .office {
+        position: absolute;
+        inset: 0;
+        background: #5a7a5a;
+        border: 4px solid #2a2a4a;
+        overflow: hidden;
+        image-rendering: pixelated;
+        transform-origin: top left;
+      }
+
+      .office > * {
+        position: absolute;
+      }
+
+      .floor {
+        inset: 0;
+        background: repeating-conic-gradient(#c8b89a 0% 25%, #bfaf8f 0% 50%) 0
+          0 / 64px 64px;
+      }
+
+      .wall {
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 64px;
+        background: linear-gradient(
+          180deg,
+          #7a8aaa 0%,
+          #6a7a9a 70%,
+          #5a6a8a 100%
+        );
+        border-bottom: 4px solid #4a5a7a;
+        z-index: 1;
+      }
+      .wall-title {
+        position: absolute;
+        bottom: 6px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: #cdf;
+        font-size: 16px;
+        font-weight: bold;
+        letter-spacing: 3px;
+        text-shadow: 0 0 10px rgba(170, 200, 255, 0.6);
+        white-space: nowrap;
+      }
+
+      .deco {
+        z-index: 3;
+        image-rendering: pixelated;
+      }
+
+      /* ── Workstation ── */
+      .workstation {
+        position: absolute;
+        width: 128px;
+        height: 160px;
+        z-index: 5;
+      }
+      .workstation .desk-img {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 128px;
+        height: 128px;
+        image-rendering: pixelated;
+        z-index: 12;
+      }
+      .workstation .char-container {
+        position: absolute;
+        bottom: 24px;
+        left: 32px;
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        z-index: 14;
+        image-rendering: pixelated;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+      .workstation .char-container.seated {
+        height: 48px;
+        overflow: hidden;
+      }
+      .workstation .char-sprite {
+        position: absolute;
+        top: -1px;
+        left: 0;
+        height: 66px;
+        image-rendering: pixelated;
+        will-change: transform;
+        animation: work-anim 1.2s steps(6) infinite;
+      }
+      @keyframes work-anim {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-384px);
+        }
+      }
+      .workstation.idle .char-sprite {
+        animation: work-anim 2.4s steps(6) infinite;
+      }
+      .workstation.offline .char-container {
+        display: none;
+      }
+
+      .workstation .label {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 11px;
+        color: #fff;
+        background: rgba(0, 0, 0, 0.75);
+        padding: 2px 8px;
+        border-radius: 3px;
+        z-index: 20;
+      }
+      .workstation .status-dot {
+        position: absolute;
+        top: 0px;
+        right: 0px;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        border: 2px solid rgba(0, 0, 0, 0.4);
+        z-index: 20;
+        animation: pulse 2s infinite;
+      }
+      .workstation .task-bubble {
+        position: absolute;
+        bottom: -38px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 10px;
+        color: #ddd;
+        background: rgba(20, 20, 50, 0.95);
+        padding: 3px 8px;
+        border-radius: 4px;
+        border: 1px solid #556;
+        z-index: 30;
+        opacity: 0;
+        transition: opacity 0.3s;
+        pointer-events: none;
+      }
+      .workstation:hover .task-bubble {
+        opacity: 1;
+      }
+      .workstation.tap-show .task-bubble {
+        opacity: 1;
+      }
+
+      .workstation.busy::after {
+        content: "💬";
+        position: absolute;
+        top: -12px;
+        left: 12px;
+        font-size: 18px;
+        animation: float-bubble 1.5s ease-in-out infinite;
+        z-index: 25;
+      }
+      @keyframes float-bubble {
+        0%,
+        100% {
+          transform: translateY(0);
+          opacity: 0.8;
+        }
+        50% {
+          transform: translateY(-10px);
+          opacity: 1;
+        }
+      }
+
+      /* ── Walker ── */
+      .walker {
+        position: absolute;
+        width: 64px;
+        height: 64px;
+        overflow: hidden;
+        z-index: 10;
+        transition-property: left, top;
+        transition-timing-function: linear;
+        image-rendering: pixelated;
+        -webkit-backface-visibility: hidden;
+        backface-visibility: hidden;
+      }
+      .walker .sprite-sheet {
+        position: absolute;
+        top: -1px;
+        left: 0;
+        height: 66px;
+        image-rendering: pixelated;
+        will-change: transform;
+        animation: walk-cycle 0.5s steps(6) infinite;
+      }
+      @keyframes walk-cycle {
+        from {
+          transform: translateX(0);
+        }
+        to {
+          transform: translateX(-384px);
+        }
+      }
+      .walker .walker-label {
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        white-space: nowrap;
+        font-size: 9px;
+        color: #ff0;
+        background: rgba(0, 0, 0, 0.7);
+        padding: 1px 5px;
+        border-radius: 2px;
+      }
+
+      .st-online {
+        background: #4f4;
+        box-shadow: 0 0 6px #4f4;
+      }
+      .st-busy {
+        background: #fa0;
+        box-shadow: 0 0 6px #fa0;
+      }
+      .st-idle {
+        background: #48f;
+        box-shadow: 0 0 6px #48f;
+      }
+      .st-offline {
+        background: #666;
+        box-shadow: none;
+        animation: none;
+      }
+
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* ── Panel ── */
+      .panel {
+        position: relative;
+        width: 100%;
+        max-width: 960px;
+        margin-top: 12px;
+        background: rgba(15, 15, 35, 0.95);
+        border: 2px solid #446;
+        border-radius: 8px;
+        padding: 14px;
+        color: #ccc;
+        font-size: 11px;
+        box-sizing: border-box;
+      }
+      .panel h3 {
+        color: #8af;
+        font-size: 14px;
+        margin-bottom: 10px;
+        border-bottom: 1px solid #335;
+        padding-bottom: 6px;
+      }
+      /* ── 一排 3 个 ── */
+      .panel .panel-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px 16px;
+      }
+      .agent-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 5px 8px;
+        border-radius: 4px;
+        background: rgba(255, 255, 255, 0.03);
+        border-bottom: 1px solid #1a1a3a;
+        min-width: 0;
+      }
+      .agent-row .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+      .agent-row .aname {
+        color: #eee;
+        font-weight: bold;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+      .agent-row .astatus {
+        color: #888;
+        font-size: 9px;
+        margin-top: 1px;
+        white-space: nowrap;
+      }
+      .agent-row .atask {
+        color: #aad;
+        font-size: 10px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        max-width: 100px;
+        margin-left: auto;
+        text-align: right;
+      }
+      .agent-row .info {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+      }
+
+      #last-update {
+        font-size: 10px;
+        color: #667;
+        text-align: right;
+        margin-top: 6px;
+      }
+
+      /* ── 响应式 ── */
+      @media (max-width: 768px) {
+        body {
+          padding: 6px;
+        }
+
+        .wall-title {
+          font-size: 11px;
+          letter-spacing: 1px;
+        }
+
+        .workstation .label {
+          font-size: 8px;
+          padding: 1px 4px;
+          bottom: -16px;
+        }
+        .workstation .status-dot {
+          width: 8px;
+          height: 8px;
+          top: -2px;
+          right: -2px;
+          border-width: 1px;
+        }
+        .workstation .task-bubble {
+          font-size: 8px;
+          padding: 2px 5px;
+          bottom: -30px;
+          white-space: nowrap;
+          max-width: 120px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .workstation.busy::after {
+          font-size: 14px;
+          top: -8px;
+          left: 6px;
+        }
+
+        .walker .walker-label {
+          font-size: 7px;
+          top: -14px;
+          padding: 0 4px;
+        }
+
+        .panel {
+          padding: 10px;
+          font-size: 10px;
+          margin-top: 8px;
+        }
+        .panel h3 {
+          font-size: 12px;
+        }
+        .panel .panel-grid {
+          grid-template-columns: repeat(3, 1fr);
+          gap: 2px 8px;
+        }
+        .agent-row {
+          padding: 3px 4px;
+          gap: 4px;
+        }
+        .agent-row .aname {
+          font-size: 10px;
+        }
+        .agent-row .astatus {
+          font-size: 8px;
+        }
+        .agent-row .atask {
+          font-size: 8px;
+          max-width: 50px;
+        }
+        .agent-row .dot {
+          width: 8px;
+          height: 8px;
+        }
+      }
+
+      @media (max-width: 480px) {
+        body {
+          padding: 4px;
+        }
+
+        .wall-title {
+          font-size: 9px;
+          letter-spacing: 0;
+        }
+
+        .workstation .label {
+          font-size: 7px;
+          padding: 0 3px;
+          bottom: -14px;
+        }
+        .workstation .status-dot {
+          width: 6px;
+          height: 6px;
+          top: -2px;
+          right: -2px;
+          border-width: 1px;
+        }
+        .workstation .task-bubble {
+          font-size: 7px;
+          padding: 1px 4px;
+          bottom: -24px;
+          max-width: 80px;
+        }
+        .workstation.busy::after {
+          font-size: 12px;
+          top: -6px;
+          left: 4px;
+        }
+
+        .walker .walker-label {
+          font-size: 6px;
+          top: -12px;
+          padding: 0 3px;
+        }
+
+        .panel {
+          padding: 8px;
+          font-size: 9px;
+        }
+        .panel h3 {
+          font-size: 11px;
+        }
+        /* 小屏幕改为 2 列 */
+        .panel .panel-grid {
+          grid-template-columns: repeat(2, 1fr);
+          gap: 0 6px;
+        }
+        .agent-row {
+          padding: 2px 4px;
+          gap: 4px;
+        }
+        .agent-row .aname {
+          font-size: 9px;
+        }
+        .agent-row .astatus {
+          font-size: 7px;
+        }
+        .agent-row .atask {
+          font-size: 7px;
+          max-width: 30px;
+        }
+        .agent-row .dot {
+          width: 6px;
+          height: 6px;
+        }
+      }
+
+      @media (max-width: 360px) {
+        .panel .panel-grid {
+          grid-template-columns: 1fr 1fr;
+          gap: 0 4px;
+        }
+        .agent-row .atask {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrapper">
+      <div class="office-wrapper">
+        <div class="office" id="office">
+          <div class="floor"></div>
+          <div class="wall">
+            <div class="wall-title">🏢 不见水星记的 Agent 办公区</div>
+          </div>
+
+          <!-- Decorations -->
+          <img
+            class="deco"
+            src="assets/office/plant.png"
+            style="left: 16px; top: 72px; width: 48px; height: 48px"
+          />
+          <img
+            class="deco"
+            src="assets/office/plant.png"
+            style="left: 896px; top: 72px; width: 48px; height: 48px"
+          />
+          <img
+            class="deco"
+            src="assets/office/coffee-maker.png"
+            style="left: 820px; top: 440px; width: 96px; height: 96px"
+          />
+          <img
+            class="deco"
+            src="assets/office/cabinet.png"
+            style="left: 16px; top: 440px; width: 96px; height: 96px"
+          />
+          <img
+            class="deco"
+            src="assets/office/printer.png"
+            style="left: 130px; top: 460px; width: 80px; height: 80px"
+          />
+          <img
+            class="deco"
+            src="assets/office/water-cooler.png"
+            style="left: 740px; top: 480px; width: 48px; height: 96px"
+          />
+          <img
+            class="deco"
+            src="assets/office/office-partitions-1.png"
+            style="left: 16px; top: 300px; width: 96px; height: 96px"
+          />
+
+          <img
+            class="deco"
+            src="assets/office/writing-table.png"
+            style="left: 400px; top: 380px; width: 160px; height: 160px"
+          />
+          <img
+            class="deco"
+            src="assets/office/Chair.png"
+            style="left: 280px; top: 440px; width: 48px; height: 48px"
+          />
+          <img
+            class="deco"
+            src="assets/office/Chair.png"
+            style="left: 280px; top: 500px; width: 48px; height: 48px"
+          />
+          <img
+            class="deco"
+            src="assets/office/sink.png"
+            style="left: 890px; top: 380px; width: 64px; height: 64px"
+          />
+
+          <div id="agents-container"></div>
+          <div id="walkers-container"></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Agents: <span id="online-count">0</span>/0 在线</h3>
+        <div class="panel-grid" id="agent-list"></div>
+        <div id="last-update">⏳ 加载中...</div>
+      </div>
+    </div>
+
+    <script>
+      // ===== 缩放逻辑 =====
+      function scaleOffice() {
+        const wrapper = document.querySelector(".office-wrapper");
+        const office = document.getElementById("office");
+        if (!wrapper || !office) return;
+
+        const wrapperWidth = wrapper.clientWidth;
+        const targetHeight = wrapperWidth * (580 / 960);
+
+        const scaleX = wrapperWidth / 960;
+        const scaleY = targetHeight / 580;
+        const scale = Math.min(scaleX, scaleY);
+
+        office.style.transform = `scale(${scale})`;
+        office.style.transformOrigin = "top left";
+        office.style.width = `${960 / scale}px`;
+        office.style.height = `${580 / scale}px`;
+
+        wrapper.style.height = `${580 * scale}px`;
+      }
+
+      function throttle(fn, delay) {
+        let timer = null;
+        return function (...args) {
+          if (timer) return;
+          timer = setTimeout(() => {
+            fn.apply(this, args);
+            timer = null;
+          }, delay);
+        };
+      }
+
+      const throttledScale = throttle(scaleOffice, 100);
+      window.addEventListener("resize", throttledScale);
+
+      // ===== 其他功能 =====
+      function esc(str) {
+        const d = document.createElement("div");
+        d.textContent = str || "";
+        return d.innerHTML;
+      }
+
+      const statusLabels = {
+        online: { cls: "st-online", label: "在线" },
+        busy: { cls: "st-busy", label: "忙碌中" },
+        idle: { cls: "st-idle", label: "闲置" },
+        offline: { cls: "st-offline", label: "离线" },
+      };
+
+      const SPRITE_MAP = {
+        main: "agent-boss",
+        tech: "agent-tech",
+        admin: "agent-admin",
+        listing: "agent-listing",
+        marketing: "agent-marketing",
+        dev: "agent-dev",
+      };
+
+      const DESK_POSITIONS = [
+        { left: 60, top: 80 },
+        { left: 210, top: 80 },
+        { left: 360, top: 80 },
+        { left: 510, top: 80 },
+        { left: 660, top: 80 },
+        { left: 810, top: 80 },
+      ];
+
+      const OBSTACLES = [
+        { x: 40, y: 60, w: 900, h: 200 },
+        { x: 0, y: 60, w: 70, h: 60 },
+        { x: 880, y: 60, w: 80, h: 60 },
+        { x: 0, y: 280, w: 120, h: 110 },
+        { x: 0, y: 400, w: 240, h: 160 },
+        { x: 330, y: 310, w: 280, h: 260 },
+        { x: 810, y: 430, w: 110, h: 110 },
+        { x: 725, y: 465, w: 70, h: 110 },
+        { x: 880, y: 370, w: 80, h: 80 },
+        { x: 270, y: 430, w: 65, h: 130 },
+        { x: 0, y: 0, w: 960, h: 70 },
+      ];
+
+      function isWalkable(x, y, size = 64) {
+        if (x < 10 || x + size > 950 || y < 70 || y + size > 570) return false;
+        for (const o of OBSTACLES) {
+          if (
+            x + size > o.x &&
+            x < o.x + o.w &&
+            y + size > o.y &&
+            y < o.y + o.h
+          )
+            return false;
+        }
+        return true;
+      }
+
+      function isPathClear(x1, y1, x2, y2) {
+        const steps = Math.max(Math.abs(x2 - x1), Math.abs(y2 - y1)) / 16;
+        for (let i = 0; i <= steps; i++) {
+          const t = steps > 0 ? i / steps : 0;
+          const px = x1 + (x2 - x1) * t;
+          const py = y1 + (y2 - y1) * t;
+          if (!isWalkable(px, py)) return false;
+        }
+        return true;
+      }
+
+      const REST_SPOTS = [
+        { x: 800, y: 370, label: "coffee" },
+        { x: 750, y: 410, label: "water" },
+        { x: 340, y: 450, label: "chair1" },
+        { x: 340, y: 510, label: "chair2" },
+        { x: 870, y: 320, label: "sink" },
+        { x: 200, y: 340, label: "walk1" },
+        { x: 700, y: 310, label: "walk2" },
+        { x: 150, y: 400, label: "walk3" },
+      ];
+
+      function randomWalkablePoint() {
+        if (Math.random() < 0.7) {
+          const spot =
+            REST_SPOTS[Math.floor(Math.random() * REST_SPOTS.length)];
+          return {
+            x: spot.x + (Math.random() - 0.5) * 20,
+            y: spot.y + (Math.random() - 0.5) * 20,
+          };
+        }
+        for (let i = 0; i < 50; i++) {
+          const x = 30 + Math.random() * 880;
+          const y = 270 + Math.random() * 250;
+          if (isWalkable(x, y)) return { x, y };
+        }
+        return { x: 300, y: 320 };
+      }
+
+      let activeWalkers = {};
+
+      function renderAgents(agents) {
+        const container = document.getElementById("agents-container");
+        const listEl = document.getElementById("agent-list");
+        const walkersContainer = document.getElementById("walkers-container");
+        container.innerHTML = "";
+        listEl.innerHTML = "";
+
+        let onlineCount = 0;
+        let idleAgents = [];
+
+        agents.forEach((a, i) => {
+          const pos = DESK_POSITIONS[i] || { left: 60 + i * 170, top: 100 };
+          const s = statusLabels[a.status] || statusLabels.offline;
+          if (a.status !== "offline") onlineCount++;
+          if (a.status === "idle" || a.status === "online") idleAgents.push(a);
+
+          const spritePrefix = SPRITE_MAP[a.id] || "agent-boss";
+          const isOccupied = a.status === "busy";
+          const isIdle = a.status === "idle" || a.status === "online";
+          const isOffline = a.status === "offline";
+
+          const timeStr = a.lastActive >= 0 ? `${a.lastActive}m ago` : "—";
+
+          const ws = document.createElement("div");
+          ws.className = `workstation ${isOccupied ? "busy" : ""} ${isIdle ? "idle" : ""} ${isOffline ? "offline" : ""}`;
+          ws.style.left = pos.left + "px";
+          ws.style.top = pos.top + "px";
+          ws.dataset.agentId = a.id;
+
+          ws.innerHTML = `
+      <img class="desk-img" src="assets/office/desk-with-pc.png">
+      ${
+        isOccupied
+          ? `<div class="char-container seated">
+        <img class="char-sprite" src="assets/office/${esc(spritePrefix)}-walk-up.png" style="width:384px;">
+      </div>`
+          : ""
+      }
+      <div class="status-dot ${s.cls}"></div>
+      <div class="label">${esc(a.name)}</div>
+      <div class="task-bubble">${esc(a.task)} (${esc(timeStr)})</div>
+    `;
+          container.appendChild(ws);
+
+          ws.addEventListener("click", function (e) {
+            e.stopPropagation();
+            document
+              .querySelectorAll(".workstation.tap-show")
+              .forEach((el) => el.classList.remove("tap-show"));
+            this.classList.toggle("tap-show");
+          });
+
+          // 面板行 - 每行 3 个
+          const row = document.createElement("div");
+          row.className = "agent-row";
+          row.innerHTML = `
+      <div class="dot ${s.cls}"></div>
+      <div class="info">
+        <div class="aname">${esc(a.name)}</div>
+        <div class="astatus">${esc(s.label)}</div>
+      </div>
+      <div class="atask" title="${esc(a.task)}">${esc(a.task)}</div>
+    `;
+          listEl.appendChild(row);
+        });
+
+        document.getElementById("online-count").textContent =
+          `${onlineCount}/${agents.length}`;
+
+        const currentIds = new Set(idleAgents.map((a) => a.id));
+
+        for (const id of Object.keys(activeWalkers)) {
+          if (!currentIds.has(id)) {
+            activeWalkers[id].el.remove();
+            delete activeWalkers[id];
+          }
+        }
+
+        for (const a of idleAgents) {
+          if (activeWalkers[a.id]) continue;
+          const prefix = SPRITE_MAP[a.id] || "agent-boss";
+          const start = randomWalkablePoint();
+
+          const el = document.createElement("div");
+          el.className = "walker";
+          el.style.left = start.x + "px";
+          el.style.top = start.y + "px";
+          el.innerHTML = `
+      <img class="sprite-sheet" src="assets/office/${prefix}-walk-right.png" style="width:384px;">
+      <div class="walker-label">${esc(a.name)} ☕</div>
+    `;
+          walkersContainer.appendChild(el);
+
+          activeWalkers[a.id] = {
+            el,
+            prefix,
+            x: start.x,
+            y: start.y,
+            moveTimer: null,
+          };
+        }
+
+        startWalkers();
+      }
+
+      const POLL_INTERVAL = 10000;
+
+      function onStatusUpdate(data) {
+        renderAgents(data.agents);
+        const t = new Date(data.timestamp).toLocaleTimeString("zh-CN", {
+          hour12: false,
+        });
+        document.getElementById("last-update").textContent = "⚡ 更新于 " + t;
+      }
+
+      async function fetchStatus() {
+        try {
+          const resp = await fetch("api/status?t=" + Date.now());
+          if (!resp.ok) throw new Error("HTTP " + resp.status);
+          const data = await resp.json();
+          onStatusUpdate(data);
+          document.getElementById("last-update").textContent = "⚡ 即时连线";
+          wsRetry = 0;
+        } catch (e) {
+          console.warn("Poll failed:", e);
+          document.getElementById("last-update").textContent = "⏳ 重连中...";
+          wsRetry++;
+        }
+      }
+
+      let wsRetry = 0;
+      fetchStatus();
+      setInterval(fetchStatus, POLL_INTERVAL);
+
+      const dirMap = {
+        right: "walk-right",
+        left: "walk-left",
+        down: "walk-down",
+        up: "walk-up",
+      };
+      const WALK_SPEED = 40;
+
+      function moveWalkerById(id) {
+        const w = activeWalkers[id];
+        if (!w) return;
+
+        const target = randomWalkablePoint();
+        const dx = target.x - w.x,
+          dy = target.y - w.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < 20) {
+          w.moveTimer = setTimeout(() => moveWalkerById(id), 1000);
+          return;
+        }
+
+        let dir;
+        if (Math.abs(dx) > Math.abs(dy)) {
+          dir = dx > 0 ? "right" : "left";
+        } else {
+          dir = dy > 0 ? "down" : "up";
+        }
+
+        const duration = dist / WALK_SPEED;
+
+        w.el.querySelector(".sprite-sheet").src =
+          `assets/office/${w.prefix}-${dirMap[dir]}.png`;
+        w.el.style.transitionDuration = `${duration}s`;
+
+        requestAnimationFrame(() => {
+          w.el.style.left = target.x + "px";
+          w.el.style.top = target.y + "px";
+        });
+
+        w.x = target.x;
+        w.y = target.y;
+
+        const isRestSpot = REST_SPOTS.some(
+          (s) => Math.abs(s.x - target.x) < 30 && Math.abs(s.y - target.y) < 30,
+        );
+        const pause = isRestSpot
+          ? 3000 + Math.random() * 3000
+          : 1000 + Math.random() * 1500;
+
+        if (isRestSpot) {
+          setTimeout(
+            () => {
+              if (activeWalkers[id]) {
+                w.el.querySelector(".sprite-sheet").src =
+                  `assets/office/${w.prefix}-walk-down.png`;
+              }
+            },
+            duration * 1000 + 200,
+          );
+        }
+
+        w.moveTimer = setTimeout(
+          () => moveWalkerById(id),
+          duration * 1000 + pause,
+        );
+      }
+
+      function startWalkers() {
+        let delay = 0;
+        for (const id of Object.keys(activeWalkers)) {
+          const w = activeWalkers[id];
+          if (w.moveTimer) clearTimeout(w.moveTimer);
+          setTimeout(() => moveWalkerById(id), delay);
+          delay += 800;
+        }
+      }
+
+      document.addEventListener("click", function () {
+        document
+          .querySelectorAll(".workstation.tap-show")
+          .forEach((el) => el.classList.remove("tap-show"));
+      });
+
+      setTimeout(scaleOffice, 50);
+    </script>
+  </body>
+</html>
