@@ -30,7 +30,7 @@ const gpt = {
   exportTooltip: '导出当前对话',
   enterToSend: '按 Enter 发送，Shift + Enter 换行',
   subtitle: '智能问答，请规范问题健康提问，AI回答仅供参考',
-  modelName: 'DeepSeek V3.2模型',
+  modelName: 'DeepSeek V4模型',
   copy: '复制',
   readAloud: '朗读',
   helpful: '有帮助',

@@ -63,7 +63,7 @@ const GPT: React.FC = () => {
 
   // 初始化 OpenAI 客户端（从环境变量读取配置）
   const openai = new OpenAI({
-    baseURL: import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.deepseek.com/v1',
+    baseURL: import.meta.env.VITE_OPENAI_BASE_URL || 'https://api.deepseek.com',
     apiKey: import.meta.env.VITE_OPENAI_API_KEY || '',
     dangerouslyAllowBrowser: true
   })
@@ -286,7 +286,7 @@ const GPT: React.FC = () => {
       // 调用流式 API
       const stream = await openai.chat.completions.create(
         {
-          model: 'deepseek-v3-2-251201',
+          model: 'deepseek-v4-flash',
           messages: [
             {
               role: 'system',

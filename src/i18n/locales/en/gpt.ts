@@ -30,7 +30,7 @@ export default {
   exportTooltip: 'Export current conversation',
   enterToSend: 'Press Enter to send, Shift + Enter for new line',
   subtitle: 'Intelligent Q&A, please ask questions in a standardized and healthy manner, AI answers are for reference only',
-  modelName: 'DeepSeek V3.2 Model',
+  modelName: 'DeepSeek V4 Model',
   copy: 'Copy',
   readAloud: 'Read Aloud',
   helpful: 'Helpful',
