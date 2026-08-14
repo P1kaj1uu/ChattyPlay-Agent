@@ -430,4 +430,4 @@ WeChat Pay：
 
 ## ⏰ Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=P1kaj1uu/ChattyPlay-Agent&type=Timeline)](https://star-history.com/#P1kaj1uu/ChattyPlay-Agent&Timeline)
+[![Star History Chart](https://star-history.dera.page/svg?repos=P1kaj1uu/ChattyPlay-Agent&type=Timeline)](https://star-history.dera.page/#P1kaj1uu/ChattyPlay-Agent&Timeline)
