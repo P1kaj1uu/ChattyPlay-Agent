@@ -1,5 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { statusApi } from '@/services/goofish'
+import { GOOFISH_USES_REMOTE_BACKEND, GOOFISH_WS_URL } from '@/services/goofish/config'
+import { getToken } from '@/utils/token'
 
 interface UseWebSocketOptions {
   onMessage?: (data: any) => void
@@ -13,15 +15,25 @@ export function useGoofishWebSocket(options: UseWebSocketOptions = {}) {
   const [wsInstance, setWsInstance] = useState<WebSocket | null>(null)
   const wsRef = useRef<WebSocket | null>(null)
   const reconnectTimerRef = useRef<NodeJS.Timeout | null>(null)
+  const mountedRef = useRef(false)
   const { onMessage, onError, reconnectInterval = 5000 } = options
 
   // 连接 WebSocket
   const connect = () => {
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
+    if (!mountedRef.current || wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
       return
     }
 
-    const ws = new WebSocket('ws://localhost:3001/ws')
+    const token = getToken()
+    if (GOOFISH_USES_REMOTE_BACKEND && !token) {
+      console.warn('Goofish WebSocket requires a site account login')
+      return
+    }
+
+    const protocols = token ? [`chattyplay.jwt.${token}`] : undefined
+    const ws = protocols
+      ? new WebSocket(GOOFISH_WS_URL, protocols)
+      : new WebSocket(GOOFISH_WS_URL)
     wsRef.current = ws
 
     ws.onopen = () => {
@@ -39,6 +51,7 @@ export function useGoofishWebSocket(options: UseWebSocketOptions = {}) {
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current)
       }
+      if (!mountedRef.current) return
       reconnectTimerRef.current = setTimeout(() => {
         console.log('Reconnecting to Goofish WebSocket...')
         connect()
@@ -83,10 +96,12 @@ export function useGoofishWebSocket(options: UseWebSocketOptions = {}) {
   }
 
   useEffect(() => {
+    mountedRef.current = true
     connect()
     fetchStatus()
 
     return () => {
+      mountedRef.current = false
       disconnect()
     }
   }, [])

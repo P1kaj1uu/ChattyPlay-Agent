@@ -19,7 +19,7 @@ import {
   ReloadOutlined,
   ShoppingOutlined,
 } from '@ant-design/icons'
-import { accountApi } from '@/services/goofish'
+import { accountApi, goodsApi } from '@/services/goofish'
 
 const { Option } = Select
 const { Text } = Typography
@@ -81,10 +81,8 @@ const Goods: React.FC = () => {
       if (selectedAccountId) params.accountId = selectedAccountId
       if (selectedStatus) params.status = selectedStatus
 
-      // 使用 fetch 调用商品接口
-      const queryString = new URLSearchParams(params).toString()
-      const response = await fetch(`/api/goods${queryString ? '?' + queryString : ''}`)
-      const data = await response.json()
+      const response = await goodsApi.getGoods(params)
+      const data = response.data
       setGoods(data.items || [])
     } catch (error) {
       message.error('加载商品列表失败')

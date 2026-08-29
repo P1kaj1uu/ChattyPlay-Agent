@@ -8,6 +8,8 @@ import {
 } from '@ant-design/icons'
 import { useGoofishWebSocket } from '@/hooks/goofish'
 import { accountApi } from '@/services/goofish'
+import { GOOFISH_USES_REMOTE_BACKEND } from '@/services/goofish/config'
+import { getToken } from '@/utils/token'
 
 const Dashboard: React.FC = () => {
   const { connected, status, refetchStatus } = useGoofishWebSocket({
@@ -39,6 +41,7 @@ const Dashboard: React.FC = () => {
 
   const activeAccounts = accounts.filter(a => a.enabled).length
   const connectedAccounts = status?.clients?.filter((c: any) => c.connected).length || 0
+  const requiresSiteLogin = GOOFISH_USES_REMOTE_BACKEND && !getToken()
 
   return (
     <div>
@@ -46,23 +49,14 @@ const Dashboard: React.FC = () => {
         {/* 警告信息 */}
         {!connected && (
           <Alert
-            message="服务离线"
-            description="无法连接到 Goofish 服务器，请检查服务是否正常运行。"
+            message={requiresSiteLogin ? '需要站点账号登录' : '服务离线'}
+            description={requiresSiteLogin
+              ? '远程闲鱼后端需要使用本站用户名和密码登录，Google/GitHub 临时登录无法访问。'
+              : '无法连接到 Goofish 服务器，请检查服务是否正常运行。'}
             type="warning"
             showIcon
             icon={<WarningOutlined />}
             closable
-          />
-        )}
-
-        {/* 警告信息 */}
-        {!connected && (
-          <Alert
-            message="服务离线"
-            description="无法连接到 Goofish 服务器，请检查服务是否正常运行。"
-            type="warning"
-            showIcon
-            icon={<WarningOutlined />}
           />
         )}
 

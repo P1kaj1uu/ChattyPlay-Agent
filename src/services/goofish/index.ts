@@ -4,12 +4,12 @@
  */
 
 import axios from 'axios'
-
-const API_BASE = '/api'
+import { getToken } from '@/utils/token'
+import { GOOFISH_API_URL } from './config'
 
 // 创建 axios 实例
 const apiClient = axios.create({
-  baseURL: API_BASE,
+  baseURL: GOOFISH_API_URL,
   timeout: 30000,
   headers: {
     'Content-Type': 'application/json'
@@ -19,6 +19,10 @@ const apiClient = axios.create({
 // 请求拦截器
 apiClient.interceptors.request.use(
   (config) => {
+    const token = getToken()
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+    }
     return config
   },
   (error) => {
@@ -175,6 +179,12 @@ export const statusApi = {
   getStatus: () => apiClient.get('/status')
 }
 
+// ==================== 商品管理 ====================
+export const goodsApi = {
+  getGoods: (params?: { accountId?: string; status?: string }) =>
+    apiClient.get('/goods', { params })
+}
+
 export default {
   account: accountApi,
   conversation: conversationApi,
@@ -184,5 +194,6 @@ export default {
   autoSell: autoSellApi,
   workflow: workflowApi,
   log: logApi,
-  status: statusApi
+  status: statusApi,
+  goods: goodsApi
 }

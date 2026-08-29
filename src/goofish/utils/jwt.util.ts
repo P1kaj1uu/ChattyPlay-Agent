@@ -5,7 +5,7 @@
 
 import CryptoJS from 'crypto-js'
 
-const JWT_SECRET = 'chattyplay-jwt-secret-2024'
+const JWT_SECRET = process.env.JWT_SECRET || 'chattyplay-jwt-secret-2024'
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000 // 7天
 
 export interface TokenPayload {

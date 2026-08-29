@@ -9,7 +9,7 @@ app.use('/*', cors())
 
 // ============ 认证相关常量 ============
 
-const JWT_SECRET = 'chattyplay-jwt-secret-2024'
+const JWT_SECRET = process.env.JWT_SECRET || 'chattyplay-jwt-secret-2024'
 const PASSWORD_SECRET = 'chattyplay-secret-key-2024'
 const TOKEN_EXPIRY = 7 * 24 * 60 * 60 * 1000 // 7天
 
@@ -451,6 +451,39 @@ app.get('/api/auth/me', async (c) => {
 
 // 简单的健康检查
 app.get('/api/health', (c) => c.json({ status: 'ok' }))
+
+// Vercel Cron 定期唤醒常驻的 Hugging Face 闲鱼后端
+app.get('/api/goofish-health', async (c) => {
+  const cronSecret = process.env.CRON_SECRET
+  if (cronSecret && c.req.header('Authorization') !== `Bearer ${cronSecret}`) {
+    return c.json({ status: 'unauthorized' }, 401)
+  }
+
+  const backendUrl = (process.env.GOOFISH_BACKEND_URL || 'https://wangdsd-chattyplay-goofish.hf.space')
+    .replace(/\/+$/, '')
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 15000)
+
+  try {
+    const response = await fetch(`${backendUrl}/health`, {
+      headers: { Accept: 'application/json' },
+      signal: controller.signal
+    })
+    const body = await response.json().catch(() => null)
+    return c.json({
+      status: response.ok ? 'ok' : 'unavailable',
+      backendStatus: response.status,
+      backend: body
+    }, response.ok ? 200 : 502)
+  } catch (error) {
+    return c.json({
+      status: 'unavailable',
+      message: error instanceof Error ? error.message : 'Unknown error'
+    }, 502)
+  } finally {
+    clearTimeout(timeout)
+  }
+})
 
 // 视频下载代理端点
 app.post('/api/resolve', async (c) => {
