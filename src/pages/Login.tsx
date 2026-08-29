@@ -283,6 +283,20 @@ const loadTurnstileScript = (): Promise<void> => {
   })
 }
 
+// 保存 OAuth 登录会话（本站 JWT + 用户信息）
+const applyOAuthSession = (data: { token: string; user: { id: number; username: string; email?: string; avatar?: string } }) => {
+  setToken(data.token)
+  localStorage.setItem('isLoggedIn', 'true')
+  localStorage.setItem('username', data.user.username)
+  localStorage.setItem('userId', String(data.user.id))
+  if (data.user.email) {
+    localStorage.setItem('email', data.user.email)
+  }
+  if (data.user.avatar) {
+    localStorage.setItem('avatar', data.user.avatar)
+  }
+}
+
 const Login: React.FC = () => {
   const { t } = useTranslation()
   const [loginForm] = Form.useForm()
@@ -356,6 +370,41 @@ const Login: React.FC = () => {
         // Turnstile 加载失败，允许用户继续登录（静默降级）
         setTurnstileReady(true) // 设置为 true 避免一直等待
       })
+  }, [])
+
+  // GitHub OAuth 回调处理：URL 带 code 时用 code 向后端换取本站 JWT
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    const githubCode = params.get('code')
+    if (!githubCode) return
+
+    window.history.replaceState({}, '', window.location.pathname)
+    setLoading(true)
+    ;(async () => {
+      try {
+        const response = await fetch('/api/auth/github', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ code: githubCode })
+        })
+        const data = await response.json()
+        if (data.success) {
+          applyOAuthSession(data)
+          message.success(t('login.loginSuccess'))
+          setShowHeartBeat(true)
+        } else {
+          message.error(data.message || t('login.loginFailed'))
+        }
+      } catch (error: any) {
+        console.error('GitHub OAuth error:', error)
+        message.error(error.message || t('login.loginFailed'))
+      } finally {
+        setLoading(false)
+      }
+    })()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const generateVerifyCode = () => {
@@ -607,28 +656,27 @@ const Login: React.FC = () => {
     onSuccess: async (tokenResponse) => {
       console.log('Google Access Token:', tokenResponse)
 
-      // 获取用户信息
+      // 后端用 access_token 验证身份并签发本站 JWT
       try {
-        const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        const response = await fetch('/api/auth/google', {
+          method: 'POST',
           headers: {
-            Authorization: `Bearer ${tokenResponse.access_token}`
-          }
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ accessToken: tokenResponse.access_token })
         })
-        const userData = await response.json()
-        console.log('Google User Data:', userData)
+        const data = await response.json()
 
-        // 保存登录状态
-        setToken()
-        localStorage.setItem('isLoggedIn', 'true')
-        localStorage.setItem('username', userData.name || 'Google用户')
-        localStorage.setItem('email', userData.email || '')
-        localStorage.setItem('avatar', userData.picture || '')
-
-        message.success(t('login.loginSuccess'))
-        setShowHeartBeat(true)
-      } catch (error) {
-        console.error('Error fetching Google user info:', error)
-        message.error(t('login.loginFailed'))
+        if (data.success) {
+          applyOAuthSession(data)
+          message.success(t('login.loginSuccess'))
+          setShowHeartBeat(true)
+        } else {
+          message.error(data.message || t('login.loginFailed'))
+        }
+      } catch (error: any) {
+        console.error('Google login error:', error)
+        message.error(error.message || t('login.loginFailed'))
       }
     },
     onError: () => {
@@ -645,15 +693,12 @@ const Login: React.FC = () => {
       return
     }
 
-    // 构建 GitHub OAuth 授权 URL，直接回调到 /home
-    const redirectUri = window.location.origin + '/home'
+    // 构建 GitHub OAuth 授权 URL，回调回登录页（/），由登录页用 code 换取本站 JWT
+    const redirectUri = window.location.origin + '/'
     const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=user:email`
 
     // 跳转到 GitHub 授权页面
     window.location.href = githubAuthUrl
-    setToken()
-    localStorage.setItem('isLoggedIn', 'true')
-    localStorage.setItem('username', 'Github用户')
   }
 
   return (

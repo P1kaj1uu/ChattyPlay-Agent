@@ -395,6 +395,204 @@ app.post('/api/auth/login', async (c) => {
 })
 
 /**
+ * Google OAuth 登录
+ * POST /api/auth/google
+ * 用 Google access_token 验证身份，找到或自动创建本站用户，签发本站 JWT
+ */
+app.post('/api/auth/google', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { accessToken } = body
+
+    if (!accessToken) {
+      return c.json({ success: false, message: '缺少 access_token' }, 400)
+    }
+
+    // 用 access_token 调 Google userinfo 验证身份（access_token 无需 client_secret）
+    const profileResponse = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        Accept: 'application/json'
+      }
+    })
+
+    if (!profileResponse.ok) {
+      return c.json({ success: false, message: 'Google 身份验证失败' }, 401)
+    }
+
+    const profile = await profileResponse.json()
+    if (!profile || !profile.sub) {
+      return c.json({ success: false, message: 'Google 身份验证失败' }, 401)
+    }
+
+    const email = profile.email || ''
+    const avatar = profile.picture || ''
+    let username = email ? email.split('@')[0] : `google_${profile.sub}`
+
+    // 按邮箱查找已有用户，没有则自动创建
+    let user = email ? await getUserByEmail(email) : null
+    if (!user) {
+      // 用户名冲突时追加后缀保证唯一
+      const baseUsername = username
+      let suffix = 0
+      while (await getUserByUsername(username)) {
+        suffix += 1
+        username = `${baseUsername}_${suffix}`
+      }
+
+      const userId = await getNextUserId()
+      if (userId === null) {
+        return c.json({ success: false, message: '用户服务暂不可用，请检查 Redis 配置' }, 500)
+      }
+
+      const createdAt = new Date().toISOString()
+      user = {
+        id: userId,
+        username,
+        password: '',
+        email,
+        avatar,
+        created_at: createdAt,
+        last_login: createdAt
+      }
+      await createUser(user)
+      if (avatar) await updateUserField(user.id, 'avatar', avatar)
+    } else {
+      await updateUserField(user.id, 'last_login', new Date().toISOString())
+      if (avatar) await updateUserField(user.id, 'avatar', avatar)
+    }
+
+    const token = generateToken({ userId: user.id, username: user.username })
+
+    return c.json({
+      success: true,
+      message: '登录成功',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        created_at: user.created_at,
+        last_login: user.last_login
+      }
+    })
+  } catch (error) {
+    console.error('Google 登录接口错误:', error)
+    return c.json({ success: false, message: '服务器错误' }, 500)
+  }
+})
+
+/**
+ * GitHub OAuth 登录
+ * POST /api/auth/github
+ * 用 GitHub 授权 code 换取 access_token，验证身份后签发本站 JWT
+ */
+app.post('/api/auth/github', async (c) => {
+  try {
+    const body = await c.req.json()
+    const { code } = body
+
+    if (!code) {
+      return c.json({ success: false, message: '缺少 code' }, 400)
+    }
+
+    // client_id 复用现有的 VITE_GITHUB_CLIENT_ID（Vercel 平台环境变量中配置）
+    // client_secret 从 GITHUB_CLIENT_SECRET 读取（可选，仅部署到 Vercel 平台时配置；未配置则 GitHub JWT 登录不可用）
+    const clientId = process.env.VITE_GITHUB_CLIENT_ID
+    const clientSecret = process.env.GITHUB_CLIENT_SECRET
+
+    if (!clientId || !clientSecret) {
+      return c.json({
+        success: false,
+        message: 'GitHub OAuth 未配置，请在 Vercel 环境变量中设置 VITE_GITHUB_CLIENT_ID 和 GITHUB_CLIENT_SECRET'
+      }, 500)
+    }
+
+    // code 换取 access_token
+    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({
+        client_id: clientId,
+        client_secret: clientSecret,
+        code
+      })
+    })
+
+    const tokenData = await tokenResponse.json()
+    if (!tokenData.access_token) {
+      return c.json({ success: false, message: 'GitHub 授权失败，请重试' }, 401)
+    }
+
+    // 获取 GitHub 用户信息
+    const userResponse = await fetch('https://api.github.com/user', {
+      headers: {
+        Authorization: `Bearer ${tokenData.access_token}`,
+        'Accept': 'application/vnd.github+json',
+        'User-Agent': 'ChattyPlay'
+      }
+    })
+
+    if (!userResponse.ok) {
+      return c.json({ success: false, message: '获取 GitHub 用户信息失败' }, 401)
+    }
+
+    const profile = await userResponse.json()
+    const username = profile.login
+    const email = profile.email || ''
+    const avatar = profile.avatar_url || ''
+
+    // 按用户名查找已有用户（GitHub 用户名全局唯一），没有则自动创建
+    let user = await getUserByUsername(username)
+    if (!user) {
+      const userId = await getNextUserId()
+      if (userId === null) {
+        return c.json({ success: false, message: '用户服务暂不可用，请检查 Redis 配置' }, 500)
+      }
+
+      const createdAt = new Date().toISOString()
+      user = {
+        id: userId,
+        username,
+        password: '',
+        email,
+        avatar,
+        created_at: createdAt,
+        last_login: createdAt
+      }
+      await createUser(user)
+      if (avatar) await updateUserField(user.id, 'avatar', avatar)
+    } else {
+      await updateUserField(user.id, 'last_login', new Date().toISOString())
+      if (avatar) await updateUserField(user.id, 'avatar', avatar)
+    }
+
+    const token = generateToken({ userId: user.id, username: user.username })
+
+    return c.json({
+      success: true,
+      message: '登录成功',
+      token,
+      user: {
+        id: user.id,
+        username: user.username,
+        email: user.email,
+        avatar: user.avatar,
+        created_at: user.created_at,
+        last_login: user.last_login
+      }
+    })
+  } catch (error) {
+    console.error('GitHub 登录接口错误:', error)
+    return c.json({ success: false, message: '服务器错误' }, 500)
+  }
+})
+
+/**
  * 验证 token 并获取用户信息
  * GET /api/auth/me
  */
