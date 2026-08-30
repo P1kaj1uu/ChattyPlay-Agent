@@ -58,8 +58,9 @@
 - v4.7新增cloudflare turnstile防恶意请求和爬虫（2026.4.25-2026.4.27）
 - v4.8新增支付功能（2026.4.28-2026.4.29）
 - v4.9新增Latex编辑功能（2026.5.2-2026.5.8），完善上传压缩包并自动解压功能（2026.7.4-2026.7.5），国外用户接入Adsterra广告弹窗服务（2026.7.11）
+- v5.0修复生产环境闲鱼服务接口和websocket连接问题，使用JWT_SECRET验证hugging space闲鱼后端（2026.8.20-2026.8.30）
 
-## 最新版本V4.9（推荐）
+## 最新版本V5.0（推荐）
 
 > 本地调试时，可注释掉限制调用控制台的代码。参照说明修改package.json、email.config.js、index.html、.env.development、.env.production和docker-compose.yml文件。
 
@@ -116,6 +117,9 @@
 - cloudflare turnstile防恶意请求和爬虫
 - 支付宝支付功能
 - Latex编辑，可替代overleaf使用
+- 支持上传压缩包并自动解压功能
+- 国外用户接入Adsterra广告弹窗服务
+- 代码自动同步部署集成 (CI/CD)
 
 ✅ 音乐播放
 

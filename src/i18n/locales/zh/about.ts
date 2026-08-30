@@ -1,7 +1,7 @@
 const about = {
   title: '关于我（求内推～）',
   role: '一名全栈技术的爱好者',
-  name: '不见水星记（研一',
+  name: '不见水星记（研二',
   description: '宇宙终极无敌超级爆炸究极飞天帅比暴龙战士',
   contact: '联系方式',
   wechat: '微信号：Dveiklokk',
