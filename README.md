@@ -26,6 +26,13 @@
 - 视频预览：<a href="https://www.bilibili.com/video/BV1DmFYzbEQp/?share_source=copy_web&vd_source=1c9f57ed1dd7f17c0142ea7c34926f1e" target="_blank">录频视频</a>
 - 备注：如使用ChatGPT服务，我的APIKey配额有限，希望大家能省点用谢谢！
 
+## 📦 相关项目
+
+如果你更习惯在终端里工作，可以试试我的另一个项目：
+
+- **[ChattyPlay-Agent-Terminal](https://github.com/P1kaj1uu/ChattyPlay-Agent-Terminal)**
+  **终端 AI 编程助手**，在 shell 里直接调用 AI 写代码、改 bug、解释代码、操作文件等等。
+
 ## 📖 版本迭代
 
 - v1.0版本已完成（2023.1.7凌晨）
