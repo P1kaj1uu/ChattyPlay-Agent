@@ -20,7 +20,8 @@ import {
   EyeOutlined,
   StarOutlined,
   UserOutlined,
-  ReadOutlined
+  ReadOutlined,
+  LockOutlined
 } from '@ant-design/icons'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -99,23 +100,25 @@ const BackButton = styled(Button)`
 interface TopicInfo {
   id: number;
   title: string;
-  description: string;
-  cover: string;
-  views_count: number;
-  likes_count: number;
+  introduction: string;
+  evaluate?: string;
+  vertical_cover: string;
+  interact_value?: string;
   is_finish: number;
-  author: {
-    name: string;
-  };
-  tag_list: Array<{
+  author_name: string[];
+  tags: Array<{
     id: number;
-    title: string;
+    name: string;
   }>;
-  comics: Array<{
+  ep_list: Array<{
     id: number;
     title: string;
     cover: string;
-    order: number;
+    ord: number;
+    short_title: string;
+    pub_time: string;
+    is_locked: boolean;
+    is_in_free: boolean;
   }>;
 }
 
@@ -123,7 +126,7 @@ const CartoonDetail: React.FC = () => {
   const { t } = useTranslation()
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [topicInfo, setTopicInfo] = useState<TopicInfo | null>(null)
 
   useEffect(() => {
@@ -136,11 +139,12 @@ const CartoonDetail: React.FC = () => {
   const fetchTopicDetail = async (topicId: number) => {
     try {
       setLoading(true)
-      const response = await fetch((`/api/kuaikan/v2/pweb/topic/${topicId}`))
+      const response = await fetch(`/api/bcomic/ComicDetail?comicId=${topicId}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
-      if (data.data && data.data.topic_info) {
-        setTopicInfo(data.data.topic_info)
+      if (data.code === 0 && data.data) {
+        setTopicInfo(data.data)
       } else {
         message.error(t('cartoonDetail.fetchDetailFailed'))
       }
@@ -153,20 +157,12 @@ const CartoonDetail: React.FC = () => {
   }
 
   // 处理章节点击
-  const handleChapterClick = async (comicId: number) => {
-    try {
-      const response = await fetch((`/api/kuaikan/v2/pweb/comic/${comicId}`))
-      const data = await response.json()
-    
-      if (data.data && data.data.comic_info && data.data.comic_info.comic_images) {
-        navigate(`/cartoon/chapter/${comicId}`)
-      } else {
-        message.warning(t('cartoonChapter.noContent'))
-      }
-    } catch (error) {
-      console.error('获取章节内容失败:', error)
-      message.error(t('cartoonChapter.fetchChapterFailed'))
+  const handleChapterClick = (episode: TopicInfo['ep_list'][number]) => {
+    if (episode.is_locked && !episode.is_in_free) {
+      message.warning(t('cartoonChapter.needPurchase'))
+      return
     }
+    navigate(`/cartoon/chapter/${episode.id}?comicId=${topicInfo?.id}`)
   }
 
   // 格式化数字显示
@@ -221,10 +217,10 @@ const CartoonDetail: React.FC = () => {
           <Row gutter={[32, 32]}>
             <Col xs={24} sm={8} md={6} style={{ display: 'flex', justifyContent: 'center' }}>
               <CoverImage
-                // @ts-ignore
-                src={topicInfo.cover_image_url}
+                src={topicInfo.vertical_cover}
                 alt={topicInfo.title}
                 preview={false}
+                referrerPolicy="no-referrer"
               />
             </Col>
             <Col xs={24} sm={16} md={18}>
@@ -237,39 +233,36 @@ const CartoonDetail: React.FC = () => {
                 </Title>
 
                 <Space direction="vertical" size={12} style={{ width: '100%' }}>
-                  {/* @ts-ignore */}
-                  {topicInfo.user && (
+                  {topicInfo.author_name.length > 0 && (
                     <Text>
                       <UserOutlined style={{ marginRight: 8 }} />
-                      {t('cartoonDetail.author')}：{/* @ts-ignore */}
-                      {topicInfo.user.nickname}
+                      {t('cartoonDetail.author')}：{topicInfo.author_name.join(' / ')}
                     </Text>
                   )}
 
                   <Space size={24} wrap>
                     <Text>
                       <EyeOutlined style={{ marginRight: 8 }} />
-                      {/* @ts-ignore */}
-                      {t('cartoonDetail.status')}：{formatNumber(topicInfo.update_status)}
+                      {t('cartoonDetail.status')}：{topicInfo.is_finish === 1 ? t('cartoon.finished') : t('cartoon.ongoing')}
                     </Text>
-                    <Text>
-                      <StarOutlined style={{ marginRight: 8 }} />
-                      {t('cartoonDetail.likes')}：{formatNumber(topicInfo.likes_count)}
-                    </Text>
+                    {topicInfo.interact_value && (
+                      <Text>
+                        <StarOutlined style={{ marginRight: 8 }} />
+                        {t('cartoonDetail.likes')}：{formatNumber(Number(topicInfo.interact_value))}
+                      </Text>
+                    )}
                     <Text>
                       <BookOutlined style={{ marginRight: 8 }} />
-                      {t('cartoon.chapters')}：{topicInfo.comics?.length || 0} {t('cartoonDetail.hua')}
+                      {t('cartoon.chapters')}：{topicInfo.ep_list?.length || 0} {t('cartoonDetail.hua')}
                     </Text>
                   </Space>
 
-                  {/* @ts-ignore */}
                   {topicInfo.tags && topicInfo.tags.length > 0 && (
                     <div>
                       <Text style={{ marginRight: 12 }}>{t('cartoonDetail.tags')}：</Text>
-                      {/* @ts-ignore */}
                       {topicInfo.tags.map(tag => (
-                        <Tag color="blue" key={tag} style={{ marginBottom: 8 }}>
-                          {tag}
+                        <Tag color="blue" key={tag.id} style={{ marginBottom: 8 }}>
+                          {tag.name}
                         </Tag>
                       ))}
                     </div>
@@ -282,7 +275,7 @@ const CartoonDetail: React.FC = () => {
                       {t('cartoonDetail.intro')}：
                     </Text>
                     <Paragraph style={{ marginBottom: 0, color: '#666' }}>
-                      {topicInfo.description}
+                      {topicInfo.evaluate || topicInfo.introduction}
                     </Paragraph>
                   </div>
                 </Space>
@@ -291,7 +284,7 @@ const CartoonDetail: React.FC = () => {
           </Row>
         </HeaderCard>
 
-        {topicInfo.comics && topicInfo.comics.length > 0 && (
+        {topicInfo.ep_list && topicInfo.ep_list.length > 0 && (
           <ChapterList
             title={
               <Space>
@@ -301,20 +294,28 @@ const CartoonDetail: React.FC = () => {
             }
           >
             <List
-              dataSource={topicInfo.comics.sort((a, b) => b.id - a.id)}
-              renderItem={(comic, index) => (
+              dataSource={[...topicInfo.ep_list].sort((a, b) => b.ord - a.ord)}
+              renderItem={(episode) => (
                 <List.Item
-                  onClick={() => handleChapterClick(comic.id)}
+                  onClick={() => handleChapterClick(episode)}
+                  aria-disabled={episode.is_locked && !episode.is_in_free}
+                  style={episode.is_locked && !episode.is_in_free ? { cursor: 'not-allowed', opacity: 0.6 } : undefined}
+                  extra={<Text type="secondary" style={{ whiteSpace: 'nowrap' }}>{episode.pub_time}</Text>}
                 >
                   <List.Item.Meta
                     avatar={
                       <Text style={{ fontSize: 16, fontWeight: 500, minWidth: 60 }}>
-                        {t('cartoonDetail.episode')} {topicInfo.comics!.length - index} {t('cartoonDetail.hua')}
+                        {t('cartoonDetail.episode')} {episode.short_title} {t('cartoonDetail.hua')}
                       </Text>
                     }
-                    title={comic.title}
-                    // @ts-ignore
-                    description={comic.created_at}
+                    title={
+                      <Space>
+                        {episode.title}
+                        {episode.is_locked && !episode.is_in_free && (
+                          <Tag icon={<LockOutlined />}>{t('cartoonChapter.needPurchase')}</Tag>
+                        )}
+                      </Space>
+                    }
                   />
                 </List.Item>
               )}

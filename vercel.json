@@ -28,12 +28,8 @@
       "destination": "https://fanyi-api.baidu.com/api/trans/vip/translate/:path*"
     },
     {
-      "source": "/api/kuaikan/:path*",
-      "destination": "https://www.kuaikanmanhua.com/:path*"
-    },
-    {
-      "source": "/api/kuaikan-m/:path*",
-      "destination": "https://m.kuaikanmanhua.com/:path*"
+      "source": "/api/bcomic/:path*",
+      "destination": "https://apis.netstart.cn/bcomic/:path*"
     },
     {
       "source": "/api/netease/:path*",

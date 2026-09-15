@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Typography,
   Spin,
@@ -137,35 +137,34 @@ interface ComicInfo {
   id: number;
   title: string;
   comic_images: Array<{ url: string }>;
-  topic_id: number;
-  order: number;
-  previous_comic_info?: {
-    id: number;
-    title: string;
-  };
-  next_comic_info?: {
-    id: number;
-    title: string;
-  };
+}
+
+interface EpisodeInfo {
+  id: number;
+  title: string;
+  ord: number;
+  is_locked: boolean;
+  is_in_free: boolean;
 }
 
 const CartoonChapter: React.FC = () => {
   const { t } = useTranslation()
-  const { comicId } = useParams<{ comicId: string }>()
+  const { comicId: episodeId } = useParams<{ comicId: string }>()
+  const [searchParams] = useSearchParams()
+  const parentComicId = searchParams.get('comicId')
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [comicInfo, setComicInfo] = useState<ComicInfo | null>(null)
-  const [nextComicInfo, setNextComicInfo] = useState<ComicInfo | null>(null)
-  const [previousComicInfo, setPreviousComicInfo] = useState<ComicInfo | null>(null)
-  const [topicInfo, setTopicInfo] = useState<any>(null)
+  const [nextComicInfo, setNextComicInfo] = useState<EpisodeInfo | null>(null)
+  const [previousComicInfo, setPreviousComicInfo] = useState<EpisodeInfo | null>(null)
   const [showBackToTop, setShowBackToTop] = useState(false)
 
   useEffect(() => {
-    if (comicId) {
-      fetchComicDetail(Number(comicId))
+    if (episodeId) {
+      fetchComicDetail(Number(episodeId))
       scrollToTop()
     }
-  }, [comicId])
+  }, [episodeId, parentComicId])
 
   // 监听滚动，显示/隐藏返回顶部按钮
   useEffect(() => {
@@ -189,20 +188,50 @@ const CartoonChapter: React.FC = () => {
   const fetchComicDetail = async (id: number) => {
     try {
       setLoading(true)
-      const response = await fetch((`/api/kuaikan/v2/pweb/comic/${id}`))
+      setComicInfo(null)
+      setPreviousComicInfo(null)
+      setNextComicInfo(null)
+      const response = await fetch(`/api/bcomic/GetImageIndex?epId=${id}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
+      if (data.code !== 0 || !data.data?.images?.length) throw new Error(data.msg || 'No images')
 
-      if (data.data && data.data.comic_info) {
-        setComicInfo(data.data.comic_info)
-        setNextComicInfo(data.data.next_comic_info)
-        setPreviousComicInfo(data.data.previous_comic_info)
-        setTopicInfo(data.data.topic_info)
+      const imageUrls = data.data.images.map((image: { path: string }) => `${data.data.host}${image.path}@1000w.webp`)
+      const chunks = Array.from({ length: Math.ceil(imageUrls.length / 10) }, (_, index) => imageUrls.slice(index * 10, index * 10 + 10))
+      const tokenResults = await Promise.all(chunks.map(async urls => {
+        const tokenResponse = await fetch(`/api/bcomic/ImageToken?urls=${encodeURIComponent(JSON.stringify(urls))}`)
+        if (!tokenResponse.ok) throw new Error(`HTTP ${tokenResponse.status}`)
+        const tokenData = await tokenResponse.json()
+        if (tokenData.code !== 0 || !tokenData.data) throw new Error(tokenData.msg || 'No image tokens')
+        return tokenData.data as Array<{ url: string; token: string; complete_url?: string }>
+      }))
+
+      let title = `${t('cartoonDetail.episode')} ${id}`
+      if (parentComicId) {
+        const detailResponse = await fetch(`/api/bcomic/ComicDetail?comicId=${parentComicId}`)
+        if (!detailResponse.ok) throw new Error(`HTTP ${detailResponse.status}`)
+        const detailData = await detailResponse.json()
+        const episodes: EpisodeInfo[] = [...(detailData.data?.ep_list || [])]
+          .filter(episode => !episode.is_locked || episode.is_in_free)
+          .sort((a, b) => a.ord - b.ord)
+        const episodeIndex = episodes.findIndex(episode => episode.id === id)
+        title = episodes[episodeIndex]?.title || title
+        setPreviousComicInfo(episodeIndex > 0 ? episodes[episodeIndex - 1] : null)
+        setNextComicInfo(episodeIndex >= 0 && episodeIndex < episodes.length - 1 ? episodes[episodeIndex + 1] : null)
+      }
+
+      setComicInfo({
+        id,
+        title,
+        comic_images: tokenResults.flat().map(image => ({ url: image.complete_url || `${image.url}?token=${image.token}` }))
+      })
+    } catch (error) {
+      if (error instanceof Error && error.message === 'need buy episode') {
+        message.warning(t('cartoonChapter.needPurchase'))
       } else {
+        console.error('获取章节内容失败:', error)
         message.error(t('cartoonChapter.fetchChapterFailed'))
       }
-    } catch (error) {
-      console.error('获取章节内容失败:', error)
-      message.error(t('cartoonChapter.fetchChapterFailed'))
     } finally {
       setLoading(false)
     }
@@ -211,7 +240,7 @@ const CartoonChapter: React.FC = () => {
   // 上一章
   const handlePrevious = () => {
     if (previousComicInfo?.id) {
-      navigate(`/cartoon/chapter/${previousComicInfo.id}`)
+      navigate(`/cartoon/chapter/${previousComicInfo.id}?comicId=${parentComicId}`)
       scrollToTop()
     } else {
       message.warning(t('cartoonChapter.alreadyFirstChapter'))
@@ -221,7 +250,7 @@ const CartoonChapter: React.FC = () => {
   // 下一章
   const handleNext = () => {
     if (nextComicInfo?.id) {
-      navigate(`/cartoon/chapter/${nextComicInfo.id}`)
+      navigate(`/cartoon/chapter/${nextComicInfo.id}?comicId=${parentComicId}`)
       scrollToTop()
     } else {
       message.info(t('cartoonChapter.alreadyLastChapter'))
@@ -230,8 +259,8 @@ const CartoonChapter: React.FC = () => {
 
   // 返回详情页
   const handleBack = () => {
-    if (comicInfo) {
-      navigate(`/cartoon/${topicInfo.id}`)
+    if (parentComicId) {
+      navigate(`/cartoon/${parentComicId}`)
     } else {
       navigate('/cartoon')
     }
@@ -319,6 +348,7 @@ const CartoonChapter: React.FC = () => {
                   src={imageUrl.url}
                   alt={`${comicInfo.title} - ${t('cartoonChapter.page')} ${index + 1}`}
                   loading="lazy"
+                  referrerPolicy="no-referrer"
                 />
               ))}
             </div>

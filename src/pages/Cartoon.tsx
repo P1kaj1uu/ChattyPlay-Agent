@@ -124,18 +124,21 @@ const StyledTabs = styled(Tabs)`
 `
 
 interface RankType {
-  rank_id: number;
-  title: string;
+  id: number;
+  name: string;
   description: string;
 }
 
-interface Topic {
-  id: number;
+interface BComicListItem {
+  id?: number;
+  comic_id?: number;
   title: string;
-  description: string;
-  cover?: string;
-  views_count: number;
-  likes_count: number;
+  org_title?: string;
+  comic_introduction?: string;
+  vertical_cover?: string;
+  author_name?: string[];
+  author?: string[];
+  fans?: string;
   is_finish: number;
 }
 
@@ -149,10 +152,19 @@ interface CartoonData {
   is_finish?: number;
 }
 
+const formatCartoon = (comic: BComicListItem): CartoonData => ({
+  id: comic.comic_id ?? comic.id!,
+  title: comic.org_title || comic.title,
+  description: comic.comic_introduction || (comic.author_name || comic.author)?.join(' / ') || '',
+  cover: comic.vertical_cover?.replace(/^http:/, 'https:'),
+  views_count: Number(comic.fans) || undefined,
+  is_finish: comic.is_finish
+})
+
 const Cartoon: React.FC = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [rankTypes, setRankTypes] = useState<RankType[]>([])
   const [cartoonList, setCartoonList] = useState<CartoonData[]>([])
   const [selectedRankId, setSelectedRankId] = useState<number | null>(null)
@@ -169,16 +181,17 @@ const Cartoon: React.FC = () => {
   const fetchRankTypes = async () => {
     try {
       setLoading(true)
-      const response = await fetch((`/api/kuaikan/v2/pweb/rank_type_list`))
+      const response = await fetch('/api/bcomic/ListRank')
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
-      if (data.data && data.data.rank_types) {
-        setRankTypes(data.data.rank_types)
+      if (data.code === 0 && data.data?.list) {
+        setRankTypes(data.data.list)
         // 默认选择第一个排行榜
-        if (data.data.rank_types.length > 0) {
-          const firstRankId = data.data.rank_types[0].rank_id
+        if (data.data.list.length > 0) {
+          const firstRankId = data.data.list[0].id ?? data.data.default_id
           setSelectedRankId(firstRankId)
-          fetchCartoonList(firstRankId)
+          await fetchCartoonList(firstRankId)
         }
       }
     } catch (error) {
@@ -194,23 +207,13 @@ const Cartoon: React.FC = () => {
     try {
       setLoading(true)
       const response = await fetch(
-        `/api/kuaikan/v2/pweb/rank/topics?rank_id=${rankId}`
+        `/api/bcomic/GetRankInfo?id=${rankId}&offset=0&subId=0`
       )
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
-      if (data.data && data.data.rank_info && data.data.rank_info.topics) {
-        const topics: Topic[] = data.data.rank_info.topics
-        const formattedData: CartoonData[] = topics.map(topic => ({
-          id: topic.id,
-          title: topic.title,
-          description: topic.description,
-          // @ts-ignore
-          cover: topic.cover_image_url,
-          views_count: topic.views_count,
-          likes_count: topic.likes_count,
-          is_finish: topic.is_finish
-        }))
-        setCartoonList(formattedData)
+      if (data.code === 0 && data.data?.list) {
+        setCartoonList(data.data.list.map(formatCartoon))
       }
     } catch (error) {
       console.error('获取漫画列表失败:', error)
@@ -250,21 +253,12 @@ const Cartoon: React.FC = () => {
     try {
       setLoading(true)
       setIsSearching(true)
-      const response = await fetch((`/api/kuaikan/v1/search/topic?q=${encodeURIComponent(keyword)}&f=3&size=18`))
+      const response = await fetch(`/api/bcomic/Search?styleId=-1&areaId=-1&isFinish=-1&order=-1&pageNum=1&pageSize=20&isFree=-1&keyWord=${encodeURIComponent(keyword)}`)
+      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
 
-      if (data.data && data.data.hit) {
-        const hitList: Topic[] = data.data.hit
-        const formattedData: CartoonData[] = hitList.map(topic => ({
-          id: topic.id,
-          title: topic.title,
-          description: topic.description,
-          // @ts-ignore
-          cover: topic.cover_image_url,
-          views_count: topic.views_count,
-          likes_count: topic.likes_count,
-          is_finish: topic.is_finish
-        }))
+      if (data.code === 0 && data.data?.list) {
+        const formattedData: CartoonData[] = data.data.list.map(formatCartoon)
         setSearchResults(formattedData)
         message.success(t('cartoon.foundResults').replace('X', formattedData.length.toString()))
       } else {
@@ -287,8 +281,8 @@ const Cartoon: React.FC = () => {
   }
 
   const tabItems = rankTypes.map(rankType => ({
-    key: rankType.rank_id.toString(),
-    label: rankType.title
+    key: rankType.id.toString(),
+    label: rankType.name
   }))
 
   return (
@@ -343,11 +337,17 @@ const Cartoon: React.FC = () => {
                             src={cartoon.cover}
                             alt={cartoon.title}
                             preview={false}
+                            referrerPolicy="no-referrer"
                           />
                           {cartoon.is_finish === 1 && (
                             <Tag color="success" style={{ position: 'absolute', top: 8, right: 8 }}>
                               {t('cartoon.finished')}
                             </Tag>
+                          )}
+                          {cartoon.views_count && (
+                            <Text style={{ position: 'absolute', left: 8, bottom: 8, padding: '2px 8px', borderRadius: 10, color: '#fff', background: 'rgba(0, 0, 0, 0.55)', fontSize: 12 }}>
+                              <EyeOutlined /> {formatNumber(cartoon.views_count)}
+                            </Text>
                           )}
                         </div>
                       }
@@ -364,18 +364,11 @@ const Cartoon: React.FC = () => {
                             <DescriptionText title={cartoon.description}>
                               {cartoon.description}
                             </DescriptionText>
-                            <Space size={12}>
-                              {cartoon.views_count && (
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  <EyeOutlined /> {formatNumber(cartoon.views_count)}
-                                </Text>
-                              )}
-                              {cartoon.likes_count && (
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  <StarOutlined /> {formatNumber(cartoon.likes_count)}
-                                </Text>
-                              )}
-                            </Space>
+                            {cartoon.likes_count && (
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                <StarOutlined /> {formatNumber(cartoon.likes_count)}
+                              </Text>
+                            )}
                           </Space>
                         }
                       />
@@ -413,11 +406,17 @@ const Cartoon: React.FC = () => {
                             src={cartoon.cover}
                             alt={cartoon.title}
                             preview={false}
+                            referrerPolicy="no-referrer"
                           />
                           {cartoon.is_finish === 1 && (
                             <Tag color="success" style={{ position: 'absolute', top: 8, right: 8 }}>
                               {t('cartoon.finished')}
                             </Tag>
+                          )}
+                          {cartoon.views_count && (
+                            <Text style={{ position: 'absolute', left: 8, bottom: 8, padding: '2px 8px', borderRadius: 10, color: '#fff', background: 'rgba(0, 0, 0, 0.55)', fontSize: 12 }}>
+                              <EyeOutlined /> {formatNumber(cartoon.views_count)}
+                            </Text>
                           )}
                         </div>
                       }
@@ -434,18 +433,11 @@ const Cartoon: React.FC = () => {
                             <DescriptionText title={cartoon.description}>
                               {cartoon.description}
                             </DescriptionText>
-                            <Space size={12}>
-                              {cartoon.views_count && (
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  <EyeOutlined /> {formatNumber(cartoon.views_count)}
-                                </Text>
-                              )}
-                              {cartoon.likes_count && (
-                                <Text type="secondary" style={{ fontSize: 12 }}>
-                                  <StarOutlined /> {formatNumber(cartoon.likes_count)}
-                                </Text>
-                              )}
-                            </Space>
+                            {cartoon.likes_count && (
+                              <Text type="secondary" style={{ fontSize: 12 }}>
+                                <StarOutlined /> {formatNumber(cartoon.likes_count)}
+                              </Text>
+                            )}
                           </Space>
                         }
                       />

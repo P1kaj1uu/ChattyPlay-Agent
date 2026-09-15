@@ -160,8 +160,7 @@ app.get('/api/info', (c) => {
     endpoints: {
       '/health': 'Health check endpoint',
       '/api/translate': 'Baidu Translate API proxy',
-      '/api/kuaikan/*': 'Kuaikan Manhua API proxy (PC)',
-      '/api/kuaikan-m/*': 'Kuaikan Manhua API proxy (Mobile)',
+      '/api/bcomic/*': 'Bilibili Manhua API proxy',
       '/api/netease/*': 'Netease Cloud Music API proxy',
       '/api/latex': 'LaTeX compilation API proxy',
       '/ws': 'WebSocket endpoint',
@@ -744,23 +743,10 @@ const PROXY_CONFIG: Record<string, {
       'Origin': 'https://fanyi.baidu.com',
     },
   },
-  '/api/kuaikan': {
-    target: 'https://www.kuaikanmanhua.com',
-    pathRewrite: '',
-    timeout: 15000,
-    headers: {
-      'Referer': 'https://www.kuaikanmanhua.com/',
-      'Origin': 'https://www.kuaikanmanhua.com',
-    },
-  },
-  '/api/kuaikan-m': {
-    target: 'https://m.kuaikanmanhua.com',
-    pathRewrite: '',
-    timeout: 15000,
-    headers: {
-      'Referer': 'https://m.kuaikanmanhua.com/',
-      'Origin': 'https://m.kuaikanmanhua.com',
-    },
+  '/api/bcomic': {
+    target: 'https://apis.netstart.cn',
+    pathRewrite: '/bcomic',
+    timeout: 30000,
   },
   '/api/netease': {
     target: 'https://netease-cloud-music-api.fe-mm.com',

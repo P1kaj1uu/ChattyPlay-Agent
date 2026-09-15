@@ -682,11 +682,16 @@ const PaperListPage: React.FC = () => {
                     <div className="flex">
                       {/* 左侧：封面图 */}
                       {paper.thumbnail && activeTab === 'daily' && (
-                        <div className="flex-shrink-0 w-[30%] h-full mr-4">
+                        <div className="flex-shrink-0 w-[30%] aspect-video self-start mr-4 overflow-hidden rounded border border-gray-200 bg-gray-100">
                           <Image
                             src={paper.thumbnail}
                             alt={paper.title}
-                            className="w-full h-full object-cover rounded border border-gray-200"
+                            width="100%"
+                            height="100%"
+                            loading="lazy"
+                            wrapperStyle={{ width: '100%', height: '100%' }}
+                            placeholder={<Skeleton.Image active style={{ width: '100%', height: '100%' }} />}
+                            className="object-cover"
                           />
                         </div>
                       )}
