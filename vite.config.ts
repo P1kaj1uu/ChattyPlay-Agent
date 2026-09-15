@@ -49,6 +49,25 @@ export default defineConfig({
   define: {
     __APP_VERSION__: JSON.stringify(pkg.version)
   },
+  optimizeDeps: {
+    esbuildOptions: {
+      // 这里改的是「依赖预打包」，与上面顶层的 define 无关。
+      // Monaco 由 @monaco-editor/react 从 CDN 以 AMD loader 方式加载，会注入全局 define；
+      // 而部分依赖是 UMD 包，检测到 define 后会在加载时走 AMD 分支，执行匿名 define(...)，
+      // 触发 Monaco loader 的限制并抛出
+      // "Can only have one anonymous define call per script file"。
+      //
+      // UMD 的检测有两种写法，必须都覆盖：
+      //   1) typeof define === "function" && define.amd   -> 用 define.amd = false 关闭
+      //   2) typeof define === "function"（不检查 amd，如 fastdom）-> 用 define = undefined 关闭
+      // esbuild 只会替换「未被局部变量遮蔽」的全局标识符，因此 axios 这类
+      // `const define = (arr) => ...` 的局部函数不受影响。
+      define: {
+        'define.amd': 'false',
+        define: 'undefined'
+      }
+    }
+  },
   plugins: [react(), honoServerPlugin(), copyHtaccessPlugin()],
   server: {
     host: '0.0.0.0', // 允许真机通过局域网 IP 访问

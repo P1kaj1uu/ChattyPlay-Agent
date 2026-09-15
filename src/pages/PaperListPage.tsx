@@ -581,6 +581,21 @@ const PaperListPage: React.FC = () => {
               >
                 <Button type="primary" className="px-3 py-1 text-sm" onClick={() => navigate('/latex')}>{t('paper.gotoLatexEdit')}</Button>
               </Radio.Group>
+              <Radio.Group
+                optionType="button"
+                buttonStyle="solid"
+                size="small"
+                className="bg-white rounded-lg flex mt-2 max-[700px]:hidden"
+              >
+                <Button
+                  type="primary"
+                  className="px-3 py-1 text-sm"
+                  style={{ background: '#764ba2', borderColor: '#764ba2' }}
+                  onClick={() => navigate('/markdown')}
+                >
+                  {t('paper.gotoMarkdownEdit')}
+                </Button>
+              </Radio.Group>
             </div>
           </div>
 

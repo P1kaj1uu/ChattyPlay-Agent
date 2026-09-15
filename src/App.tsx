@@ -40,6 +40,7 @@ import { isMobileDevice } from './utils/isMobile'
 import WorkerAgent from './pages/WorkerAgent'
 import Markmap from './pages/Markmap'
 import Latex from './pages/Latex'
+import Markdown from './pages/Markdown'
 
 // 公开路由
 const publicRoutes = ['/']
@@ -213,6 +214,7 @@ const AppContent: React.FC = () => {
           <Route path="/papers" element={<PaperListPage />} />
           <Route path="/markmap" element={<Markmap />} />
           <Route path="/latex" element={<Latex />} />
+          <Route path="/markdown" element={<Markdown />} />
           <Route path="/worker" element={<WorkerAgent />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>

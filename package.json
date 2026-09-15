@@ -6,7 +6,7 @@
     "email": "891523233@qq.com",
     "url": "https://github.com/P1Kaj1uu"
   },
-  "version": "5.0.0",
+  "version": "5.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -46,7 +46,9 @@
     "http-proxy-middleware": "^3.0.5",
     "i18next": "^25.8.0",
     "i18next-browser-languagedetector": "^8.2.0",
+    "katex": "^0.16.47",
     "marked": "^11.1.0",
+    "mermaid": "^11.17.2",
     "monaco-editor": "^0.55.1",
     "nprogress": "^0.2.0",
     "oh-my-live2d": "^0.19.3",

@@ -33,4 +33,5 @@ export default {
   hotLoadError: '加载热门数据失败，请稍后重试',
   paper: '论文',
   gotoLatexEdit: '前往Latex编辑',
+  gotoMarkdownEdit: '前往Markdown',
 }

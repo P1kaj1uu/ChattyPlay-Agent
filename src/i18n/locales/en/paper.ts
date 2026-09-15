@@ -33,4 +33,5 @@ export default {
   hotLoadError: 'Failed to load hot papers. Please try again later',
   paper: 'Paper',
   gotoLatexEdit: 'Go to Latex Editor',
+  gotoMarkdownEdit: 'Go to Markdown Editor',
 }
