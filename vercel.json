@@ -28,10 +28,6 @@
       "destination": "https://fanyi-api.baidu.com/api/trans/vip/translate/:path*"
     },
     {
-      "source": "/api/bcomic/:path*",
-      "destination": "https://apis.netstart.cn/bcomic/:path*"
-    },
-    {
       "source": "/api/netease/:path*",
       "destination": "https://netease-cloud-music-api.fe-mm.com/:path*"
     },

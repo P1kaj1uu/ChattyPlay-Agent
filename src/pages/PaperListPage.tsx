@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Card, Input, Button, Radio, RadioChangeEvent, Avatar, Tag, Skeleton, Tooltip, Badge, Dropdown, Image, Modal } from 'antd'
+import { Card, Input, Button, Radio, RadioChangeEvent, Avatar, Tag, Skeleton, Tooltip, Badge, Dropdown, Image, Modal, Spin } from 'antd'
 import { 
   SearchOutlined, 
   GithubOutlined, 
@@ -210,6 +210,21 @@ const PaperListPage: React.FC = () => {
   const [pdfModalVisible, setPdfModalVisible] = useState<boolean>(false);
   const [currentPdfUrl, setCurrentPdfUrl] = useState<string>('');
   const [currentPaperTitle, setCurrentPaperTitle] = useState<string>('');
+  const [pdfStatus, setPdfStatus] = useState<'loading' | 'slow' | 'loaded'>('loading');
+
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'preconnect'
+    link.href = 'https://arxiv.org'
+    document.head.appendChild(link)
+    return () => link.remove()
+  }, [])
+
+  useEffect(() => {
+    if (!pdfModalVisible || pdfStatus !== 'loading') return
+    const timer = window.setTimeout(() => setPdfStatus('slow'), 12000)
+    return () => window.clearTimeout(timer)
+  }, [pdfModalVisible, currentPdfUrl, pdfStatus])
 
   const API_PAPERS_URL = import.meta.env.VITE_PAPERS_API_URL || ''
 
@@ -422,21 +437,10 @@ const PaperListPage: React.FC = () => {
 
   // 处理PDF预览
   const handlePdfPreview = (pdfUrl: string, paperTitle: string) => {
-    if (isMobileDevice()) {
-      let viewerUrl = ''
-      try {
-        viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(pdfUrl)}&embedded=true`
-      } catch (error) {
-        viewerUrl = `https://mozilla.github.io/pdf.js/web/viewer.html?file=${encodeURIComponent(pdfUrl)}`
-      }
-      setCurrentPdfUrl(viewerUrl)
-      setCurrentPaperTitle(paperTitle)
-      setPdfModalVisible(true)
-    } else {
-      setCurrentPdfUrl(pdfUrl)
-      setCurrentPaperTitle(paperTitle)
-      setPdfModalVisible(true)
-    }
+    setPdfStatus('loading')
+    setCurrentPdfUrl(pdfUrl)
+    setCurrentPaperTitle(paperTitle)
+    setPdfModalVisible(true)
   }
 
   // 跳转到ChatGPT对话
@@ -450,6 +454,7 @@ const PaperListPage: React.FC = () => {
     setPdfModalVisible(false)
     setCurrentPdfUrl('')
     setCurrentPaperTitle('')
+    setPdfStatus('loading')
   }
 
   // 获取所有可用链接
@@ -950,20 +955,44 @@ const PaperListPage: React.FC = () => {
           }
           open={pdfModalVisible}
           onCancel={handlePdfModalClose}
-          footer={null}
-          width="80%"
+          destroyOnClose
+          footer={
+            <div className="flex items-center justify-between gap-3">
+              <span role="status" className="text-sm text-gray-500">
+                {pdfStatus === 'loading' && t('paper.pdfLoading')}
+                {pdfStatus === 'slow' && t('paper.pdfSlow')}
+              </span>
+              <Button href={currentPdfUrl || undefined} target="_blank" rel="noopener noreferrer" icon={<LinkOutlined />}>
+                {t('paper.pdfOpenOriginal')}
+              </Button>
+            </div>
+          }
+          width={isMobileDevice() ? '96%' : '80%'}
           style={{ top: 20 }}
           styles={{ body: { height: '80vh', padding: 0 } }}
         >
-          {currentPdfUrl && (
-            <iframe
-              src={`${currentPdfUrl}#view=FitH`}
-              title={`PDF - ${currentPaperTitle}`}
-              width="100%"
-              height="100%"
-              style={{ border: 'none' }}
-              className="w-full h-full"
-            />
+          {pdfModalVisible && currentPdfUrl && (
+            <div className="relative w-full h-full">
+              {pdfStatus === 'loading' && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none" role="status">
+                  <div className="bg-white rounded-lg px-6 py-4 shadow-sm flex items-center gap-3">
+                    <Spin />
+                    <span>{t('paper.pdfLoading')}</span>
+                  </div>
+                </div>
+              )}
+              <iframe
+                key={currentPdfUrl}
+                src={`${currentPdfUrl}#view=FitH`}
+                title={`PDF - ${currentPaperTitle}`}
+                onLoad={() => setPdfStatus('loaded')}
+                onError={() => setPdfStatus('slow')}
+                width="100%"
+                height="100%"
+                style={{ border: 'none' }}
+                className="w-full h-full"
+              />
+            </div>
           )}
         </Modal>
       </div>

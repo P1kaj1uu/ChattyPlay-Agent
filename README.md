@@ -12,7 +12,7 @@
 
 ## 📄 免责声明
 
-### 本项目提供音乐、影视解析下载、实时黄金及K线图、动漫漫画、Hugging Face论文、思维导图、闲鱼助手和ChatGPT相关服务，仅供学习使用，请勿用于任何商业用途。如你有更好的想法、建议、或不解的问题，欢迎提PR或Issues！如有侵权，请联系我！
+### 本项目提供音乐、影视解析及下载、实时黄金及K线图、动漫漫画、Hugging Face论文、Latex和Markdown编辑、思维导图、闲鱼助手和ChatGPT相关服务，仅供学习使用，请勿用于任何商业用途。如你有更好的想法、建议、或不解的问题，欢迎提PR或Issues！如有侵权，请联系我！
 
 > License：ChattyPlay-Agent is licensed under the Apache-2.0 License. See the [LICENSE](https://github.com/P1kaj1uu/ChattyPlay-Agent/blob/master/LICENSE) file for more information.
 
@@ -100,12 +100,13 @@
 
 ✅ 技术栈
 
-- Python + React + TypeScript + Vite + Tailwind CSS + i18n国际化 + live2d看板娘
+- Python + SQLite + Redis + React + TypeScript + Vite + Hono + WebSocket + Tailwind CSS + Docker + Nginx + Vercel + i18n国际化 + live2d看板娘
 - 适配移动端和PC端
 - Three.js 3D 模型加载动画效果
 - MD5加密，验证码，网站访问次数统计
 - Markdown语法解析，highlight代码高亮显示
-- 处理EventStream流
+- 基于HLS协议进行HTTP分片传输，结合自适应码流动态切换画质，由播放器完成下载、解码与渲染
+- 处理EventStream流数据，实时更新数据
 - 金融基金K线图
 - 实时版本检测更新
 - 限制终端控制台调用

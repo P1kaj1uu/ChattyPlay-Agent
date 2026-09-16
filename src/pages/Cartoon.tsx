@@ -7,7 +7,7 @@ import {
   Tabs,
   Spin,
   message,
-  Image,
+  Skeleton,
   Tag,
   Input,
   Space
@@ -23,6 +23,7 @@ import styled from 'styled-components'
 
 const { Title, Text, Paragraph } = Typography
 const { Search } = Input
+const coverFallback = `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="200" height="280" viewBox="0 0 200 280"><rect width="200" height="280" fill="#f0f2f5"/><g fill="none" stroke="#bfbfbf" stroke-width="3"><rect x="72" y="112" width="56" height="48" rx="4"/><circle cx="88" cy="126" r="5"/><path d="m74 153 16-16 12 12 10-10 14 14"/></g></svg>')}`
 
 const CartoonContainer = styled.div`
   width: 100%;
@@ -69,15 +70,62 @@ const StyledCard = styled(Card)`
   }
 `
 
-const CartoonImage = styled(Image)`
+const CoverContainer = styled.div`
+  position: relative;
   width: 100%;
   height: 280px;
-  object-fit: cover;
+  background: #f0f2f5;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: opacity 0.2s ease;
+  }
+
+  .cover-loading {
+    position: absolute;
+    inset: 0;
+    background: #f0f2f5;
+    z-index: 1;
+  }
+
+  .cover-loading .ant-skeleton {
+    width: 100%;
+    height: 100%;
+  }
 
   @media (max-width: 768px) {
     height: 200px;
   }
 `
+
+const CartoonImage: React.FC<{ src?: string; alt: string }> = ({ src, alt }) => {
+  const { t } = useTranslation()
+  const [loaded, setLoaded] = useState(!src)
+  const [failed, setFailed] = useState(false)
+
+  return (
+    <CoverContainer>
+      <img
+        src={failed || !src ? coverFallback : src}
+        alt={alt}
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        style={{ opacity: loaded ? 1 : 0 }}
+        onLoad={() => setLoaded(true)}
+        onError={() => { setFailed(true); setLoaded(true) }}
+      />
+      {!loaded && (
+        <div className="cover-loading" role="status" aria-label={t('common.loading')}>
+          <Skeleton.Image active style={{ width: '100%', height: '100%' }} />
+        </div>
+      )}
+    </CoverContainer>
+  )
+}
 
 const DescriptionText = styled.div`
   font-size: 12px;
@@ -334,10 +382,9 @@ const Cartoon: React.FC = () => {
                           onClick={() => handleCardClick(cartoon)}
                         >
                           <CartoonImage
+                            key={cartoon.cover}
                             src={cartoon.cover}
                             alt={cartoon.title}
-                            preview={false}
-                            referrerPolicy="no-referrer"
                           />
                           {cartoon.is_finish === 1 && (
                             <Tag color="success" style={{ position: 'absolute', top: 8, right: 8 }}>
@@ -403,10 +450,9 @@ const Cartoon: React.FC = () => {
                           onClick={() => handleCardClick(cartoon)}
                         >
                           <CartoonImage
+                            key={cartoon.cover}
                             src={cartoon.cover}
                             alt={cartoon.title}
-                            preview={false}
-                            referrerPolicy="no-referrer"
                           />
                           {cartoon.is_finish === 1 && (
                             <Tag color="success" style={{ position: 'absolute', top: 8, right: 8 }}>

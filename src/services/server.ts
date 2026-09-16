@@ -22,6 +22,7 @@ import { createOrderRoutes } from '../goofish/api/routes/order.route'
 import { createAutoSellRoutes } from '../goofish/api/routes/autosell'
 import { createWorkflowRoutes } from '../goofish/api/routes/workflow.route'
 import { authRoute } from '../goofish/api/routes/auth.route'
+import { loadEnv } from 'vite'
 
 const goofishLogger = createLogger('Goofish:Integration')
 const app = new Hono()
@@ -115,6 +116,7 @@ const localIP = getLocalIP()
 
 // 环境判断
 const isDev = process.env.NODE_ENV !== 'production'
+const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || loadEnv(isDev ? 'development' : 'production', process.cwd(), 'VIDEO_PARSE_').VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')
 
 // CORS 配置
 app.use('/*', cors({
@@ -497,7 +499,7 @@ app.get('/api/latex/health', async (c) => {
 
 // 视频下载API代理
 app.post('/api/resolve', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/resolve'
+  const targetUrl = `${videoParseBaseURL}/api/resolve`
 
   try {
     const body = await c.req.json()
@@ -507,8 +509,8 @@ app.post('/api/resolve', async (c) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Referer': 'https://xiazaishipin.com/',
-        'Origin': 'https://xiazaishipin.com',
+        'Referer': `${videoParseBaseURL}/`,
+        'Origin': videoParseBaseURL,
         'Accept': 'application/json, text/plain, */*',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
@@ -575,7 +577,7 @@ app.get('/api/image-proxy', async (c) => {
 
 // B站视频下载代理
 app.post('/api/bilibili-download', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/bilibili-download'
+  const targetUrl = `${videoParseBaseURL}/api/bilibili-download`
 
   try {
     const body = await c.req.json()
@@ -585,8 +587,8 @@ app.post('/api/bilibili-download', async (c) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Referer': 'https://xiazaishipin.com/',
-        'Origin': 'https://xiazaishipin.com',
+        'Referer': `${videoParseBaseURL}/`,
+        'Origin': videoParseBaseURL,
         'Accept': '*/*',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
@@ -652,7 +654,7 @@ app.post('/api/bilibili-download', async (c) => {
 
 // 抖音和小红书视频下载代理
 app.post('/api/proxy-download', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/proxy-download'
+  const targetUrl = `${videoParseBaseURL}/api/proxy-download`
 
   try {
     const body = await c.req.json()
@@ -662,8 +664,8 @@ app.post('/api/proxy-download', async (c) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Referer': 'https://xiazaishipin.com/',
-        'Origin': 'https://xiazaishipin.com',
+        'Referer': `${videoParseBaseURL}/`,
+        'Origin': videoParseBaseURL,
         'Accept': '*/*',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
       },
@@ -744,7 +746,7 @@ const PROXY_CONFIG: Record<string, {
     },
   },
   '/api/bcomic': {
-    target: 'https://apis.netstart.cn',
+    target: (process.env.BCOMIC_API_BASE_URL || loadEnv(isDev ? 'development' : 'production', process.cwd(), 'BCOMIC_').BCOMIC_API_BASE_URL || '').replace(/\/+$/, ''),
     pathRewrite: '/bcomic',
     timeout: 30000,
   },

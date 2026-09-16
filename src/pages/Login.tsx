@@ -492,18 +492,28 @@ const Login: React.FC = () => {
     }
   }
 
+  const refreshVerification = (mode: 'login' | 'register') => {
+    generateVerifyCode()
+    const form = mode === 'login' ? loginForm : registerForm
+    form.setFieldsValue({ code: '' })
+    resetTurnstile(mode)
+  }
+
+  const showAuthError = (mode: 'login' | 'register', errorMessage: string) => {
+    message.error(errorMessage)
+    refreshVerification(mode)
+  }
+
   const handleLogin = async (values: any) => {
     const isCodeValid = values.code?.toUpperCase() === verifyCode.toUpperCase()
 
     if (!isCodeValid) {
-      message.error(t('login.verifyCodeError'))
-      generateVerifyCode()
-      loginForm.setFieldsValue({ code: '' })
+      showAuthError('login', t('login.verifyCodeError'))
       return
     }
 
     if (!isAgreed) {
-      message.error(t('login.agreeRequired'))
+      showAuthError('login', t('login.agreeRequired'))
       return
     }
 
@@ -512,7 +522,7 @@ const Login: React.FC = () => {
 
     // 如果没有 token 且 Turnstile 已加载，说明用户未完成验证（仅生产环境检查）
     if (!import.meta.env.DEV && turnstileReady && !turnstileToken) {
-      message.error('请完成人机验证')
+      showAuthError('login', '请完成人机验证')
       return
     }
 
@@ -550,14 +560,11 @@ const Login: React.FC = () => {
           navigate('/home')
         }
       } else {
-        message.error(data.message || t('login.loginFailed'))
-        // 登录失败时重置 Turnstile
-        resetTurnstile('login')
+        showAuthError('login', data.message || t('login.loginFailed'))
       }
     } catch (error: any) {
       console.error('Login error:', error)
-      message.error(error.message || t('login.loginFailed'))
-      resetTurnstile('login')
+      showAuthError('login', error.message || t('login.loginFailed'))
     } finally {
       setLoading(false)
     }
@@ -567,19 +574,17 @@ const Login: React.FC = () => {
     const isCodeValid = values.code?.toUpperCase() === verifyCode.toUpperCase()
 
     if (!isCodeValid) {
-      message.error(t('login.verifyCodeError'))
-      generateVerifyCode()
-      registerForm.setFieldsValue({ code: '' })
+      showAuthError('register', t('login.verifyCodeError'))
       return
     }
 
     if (!isAgreed) {
-      message.error(t('login.agreeRequired'))
+      showAuthError('register', t('login.agreeRequired'))
       return
     }
 
     if (values.password !== values.confirmPassword) {
-      message.error(t('login.confirmPasswordMismatch'))
+      showAuthError('register', t('login.confirmPasswordMismatch'))
       return
     }
 
@@ -588,7 +593,7 @@ const Login: React.FC = () => {
 
     // 如果没有 token 且 Turnstile 已加载，说明用户未完成验证（仅生产环境检查）
     if (!import.meta.env.DEV && turnstileReady && !turnstileToken) {
-      message.error('请完成人机验证')
+      showAuthError('register', '请完成人机验证')
       return
     }
 
@@ -613,14 +618,11 @@ const Login: React.FC = () => {
         message.success(t('login.registerSuccess'))
         toggleMode()
       } else {
-        message.error(data.message || t('login.registerFailed'))
-        // 注册失败时重置 Turnstile
-        resetTurnstile('register')
+        showAuthError('register', data.message || t('login.registerFailed'))
       }
     } catch (error: any) {
       console.error('Register error:', error)
-      message.error(error.message || t('login.registerFailed'))
-      resetTurnstile('register')
+      showAuthError('register', error.message || t('login.registerFailed'))
     } finally {
       setLoading(false)
     }
@@ -727,6 +729,7 @@ const Login: React.FC = () => {
               <Form
                 form={loginForm}
                 onFinish={handleLogin}
+                onFinishFailed={() => refreshVerification('login')}
                 layout="vertical"
                 style={{ marginBottom: '0' }}
               >
@@ -762,18 +765,20 @@ const Login: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item
-                  name="code"
                   label={t('login.verifyCode')}
-                  rules={[{ required: true, message: t('login.verifyCodeRequired') }]}
+                  required
                 >
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <Input
-                      prefix={<KeyOutlined />}
-                      placeholder={t('login.verifyCodePlaceholder')}
-                      size="large"
-                      maxLength={4}
-                      style={{ flex: 1 }}
-                    />
+                    <Form.Item name="code" noStyle rules={[{ required: true, message: t('login.verifyCodeRequired') }]}>
+                      <Input
+                        prefix={<KeyOutlined />}
+                        placeholder={t('login.verifyCodePlaceholder')}
+                        autoComplete="off"
+                        size="large"
+                        maxLength={4}
+                        style={{ flex: 1 }}
+                      />
+                    </Form.Item>
                     <div style={{ cursor: 'pointer', userSelect: 'none' }} onClick={generateVerifyCode}>
                       <VerifyCode code={verifyCode} />
                     </div>
@@ -831,6 +836,7 @@ const Login: React.FC = () => {
               <Form
                 form={registerForm}
                 onFinish={handleRegister}
+                onFinishFailed={() => refreshVerification('register')}
                 layout="vertical"
                 style={{ marginBottom: '0' }}
               >
@@ -909,18 +915,20 @@ const Login: React.FC = () => {
                 </Form.Item>
 
                 <Form.Item
-                  name="code"
                   label={t('login.verifyCode')}
-                  rules={[{ required: true, message: t('login.verifyCodeRequired') }]}
+                  required
                 >
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <Input
-                      prefix={<KeyOutlined />}
-                      placeholder={t('login.verifyCodePlaceholder')}
-                      size="large"
-                      maxLength={4}
-                      style={{ flex: 1 }}
-                    />
+                    <Form.Item name="code" noStyle rules={[{ required: true, message: t('login.verifyCodeRequired') }]}>
+                      <Input
+                        prefix={<KeyOutlined />}
+                        placeholder={t('login.verifyCodePlaceholder')}
+                        autoComplete="off"
+                        size="large"
+                        maxLength={4}
+                        style={{ flex: 1 }}
+                      />
+                    </Form.Item>
                     <div style={{ cursor: 'pointer', userSelect: 'none' }} onClick={generateVerifyCode}>
                       <VerifyCode code={verifyCode} />
                     </div>

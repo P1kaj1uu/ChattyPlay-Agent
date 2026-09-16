@@ -25,6 +25,7 @@ import Footer from './components/Footer'
 import ClickEffect from './components/ClickEffect'
 import Live2DDashboard from './components/Live2DDashboard'
 import VersionUpdateModal from './components/VersionUpdateModal'
+import WechatSupport from './components/WechatSupport'
 import { GoofishLayout } from './components/goofish'
 import Dashboard from './pages/goofish/Dashboard'
 import Accounts from './pages/goofish/Accounts'
@@ -234,6 +235,7 @@ const AppContent: React.FC = () => {
       <Footer />
       {/* 只在 /home 路由下渲染看板娘 */}
       {isHomePage && <Live2DDashboard isVisible={true} />}
+      {isAuthenticated() && !isMobileDevice() && !isHomePage && location.pathname !== '/about' && <WechatSupport />}
     </div>
   )
 }

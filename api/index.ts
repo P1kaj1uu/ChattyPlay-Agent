@@ -3,9 +3,37 @@ import { cors } from 'hono/cors'
 import CryptoJS from 'crypto-js'
 
 const app = new Hono()
+const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')
 
 // CORS
 app.use('/*', cors())
+
+// 漫画 API 使用服务端环境变量，保留前端同源请求地址。
+app.get('/api/bcomic/*', async (c) => {
+  let target: URL
+  try {
+    target = new URL(process.env.BCOMIC_API_BASE_URL || '')
+    if (!['http:', 'https:'].includes(target.protocol)) throw new Error('Invalid protocol')
+  } catch {
+    return c.json({ code: -1, msg: '请配置有效的 BCOMIC_API_BASE_URL', data: null }, 503)
+  }
+  target.pathname = c.req.path.replace(/^\/api\/bcomic/, '/bcomic')
+  target.search = new URL(c.req.url).search
+  target.hash = ''
+
+  try {
+    const response = await fetch(target, { signal: AbortSignal.timeout(30000) })
+    return new Response(response.body, {
+      status: response.status,
+      headers: {
+        'Content-Type': response.headers.get('Content-Type') || 'application/json',
+        'Cache-Control': 'no-store',
+      },
+    })
+  } catch {
+    return c.json({ code: -1, msg: '漫画接口请求失败', data: null }, 502)
+  }
+})
 
 // ============ 认证相关常量 ============
 
@@ -685,15 +713,15 @@ app.get('/api/goofish-health', async (c) => {
 
 // 视频下载代理端点
 app.post('/api/resolve', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/resolve'
+  const targetUrl = `${videoParseBaseURL}/api/resolve`
   const body = await c.req.json()
 
   const response = await fetch(targetUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Referer': 'https://xiazaishipin.com/',
-      'Origin': 'https://xiazaishipin.com',
+      'Referer': `${videoParseBaseURL}/`,
+      'Origin': videoParseBaseURL,
       'Accept': 'application/json, text/plain, */*',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
@@ -748,15 +776,15 @@ app.get('/api/image-proxy', async (c) => {
 
 // B站视频下载代理
 app.post('/api/bilibili-download', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/bilibili-download'
+  const targetUrl = `${videoParseBaseURL}/api/bilibili-download`
   const body = await c.req.json()
 
   const response = await fetch(targetUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Referer': 'https://xiazaishipin.com/',
-      'Origin': 'https://xiazaishipin.com',
+      'Referer': `${videoParseBaseURL}/`,
+      'Origin': videoParseBaseURL,
       'Accept': '*/*',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
@@ -808,15 +836,15 @@ app.post('/api/bilibili-download', async (c) => {
 
 // 抖音/其他视频下载代理
 app.post('/api/proxy-download', async (c) => {
-  const targetUrl = 'https://xiazaishipin.com/api/proxy-download'
+  const targetUrl = `${videoParseBaseURL}/api/proxy-download`
   const body = await c.req.json()
 
   const response = await fetch(targetUrl, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'Referer': 'https://xiazaishipin.com/',
-      'Origin': 'https://xiazaishipin.com',
+      'Referer': `${videoParseBaseURL}/`,
+      'Origin': videoParseBaseURL,
       'Accept': '*/*',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
     },
