@@ -232,7 +232,7 @@ const AppContent: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      <Footer />
+      {!isLoginPage && !location.pathname.includes('/goofish') && <Footer />}
       {/* 只在 /home 路由下渲染看板娘 */}
       {isHomePage && <Live2DDashboard isVisible={true} />}
       {isAuthenticated() && !isMobileDevice() && !isHomePage && location.pathname !== '/about' && <WechatSupport />}

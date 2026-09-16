@@ -14,7 +14,8 @@ import {
   GoldOutlined,
   AndroidOutlined,
   RobotOutlined,
-  NodeIndexOutlined
+  NodeIndexOutlined,
+  // NotificationOutlined
 } from '@ant-design/icons'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
@@ -209,6 +210,7 @@ const Navbar: React.FC = () => {
     { key: '/markmap', label: t('nav.aimarkmap'), icon: <NodeIndexOutlined /> },
     // 如果是移动端，不显示监工菜单项
     ...(isMobile ? [] : [{ key: '/worker', label: t('nav.worker'), icon: <RobotOutlined /> }]),
+    // { key: '/news', label: t('nav.news'), icon: <NotificationOutlined /> },
     { key: '/about', label: t('nav.about'), icon: <UserOutlined /> }
   ]
 
@@ -250,17 +252,9 @@ const Navbar: React.FC = () => {
     }
   ]
 
-  // 获取当前选中的菜单项
-  const getSelectedKey = (pathname: string): string => {
-    // 检查是否以 /cartoon 开头
-    if (pathname.startsWith('/cartoon')) {
-      return '/cartoon'
-    }
-    // 其他路径直接返回
-    return pathname
-  }
-
-  const currentKey = getSelectedKey(location.pathname)
+  const currentKey = menuItems.find(({ key }) =>
+    location.pathname === key || location.pathname.startsWith(`${key}/`)
+  )?.key ?? location.pathname
 
   // 移动端视图
   if (isMobile) {
