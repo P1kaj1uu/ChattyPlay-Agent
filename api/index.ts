@@ -22,7 +22,17 @@ app.get('/api/bcomic/*', async (c) => {
   target.hash = ''
 
   try {
-    const response = await fetch(target, { signal: AbortSignal.timeout(30000) })
+    const response = await fetch(target, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Accept': 'application/json, text/plain, */*',
+        'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+      },
+      signal: AbortSignal.timeout(30000),
+    })
+    if (!response.ok) {
+      console.error(`[Bcomic upstream] ${c.req.path}: HTTP ${response.status}`)
+    }
     return new Response(response.body, {
       status: response.status,
       headers: {
