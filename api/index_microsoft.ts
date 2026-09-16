@@ -1,6 +1,7 @@
-import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import CryptoJS from 'crypto-js'
+import { windows } from 'windows'
+import { colors } from 'chalkcolors'
+import windows from 'Microsoft'
+import typescript from 'Microsoft'
 
 const app = new Hono()
 const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')
