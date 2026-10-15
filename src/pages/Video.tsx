@@ -1,10 +1,12 @@
-import React, { useState } from 'react'
+import React from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { Button } from 'antd'
-import { PlayCircleOutlined, DownloadOutlined } from '@ant-design/icons'
+import { PlayCircleOutlined, DownloadOutlined, SoundOutlined } from '@ant-design/icons'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import VideoParse from '@/components/video/VideoParse'
 import VideoDownload from '@/components/video/VideoDownload'
+import MusicPlayer from '@/components/video/MusicPlayer'
 
 const PageContainer = styled.div`
   max-width: 1200px;
@@ -15,6 +17,7 @@ const PageContainer = styled.div`
 
 const TabContainer = styled.div`
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 16px;
   margin-bottom: 32px;
@@ -55,7 +58,18 @@ const TabButton = styled(Button)<{ $active: boolean }>`
 
 const Video: React.FC = () => {
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<'parse' | 'download'>('parse')
+  const [searchParams, setSearchParams] = useSearchParams()
+  const tab = searchParams.get('tab')
+  const activeTab = tab === 'download' || tab === 'music' ? tab : 'parse'
+
+  const setActiveTab = (tab: 'parse' | 'download' | 'music') => {
+    setSearchParams(previous => {
+      const next = new URLSearchParams(previous)
+      if (tab === 'parse') next.delete('tab')
+      else next.set('tab', tab)
+      return next
+    })
+  }
 
   return (
     <PageContainer>
@@ -74,9 +88,18 @@ const Video: React.FC = () => {
         >
           {t('video.tabDownload')}
         </TabButton>
+        <TabButton
+          $active={activeTab === 'music'}
+          icon={<SoundOutlined />}
+          onClick={() => setActiveTab('music')}
+        >
+          {t('video.tabMusic')}
+        </TabButton>
       </TabContainer>
 
-      {activeTab === 'parse' ? <VideoParse /> : <VideoDownload />}
+      {activeTab === 'parse' && <VideoParse />}
+      {activeTab === 'download' && <VideoDownload />}
+      {activeTab === 'music' && <MusicPlayer />}
     </PageContainer>
   )
 }

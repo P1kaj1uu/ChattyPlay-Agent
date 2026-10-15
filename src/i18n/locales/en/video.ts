@@ -1,6 +1,7 @@
 export default {
   tabParse: 'Video Parse',
   tabDownload: 'Video Download',
+  tabMusic: 'Music Player',
   title: 'Video Parse',
   description: 'Enter video link to play online, supports major video platforms',
   placeholder: 'Enter video link',

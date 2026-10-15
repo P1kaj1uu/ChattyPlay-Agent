@@ -179,7 +179,7 @@ const Home: React.FC = () => {
       title: t('home.features.music.title'),
       description: t('home.features.music.description'),
       icon: <SoundOutlined />,
-      path: '/music'
+      path: '/video?tab=music'
     },
     {
       title: t('home.features.video.title'),

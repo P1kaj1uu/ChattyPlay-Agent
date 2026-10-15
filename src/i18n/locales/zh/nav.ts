@@ -1,7 +1,7 @@
 const nav = {
   home: '首页',
   chatgpt: '助手',
-  video: '视频',
+  video: '影音',
   music: '音乐',
   cartoon: '漫画',
   paper: '论文',
@@ -17,6 +17,8 @@ const nav = {
   navigationMenu: '导航菜单',
   goofish: '闲鱼',
   worker: '监工',
+  games: '游戏',
+  gamesComingSoon: '游戏内容即将上线',
   user: '当前用户：'
 }
 

@@ -6,8 +6,6 @@ import styled from 'styled-components'
 import axios from 'axios'
 
 const MusicContainer = styled.div`
-  min-height: calc(100vh - 120px);
-  padding: 20px;
   position: relative;
 `
 
@@ -418,7 +416,7 @@ interface Comment {
   content: string
 }
 
-const Music: React.FC = () => {
+const MusicPlayer: React.FC = () => {
   const { t } = useTranslation()
   const [query, setQuery] = useState('')
   const [musicList, setMusicList] = useState<SearchResult[]>([])
@@ -637,4 +635,4 @@ const Music: React.FC = () => {
   )
 }
 
-export default Music
+export default MusicPlayer

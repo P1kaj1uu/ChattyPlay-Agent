@@ -134,10 +134,10 @@ const Footer: React.FC = () => {
     { path: '/papers', label: t('nav.paper') },
     { path: '/goofish', label: t('nav.goofish') },
     { path: '/video', label: t('nav.video') },
-    { path: '/music', label: t('nav.music') },
     { path: '/gold', label: t('nav.gold') },
     { path: '/gpt', label: t('nav.chatgpt') },
     { path: '/markmap', label: t('nav.aimarkmap') },
+    { path: '/games', label: t('nav.games') },
   ]
 
   return (

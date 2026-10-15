@@ -1,6 +1,7 @@
 export default {
   tabParse: '视频解析',
   tabDownload: '视频下载',
+  tabMusic: '音乐播放',
   title: '视频解析',
   description: '输入视频链接即可在线播放，支持各大视频平台',
   placeholder: '请输入视频链接',

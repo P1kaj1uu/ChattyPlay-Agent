@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import { GoogleOAuthProvider } from '@react-oauth/google'
 import { isAuthenticated } from './utils/token'
 import { ConfigProvider, Spin } from 'antd'
@@ -9,7 +9,6 @@ import Home from './pages/Home'
 import Login from './pages/Login'
 import GPT from './pages/GPT'
 import Video from './pages/Video'
-import Music from './pages/Music'
 import Cartoon from './pages/Cartoon'
 import CartoonDetail from './pages/CartoonDetail'
 import CartoonChapter from './pages/CartoonChapter'
@@ -39,6 +38,7 @@ import Goods from './pages/goofish/Goods'
 import { scrollToTop } from './utils/backTop'
 import { isMobileDevice } from './utils/isMobile'
 import WorkerAgent from './pages/WorkerAgent'
+import Games from './pages/Games'
 import Markmap from './pages/Markmap'
 import Latex from './pages/Latex'
 import Markdown from './pages/Markdown'
@@ -204,7 +204,7 @@ const AppContent: React.FC = () => {
           <Route path="/home" element={<Home />} />
           <Route path="/gpt" element={<GPT />} />
           <Route path="/video" element={<Video />} />
-          <Route path="/music" element={<Music />} />
+          <Route path="/music" element={<Navigate to="/video?tab=music" replace />} />
           <Route path="/cartoon" element={<Cartoon />} />
           <Route path="/cartoon/:id" element={<CartoonDetail />} />
           <Route path="/cartoon/chapter/:comicId" element={<CartoonChapter />} />
@@ -219,6 +219,7 @@ const AppContent: React.FC = () => {
           <Route path="/latex" element={<Latex />} />
           <Route path="/markdown" element={<Markdown />} />
           <Route path="/worker" element={<WorkerAgent />} />
+          <Route path="/games" element={<Games />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>
             <Route index element={<Dashboard />} />

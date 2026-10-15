@@ -1,7 +1,7 @@
 const nav = {
   home: 'Home',
   chatgpt: 'ChatGPT',
-  video: 'Video',
+  video: 'Media',
   music: 'Music',
   cartoon: 'Cartoon',
   paper: 'Paper',
@@ -17,6 +17,8 @@ const nav = {
   navigationMenu: 'Navigation Menu',
   goofish: 'Goofish',
   worker: 'Worker',
+  games: 'Games',
+  gamesComingSoon: 'Games are coming soon',
   user: 'Current User:'
 }
 
