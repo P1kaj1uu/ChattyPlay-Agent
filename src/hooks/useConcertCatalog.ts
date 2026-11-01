@@ -16,10 +16,7 @@ export function useConcertCatalog() {
 
   useEffect(() => {
     const controller = new AbortController()
-    let busy = false
     const sync = async () => {
-      if (busy || controller.signal.aborted) return
-      busy = true
       setSyncing(true)
       setError('')
       try {
@@ -45,25 +42,11 @@ export function useConcertCatalog() {
           }
         }
       } finally {
-        busy = false
         if (!controller.signal.aborted) setSyncing(false)
       }
     }
-    const onVisible = () => {
-      if (document.visibilityState === 'visible') void sync()
-    }
     void sync()
-    window.addEventListener('focus', onVisible)
-    window.addEventListener('online', onVisible)
-    document.addEventListener('visibilitychange', onVisible)
-    const timer = window.setInterval(onVisible, 5 * 60 * 1000)
-    return () => {
-      controller.abort()
-      window.clearInterval(timer)
-      window.removeEventListener('focus', onVisible)
-      window.removeEventListener('online', onVisible)
-      document.removeEventListener('visibilitychange', onVisible)
-    }
+    return () => controller.abort()
   }, [revision])
   return {
     catalog: data?.catalog || null,
