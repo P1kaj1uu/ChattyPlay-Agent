@@ -1,7 +1,7 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import CryptoJS from 'crypto-js'
-import { createConcertRoutes } from '../src/services/concertApi'
+import { createConcertRoutes } from '../src/services/concertApi.js'
 
 const app = new Hono()
 const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')

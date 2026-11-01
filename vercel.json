@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/index.ts": {
+      "maxDuration": 60,
+      "includeFiles": "node_modules/@jitl/quickjs-wasmfile-release-sync/dist/**"
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",

@@ -8,6 +8,9 @@ interface ImportMetaEnv {
   readonly VITE_GOOFISH_API_URL?: string
   readonly VITE_GOOFISH_WS_URL?: string
   readonly VITE_NEWS_API_BASE_URL: string
+  readonly VITE_GAMES_API_URL?: string
+  readonly VITE_CONCERT_API_URL?: string
+  readonly VITE_CONCERT_OSS_API_URL?: string
 }
 
 interface ImportMeta {

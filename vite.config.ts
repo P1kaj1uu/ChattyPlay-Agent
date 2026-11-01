@@ -1,4 +1,4 @@
-import { defineConfig, type Plugin } from 'vite'
+import { defineConfig, loadEnv, type Plugin } from 'vite'
 import { getRequestListener } from '@hono/node-server'
 import { createConcertRoutes } from './src/services/concertApi'
 import react from '@vitejs/plugin-react'
@@ -11,6 +11,10 @@ function concertDataPlugin(): Plugin {
   const listener = getRequestListener(createConcertRoutes().fetch)
   return {
     name: 'concert-live-data',
+    configResolved(config) {
+      const env = loadEnv(config.mode, config.envDir, 'VITE_CONCERT_')
+      for (const [key, value] of Object.entries(env)) process.env[key] ??= value
+    },
     configureServer(server) {
       server.middlewares.use('/api/concert', listener)
     },

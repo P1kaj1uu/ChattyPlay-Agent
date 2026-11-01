@@ -184,12 +184,6 @@ export default function Concert() {
     const timer = window.setTimeout(() => setToast(''), 3200)
     return () => window.clearTimeout(timer)
   }, [toast])
-  useEffect(() => {
-    document.title = '演唱 Live · 在出发前，看看现场'
-    return () => {
-      document.title = 'ChattyPlay'
-    }
-  }, [])
   const venues = catalog?.venues || []
   const baseVenue =
     venues.find((item) => item.id === params.get('venue')) ||

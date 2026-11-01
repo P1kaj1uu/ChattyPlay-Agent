@@ -14,7 +14,6 @@
     "build": "tsc && vite build",
     "start": "tsx src/services/server.ts",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "test:concert": "node --import tsx --test src/services/concertData.test.ts src/components/concert/geometry.test.ts",
     "preview": "vite preview",
     "worker:dev": "wrangler dev src/services/worker.ts",
     "worker:deploy": "wrangler deploy",

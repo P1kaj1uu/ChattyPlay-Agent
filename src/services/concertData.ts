@@ -4,14 +4,34 @@ import {
 } from 'quickjs-emscripten-core'
 import variant from '@jitl/quickjs-wasmfile-release-sync'
 import type { Catalog, Section } from '../components/concert/types'
-import { isConcertCatalog, isConcertSections } from './concertValidation'
+import { isConcertCatalog, isConcertSections } from './concertValidation.js'
 
-const SITE = 'https://shijiao.xingpaste.com/'
-const ASSET_ORIGIN = 'https://shijiao-static-cn.oss-cn-beijing.aliyuncs.com'
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024
 let engine: ReturnType<typeof newQuickJSWASMModuleFromVariant> | undefined
 
-export class ConcertSourceError extends Error {}
+export class ConcertSourceError extends Error {
+  readonly code: string
+  readonly stage: string
+  readonly upstreamStatus?: number
+  readonly cause?: unknown
+
+  constructor(
+    message: string,
+    options: {
+      code?: string
+      stage?: string
+      upstreamStatus?: number
+      cause?: unknown
+    } = {}
+  ) {
+    super(message)
+    this.name = 'ConcertSourceError'
+    this.code = options.code || 'CONCERT_SOURCE_INVALID'
+    this.stage = options.stage || 'parse'
+    this.upstreamStatus = options.upstreamStatus
+    this.cause = options.cause
+  }
+}
 export class ConcertVersionChanged extends Error {}
 export interface ConcertDataInfo {
   version: string
@@ -24,47 +44,102 @@ export interface ConcertLayoutResponse extends ConcertDataInfo {
   sections: Section[]
 }
 
-function assetUrl(path: string, base: string): string {
+function configuredUrl(
+  key: 'VITE_CONCERT_API_URL' | 'VITE_CONCERT_OSS_API_URL'
+) {
+  const value = process.env[key]?.trim()
+  if (!value)
+    throw new ConcertSourceError(`未配置环境变量 ${key}`, {
+      code: 'CONCERT_CONFIG_MISSING',
+      stage: 'configuration'
+    })
+  try {
+    const url = new URL(value)
+    if (!['https:', 'http:'].includes(url.protocol))
+      throw new Error('Invalid protocol')
+    return url
+  } catch {
+    throw new ConcertSourceError(
+      `环境变量 ${key} 必须是有效的 HTTP 或 HTTPS 地址`,
+      { code: 'CONCERT_CONFIG_INVALID', stage: 'configuration' }
+    )
+  }
+}
+
+function assetUrl(path: string, base: string, origin: string): string {
   const url = new URL(path, base)
   if (
-    url.origin !== ASSET_ORIGIN ||
+    url.origin !== origin ||
     !/^\/releases\/[\w-]+\/assets\/[\w.-]+\.js$/.test(url.pathname)
   ) {
-    throw new ConcertSourceError('参考站资源地址发生变化')
+    throw new ConcertSourceError('参考站资源地址与配置的 OSS 地址不匹配', {
+      code: 'CONCERT_ASSET_REJECTED',
+      stage: 'assets'
+    })
   }
   return url.href
 }
 
-async function readText(fetcher: typeof fetch, url: string): Promise<string> {
-  const response = await fetcher(url, {
-    cache: 'no-store',
-    redirect: 'error',
-    signal: AbortSignal.timeout(12000),
-    headers: {
-      'Cache-Control': 'no-cache',
-      Accept: 'text/html,application/javascript'
-    }
-  })
-  if (!response.ok || !response.body)
-    throw new ConcertSourceError(`参考站请求失败 (${response.status})`)
-  const reader = response.body.getReader()
-  const decoder = new TextDecoder()
-  let result = '',
-    bytes = 0
+async function readText(
+  fetcher: typeof fetch,
+  url: string,
+  stage: string
+): Promise<string> {
   try {
-    while (true) {
-      const { value, done } = await reader.read()
-      if (done) break
-      bytes += value.byteLength
-      if (bytes > MAX_SOURCE_BYTES) {
-        await reader.cancel()
-        throw new ConcertSourceError('参考站资源超过大小限制')
+    const response = await fetcher(url, {
+      cache: 'no-store',
+      redirect: 'error',
+      signal: AbortSignal.timeout(12000),
+      headers: {
+        'Cache-Control': 'no-cache',
+        Accept: 'text/html,application/javascript'
       }
-      result += decoder.decode(value, { stream: true })
+    })
+    if (!response.ok || !response.body)
+      throw new ConcertSourceError(`参考站请求失败 (HTTP ${response.status})`, {
+        code: 'CONCERT_UPSTREAM_HTTP_ERROR',
+        stage,
+        upstreamStatus: response.status
+      })
+    const reader = response.body.getReader()
+    const decoder = new TextDecoder()
+    let result = '',
+      bytes = 0
+    try {
+      while (true) {
+        const { value, done } = await reader.read()
+        if (done) break
+        bytes += value.byteLength
+        if (bytes > MAX_SOURCE_BYTES) {
+          await reader.cancel()
+          throw new ConcertSourceError('参考站资源超过大小限制', {
+            code: 'CONCERT_SOURCE_TOO_LARGE',
+            stage
+          })
+        }
+        result += decoder.decode(value, { stream: true })
+      }
+      return result + decoder.decode()
+    } finally {
+      reader.releaseLock()
     }
-    return result + decoder.decode()
-  } finally {
-    reader.releaseLock()
+  } catch (error) {
+    if (error instanceof ConcertSourceError) throw error
+    const timeout =
+      error instanceof Error &&
+      ['TimeoutError', 'AbortError'].includes(error.name)
+    throw new ConcertSourceError(
+      timeout
+        ? '参考站请求超时，请稍后重试'
+        : '无法连接参考站，请检查服务端网络',
+      {
+        code: timeout
+          ? 'CONCERT_UPSTREAM_TIMEOUT'
+          : 'CONCERT_UPSTREAM_UNREACHABLE',
+        stage,
+        cause: error
+      }
+    )
   }
 }
 
@@ -124,7 +199,11 @@ export async function extractConcertData(
   })()`
   engine ??= newQuickJSWASMModuleFromVariant(variant).catch((error) => {
     engine = undefined
-    throw error
+    throw new ConcertSourceError('数据解析引擎加载失败，请检查部署文件', {
+      code: 'CONCERT_ENGINE_UNAVAILABLE',
+      stage: 'engine',
+      cause: error
+    })
   })
   const vm = await engine
   const context = vm.newContext()
@@ -167,21 +246,25 @@ export function createConcertDataService(fetcher: typeof fetch = fetch) {
     Promise<{ version: string; source: string; catalog: Catalog }>
   >()
   async function currentRelease() {
+    const site = configuredUrl('VITE_CONCERT_API_URL')
+    const assetOrigin = configuredUrl('VITE_CONCERT_OSS_API_URL').origin
+    site.hash = ''
+    site.searchParams.set('_concert_sync', String(Date.now()))
     // Recheck the entry page for EVERY request. Only content-hashed releases are
     // reused; there is deliberately no TTL cache of the "latest" release pointer.
-    const html = await readText(fetcher, `${SITE}?_concert_sync=${Date.now()}`)
+    const html = await readText(fetcher, site.href, 'homepage')
     const moduleTag = html.match(/<script\b[^>]*type=["']module["'][^>]*>/)?.[0]
     const entry = moduleTag?.match(/\bsrc=["']([^"']+)["']/)?.[1]
     if (!entry) throw new ConcertSourceError('参考站未提供当前发布版本')
-    const entryUrl = assetUrl(entry, SITE)
+    const entryUrl = assetUrl(entry, site.href, assetOrigin)
     let release = releases.get(entryUrl)
     if (!release) {
       release = (async () => {
-        const main = await readText(fetcher, entryUrl)
+        const main = await readText(fetcher, entryUrl, 'entry')
         const dataPath = main.match(/assets\/data-[\w-]+\.js/)?.[0]
         if (!dataPath) throw new ConcertSourceError('参考站未提供数据模块')
-        const dataUrl = assetUrl(`../${dataPath}`, entryUrl)
-        const source = await readText(fetcher, dataUrl)
+        const dataUrl = assetUrl(`../${dataPath}`, entryUrl, assetOrigin)
+        const source = await readText(fetcher, dataUrl, 'data')
         const catalog = await extractConcertData(source, null)
         if (!isConcertCatalog(catalog))
           throw new ConcertSourceError('参考站场馆或演出数据不完整')

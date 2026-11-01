@@ -117,6 +117,8 @@ const localIP = getLocalIP()
 
 // 环境判断
 const isDev = process.env.NODE_ENV !== 'production'
+const concertEnv = loadEnv(isDev ? 'development' : 'production', process.cwd(), 'VITE_CONCERT_')
+for (const [key, value] of Object.entries(concertEnv)) process.env[key] ??= value
 const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || loadEnv(isDev ? 'development' : 'production', process.cwd(), 'VIDEO_PARSE_').VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')
 
 // CORS 配置

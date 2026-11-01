@@ -1,5 +1,23 @@
 import { Hono } from 'hono'
-import { ConcertVersionChanged, createConcertDataService } from './concertData'
+import {
+  ConcertSourceError,
+  ConcertVersionChanged,
+  createConcertDataService
+} from './concertData.js'
+
+function syncFailure(error: unknown, fallback: string) {
+  if (error instanceof ConcertSourceError)
+    return {
+      error:
+        error.code === 'CONCERT_SOURCE_INVALID'
+          ? '参考站数据格式发生变化，暂时无法解析'
+          : error.message,
+      code: error.code,
+      stage: error.stage,
+      upstreamStatus: error.upstreamStatus
+    }
+  return { error: fallback, code: 'CONCERT_INTERNAL_ERROR', stage: 'internal' }
+}
 
 export function createConcertRoutes(service = createConcertDataService()) {
   const routes = new Hono()
@@ -12,7 +30,7 @@ export function createConcertRoutes(service = createConcertDataService()) {
       return context.json(await service.catalog())
     } catch (error) {
       console.error('[Concert sync]', error)
-      return context.json({ error: '暂时无法同步最新场馆数据' }, 502)
+      return context.json(syncFailure(error, '暂时无法同步最新场馆数据'), 502)
     }
   })
   routes.get('/layout', async (context) => {
@@ -34,7 +52,7 @@ export function createConcertRoutes(service = createConcertDataService()) {
           409
         )
       console.error('[Concert layout sync]', error)
-      return context.json({ error: '暂时无法同步本场分区数据' }, 502)
+      return context.json(syncFailure(error, '暂时无法同步本场分区数据'), 502)
     }
   })
   return routes
