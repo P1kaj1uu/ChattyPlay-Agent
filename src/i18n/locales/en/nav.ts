@@ -17,8 +17,7 @@ const nav = {
   navigationMenu: 'Navigation Menu',
   goofish: 'Goofish',
   worker: 'Worker',
-  games: 'Games',
-  gamesComingSoon: 'Games are coming soon',
+  concert: 'Concerts',
   user: 'Current User:'
 }
 

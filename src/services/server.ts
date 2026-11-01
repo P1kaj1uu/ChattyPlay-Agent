@@ -23,6 +23,7 @@ import { createAutoSellRoutes } from '../goofish/api/routes/autosell'
 import { createWorkflowRoutes } from '../goofish/api/routes/workflow.route'
 import { authRoute } from '../goofish/api/routes/auth.route'
 import { loadEnv } from 'vite'
+import { createConcertRoutes } from './concertApi'
 
 const goofishLogger = createLogger('Goofish:Integration')
 const app = new Hono()
@@ -131,6 +132,7 @@ app.use('/*', cors({
 
 // 日志中间件
 app.use('/*', logger())
+app.route('/api/concert', createConcertRoutes())
 
 // 请求计时中间件
 app.use('/*', async (c, next) => {

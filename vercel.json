@@ -1,4 +1,10 @@
 {
+  "functions": {
+    "api/index.ts": {
+      "includeFiles": "node_modules/@jitl/quickjs-wasmfile-release-sync/dist/**",
+      "maxDuration": 60
+    }
+  },
   "headers": [
     {
       "source": "/api/(.*)",
@@ -10,7 +16,7 @@
       ]
     },
     {
-      "source": "/(.*)",
+      "source": "/((?!api/).*)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }
       ]

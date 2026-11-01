@@ -1,12 +1,14 @@
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import CryptoJS from 'crypto-js'
+import { createConcertRoutes } from '../src/services/concertApi'
 
 const app = new Hono()
 const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || '').replace(/\/+$/, '')
 
 // CORS
 app.use('/*', cors())
+app.route('/api/concert', createConcertRoutes())
 
 // 漫画 API 使用服务端环境变量，保留前端同源请求地址。
 app.get('/api/bcomic/*', async (c) => {

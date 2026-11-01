@@ -1,9 +1,24 @@
-import { defineConfig } from 'vite'
+import { defineConfig, type Plugin } from 'vite'
+import { getRequestListener } from '@hono/node-server'
+import { createConcertRoutes } from './src/services/concertApi'
 import react from '@vitejs/plugin-react'
 import pkg from './package.json'
 import { spawn } from 'child_process'
 import { copyFileSync, existsSync } from 'fs'
 import { resolve } from 'path'
+
+function concertDataPlugin(): Plugin {
+  const listener = getRequestListener(createConcertRoutes().fetch)
+  return {
+    name: 'concert-live-data',
+    configureServer(server) {
+      server.middlewares.use('/api/concert', listener)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use('/api/concert', listener)
+    }
+  }
+}
 
 // Hono 服务器插件 - 自动启动后端服务
 function honoServerPlugin() {
@@ -68,7 +83,7 @@ export default defineConfig({
       }
     }
   },
-  plugins: [react(), honoServerPlugin(), copyHtaccessPlugin()],
+  plugins: [react(), concertDataPlugin(), honoServerPlugin(), copyHtaccessPlugin()],
   server: {
     host: '0.0.0.0', // 允许真机通过局域网 IP 访问
     port: 3000,

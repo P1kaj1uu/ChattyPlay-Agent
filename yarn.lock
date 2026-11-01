@@ -4764,3 +4764,22 @@ zrender@6.0.0:
   integrity sha512-41dFXEEXuJpNecuUQq6JlbybmnHaqqpGlbH1yxnA5V9MMP4SbohSVZsJIwz+zdjQXSSlR1Vc34EgH1zxyTDvhg==
   dependencies:
     tslib "2.3.0"
+
+"@jitl/quickjs-ffi-types@0.32.0":
+  version "0.32.0"
+  resolved "https://registry.npmmirror.com/@jitl/quickjs-ffi-types/-/quickjs-ffi-types-0.32.0.tgz"
+  integrity sha512-v9T+GQpmk43VDJ7d72sf0Nexhk+ArvtUihW27dy7lqAl0zBObFKtSBBIm5RBjwIhE8VwsPPm9PNuvPvNqLWUEg==
+
+"@jitl/quickjs-wasmfile-release-sync@0.32.0":
+  version "0.32.0"
+  resolved "https://registry.npmmirror.com/@jitl/quickjs-wasmfile-release-sync/-/quickjs-wasmfile-release-sync-0.32.0.tgz"
+  integrity sha512-BKNDI/TPBfGlLNGYpLrhcDGXmIk4xHm4MRAisOBnOzpXVn9HZWsfmMAc9WMBrAHjvvds6HOikKeaOBKdPdpVrg==
+  dependencies:
+    "@jitl/quickjs-ffi-types" "0.32.0"
+
+"quickjs-emscripten-core@0.32.0":
+  version "0.32.0"
+  resolved "https://registry.npmmirror.com/quickjs-emscripten-core/-/quickjs-emscripten-core-0.32.0.tgz"
+  integrity sha512-QFnPfjFey8EqknSrSxe1hZrf1/8z7/6s1QzGOmKo6++02r7QRRX7ZoyNaZh7JuVjWsVW87KnQrbZqnHkOAzUyg==
+  dependencies:
+    "@jitl/quickjs-ffi-types" "0.32.0"

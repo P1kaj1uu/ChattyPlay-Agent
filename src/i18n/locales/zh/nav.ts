@@ -17,8 +17,7 @@ const nav = {
   navigationMenu: '导航菜单',
   goofish: '闲鱼',
   worker: '监工',
-  games: '游戏',
-  gamesComingSoon: '游戏内容即将上线',
+  concert: '演唱',
   user: '当前用户：'
 }
 

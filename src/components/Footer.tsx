@@ -137,7 +137,7 @@ const Footer: React.FC = () => {
     { path: '/gold', label: t('nav.gold') },
     { path: '/gpt', label: t('nav.chatgpt') },
     { path: '/markmap', label: t('nav.aimarkmap') },
-    { path: '/games', label: t('nav.games') },
+    { path: '/concert', label: t('nav.concert') },
   ]
 
   return (

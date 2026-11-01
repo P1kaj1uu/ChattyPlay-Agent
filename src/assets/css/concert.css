@@ -1,0 +1,1745 @@
+.concert-app,
+.concert-dialog {
+  --concert-ink: #263e32;
+  --concert-muted: #667664;
+  --concert-line: #dce3d7;
+  --concert-paper: #fcfdf9;
+  --concert-green: #315b45;
+  color: var(--concert-ink);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei',
+    sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+.concert-app {
+  min-height: calc(100dvh - 64px);
+  background: #f3f5ee;
+}
+.concert-app.is-exploring {
+  display: flex;
+  flex-direction: column;
+  height: calc(100dvh - 64px);
+  min-height: 560px;
+}
+.concert-app *,
+.concert-dialog * {
+  box-sizing: border-box;
+}
+.concert-app button,
+.concert-dialog button {
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background-color 150ms,
+    color 150ms,
+    opacity 150ms;
+}
+.concert-app button:disabled,
+.concert-dialog button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+.concert-app button:active:not(:disabled),
+.concert-dialog button:active:not(:disabled) {
+  transform: scale(0.96);
+}
+.concert-app button:focus-visible,
+.concert-app a:focus-visible,
+.concert-app [tabindex]:focus-visible,
+.concert-dialog button:focus-visible,
+.concert-dialog a:focus-visible,
+.concert-dialog [tabindex]:focus-visible {
+  outline: 2px solid #315e79;
+  outline-offset: 3px;
+}
+.concert-app svg,
+.concert-dialog svg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  stroke-width: 1.6;
+  vertical-align: middle;
+}
+.concert-app h1,
+.concert-app h2,
+.concert-app h3,
+.concert-dialog h2,
+.concert-dialog h3 {
+  color: inherit;
+}
+.concert-app input,
+.concert-app select,
+.concert-dialog input,
+.concert-dialog select,
+.concert-dialog textarea {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid #cdd8c6;
+  border-radius: 9px;
+  background: #fff;
+  color: #304b38;
+  font: inherit;
+  outline: none;
+}
+.concert-app input:focus-visible,
+.concert-app select:focus-visible,
+.concert-dialog input:focus-visible,
+.concert-dialog select:focus-visible,
+.concert-dialog textarea:focus-visible {
+  outline: 2px solid #315e79;
+  outline-offset: 2px;
+}
+.concert-app input::placeholder,
+.concert-dialog input::placeholder,
+.concert-dialog textarea::placeholder {
+  color: #798573;
+}
+.concert-app .primary-button,
+.concert-app .secondary-button,
+.concert-dialog .primary-button,
+.concert-dialog .secondary-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 1px solid #d0dcc7;
+  border-radius: 9px;
+  background: #f2f6eb;
+  color: #36523c;
+  font-weight: 500;
+  text-decoration: none;
+}
+.concert-app .primary-button,
+.concert-dialog .primary-button {
+  background: #315b45;
+  color: #fff;
+  border-color: #315b45;
+}
+.concert-app .icon-button,
+.concert-dialog .icon-button {
+  display: inline-grid;
+  place-items: center;
+  width: 40px;
+  min-height: 40px;
+  flex: none;
+  padding: 8px;
+  background: transparent;
+  color: #506a4c;
+  border: 0;
+  border-radius: 8px;
+}
+.concert-app .text-button,
+.concert-dialog .text-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 0;
+  border: 0;
+  background: none;
+  color: #44683d;
+  font-size: 13px;
+}
+.concert-app .full-width,
+.concert-dialog .full-width {
+  width: 100%;
+}
+.concert-app .muted,
+.concert-app .storage-note,
+.concert-dialog .storage-note {
+  color: var(--concert-muted);
+  font-size: 12px;
+  line-height: 1.85;
+}
+.concert-app .eyebrow {
+  color: #596e50;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  margin: 6px 0 20px;
+}
+.concert-topbar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  flex: none;
+  min-height: 76px;
+  padding: 12px 24px;
+  background: var(--concert-paper);
+  border-bottom: 1px solid var(--concert-line);
+}
+.concert-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 200px;
+}
+.concert-brand > span {
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 13px;
+  background: #315b45;
+  color: #edf4dd;
+}
+.concert-brand > span svg {
+  width: 25px;
+  height: 25px;
+}
+.concert-brand h1 {
+  margin: 0;
+  font-size: 19px;
+  line-height: 1.4;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+.concert-brand p {
+  margin: 2px 0 0;
+  color: #596e50;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+}
+.concert-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+  max-width: 620px;
+  min-height: 44px;
+  padding: 10px 14px;
+  text-align: left;
+  background: #f1f4ec;
+  border: 1px solid #dce4d4;
+  border-radius: 10px;
+}
+.concert-search > span {
+  flex: 1;
+  font-size: 13px;
+  color: #5a7151;
+}
+.concert-search kbd {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #d8e0ce;
+  border-radius: 5px;
+  color: #7a8a6b;
+  font: 12px/1 monospace;
+  background: #fafbf7;
+}
+.concert-help-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  margin-inline-start: auto;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #5b7054 !important;
+  font-size: 13px !important;
+}
+.concert-data-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex: none;
+  min-height: 36px;
+  padding: 0 24px;
+  background: #eff4e8;
+  border-bottom: 1px solid #e1e7db;
+  color: #607355;
+  font-size: 11px;
+}
+.concert-data-status > span {
+  min-width: 0;
+}
+.concert-data-status.is-stale {
+  color: #7b6035;
+  background: #f8f1e5;
+}
+.concert-data-status button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 34px;
+  flex: none;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  font-size: 11px;
+}
+.concert-data-status svg {
+  width: 14px;
+  height: 14px;
+}
+.concert-contextbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex: none;
+  min-height: 88px;
+  padding: 14px 24px;
+  background: var(--concert-paper);
+  border-bottom: 1px solid var(--concert-line);
+}
+.concert-context {
+  min-width: 0;
+  flex: 1;
+}
+.concert-context > button {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  max-width: 100%;
+  min-height: 48px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  text-align: start;
+}
+.concert-context > button > span {
+  min-width: 0;
+}
+.concert-context strong {
+  display: block;
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.concert-context small {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #596e50;
+}
+.concert-context svg {
+  width: 16px;
+  height: 16px;
+}
+.concert-display-tabs {
+  display: flex;
+  gap: 4px;
+  flex: none;
+  padding: 4px;
+  border: 1px solid #dde4d5;
+  border-radius: 12px;
+  background: #edf2e6;
+}
+.concert-display-tabs button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 116px;
+  min-height: 40px;
+  padding: 8px 14px;
+  background: none;
+  border: 0;
+  border-radius: 8px;
+  color: #596e50;
+  font-size: 13px;
+}
+.concert-display-tabs button.active {
+  background: #fff;
+  color: #2e533e;
+  font-weight: 600;
+  box-shadow:
+    0 1px 3px #263c2410,
+    0 2px 8px #263c2407;
+}
+.concert-explore-layout {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  flex: 1;
+  min-height: 240px;
+}
+.concert-explore-layout.panel-open {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+.concert-viewer {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  background: #e4e7df;
+}
+.concert-viewer:fullscreen,
+.concert-viewer.is-immersive {
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+}
+.concert-viewer.is-immersive {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+}
+.scene-layer {
+  position: absolute;
+  inset: 0;
+}
+.scene-layer[hidden] {
+  display: none;
+}
+.concert-stadium {
+  width: 100%;
+  height: 100%;
+}
+.concert-stadium canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+.concert-stadium canvas:focus-visible {
+  outline-offset: -4px;
+}
+.scene-loading,
+.viewer-placeholder,
+.stadium-fallback {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 24px;
+  color: #617454;
+  font-size: 13px;
+  text-align: center;
+}
+.scene-loading > svg,
+.viewer-placeholder > svg {
+  width: 32px;
+  height: 32px;
+  stroke-width: 1.2;
+}
+.viewer-placeholder strong,
+.stadium-fallback strong {
+  font-size: 17px;
+  font-weight: 500;
+}
+.viewer-placeholder p,
+.stadium-fallback p {
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.8;
+}
+.viewer-placeholder > div,
+.stadium-fallback > div {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.stadium-fallback {
+  z-index: 6;
+  background: #e8ede1;
+}
+.viewer-tools {
+  position: absolute;
+  inset-block-start: 18px;
+  inset-inline-end: 18px;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px;
+  border: 1px solid #d9e1cf;
+  border-radius: 14px;
+  background: #fbfcf7f0;
+  box-shadow: 0 3px 14px #24372508;
+}
+.viewer-tools button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 8px;
+  color: #5d7551;
+  background: none;
+}
+.viewer-tools button.active {
+  color: #315b45;
+  background: #e2ecd8;
+}
+.viewer-tools svg {
+  width: 19px;
+  height: 19px;
+}
+.viewer-modes {
+  position: absolute;
+  inset-block-end: 18px;
+  inset-inline-start: 18px;
+  z-index: 5;
+  display: flex;
+  gap: 3px;
+  padding: 4px;
+  border: 1px solid #d8e2cd;
+  border-radius: 11px;
+  background: #fbfcf6f2;
+}
+.viewer-modes button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 40px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: #667b59;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.viewer-modes button.active {
+  color: #fff;
+  background: #315b45;
+}
+.viewer-modes svg {
+  width: 16px;
+  height: 16px;
+}
+.viewer-hint {
+  position: absolute;
+  inset-block-end: 31px;
+  inset-inline-end: 24px;
+  font-size: 11px;
+  color: #5f7353;
+  pointer-events: none;
+  padding: 5px 9px;
+  border-radius: 6px;
+  background: #fbfcf7f0;
+}
+.phone-frame {
+  position: absolute;
+  inset: 10% 24% 22%;
+  pointer-events: none;
+  border: 1px solid #ffffffe0;
+  border-radius: 18px;
+  box-shadow: 0 0 0 100vmax #1325192b;
+  color: #fff;
+}
+.phone-frame > span {
+  position: absolute;
+  top: 12px;
+  left: 14px;
+  font-size: 11px;
+  text-shadow: 0 1px 4px #122e1a;
+}
+.phone-crosshair {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  border: 1px solid #ffffffa6;
+  transform: translate(-50%, -50%);
+}
+.phone-zooms {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  display: flex;
+  gap: 3px;
+  padding: 5px;
+  border-radius: 30px;
+  background: #162d20d9;
+  transform: translateX(-50%);
+  pointer-events: auto;
+}
+.phone-zooms button {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: #fff;
+  font-size: 11px;
+}
+.phone-zooms button.active {
+  color: #1e452d;
+  background: #e0ecc8;
+}
+.concert-dock {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex: none;
+  min-height: 94px;
+  padding: 16px 24px;
+  background: var(--concert-paper);
+  border-top: 1px solid var(--concert-line);
+}
+.concert-dock > div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  flex: 1;
+  min-width: 0;
+}
+.selected-position {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 3px;
+  min-width: 0;
+}
+.selected-position > span {
+  grid-column: 1;
+  color: #596e50;
+  font-size: 11px;
+}
+.selected-position strong {
+  grid-column: 2;
+  grid-row: 1 / 3;
+  color: #2b4735;
+  font-size: 20px;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.selected-position small {
+  grid-column: 1;
+  font-size: 11px;
+  color: #596e50;
+}
+.concert-dock nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.concert-dock nav button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 108px;
+  min-height: 48px;
+  padding: 10px 15px;
+  border: 1px solid #d5dfcb;
+  border-radius: 11px;
+  background: #f2f6ec;
+  color: #44613f;
+  font-size: 13px;
+}
+.concert-dock nav button.active {
+  background: #315b45;
+  border-color: #315b45;
+  color: #fff;
+}
+.concert-dock .compare-tray {
+  position: static;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 8px 12px;
+  flex: none;
+  border: 1px solid #d2dfc4;
+  border-radius: 9px;
+  background: #eaf2df;
+  color: #3b5a36;
+  font-size: 12px;
+}
+.compare-tray b {
+  display: grid;
+  place-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 4px;
+  border-radius: 50%;
+  background: #fff;
+  color: #345b3b;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+.concert-dialog {
+  position: fixed;
+  inset: 0;
+  width: min(480px, calc(100vw - 40px));
+  max-width: calc(100vw - 24px);
+  max-height: min(850px, calc(100dvh - 40px));
+  margin: auto;
+  padding: 0 24px 24px;
+  background: var(--concert-paper);
+  border: 1px solid #dbe3d2;
+  border-radius: 18px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  box-shadow:
+    0 12px 38px #172c2226,
+    0 30px 90px #172c2214;
+}
+.concert-dialog:not([open]) {
+  display: none;
+}
+.concert-dialog:focus-visible {
+  outline: 2px solid #315e79;
+  outline-offset: -2px;
+}
+.concert-dialog.wide {
+  width: min(800px, calc(100vw - 40px));
+}
+.concert-dialog::backdrop {
+  background: #17271f66;
+  backdrop-filter: blur(3px);
+}
+.concert-dialog > header {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 66px;
+  padding: 12px 0;
+  margin-bottom: 18px;
+  background: var(--concert-paper);
+  border-bottom: 1px solid #e1e7d9;
+}
+.concert-dialog > header h2 {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 600;
+}
+.concert-dialog.concert-panel {
+  position: relative;
+  inset: auto;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0 20px 24px;
+  border: 0;
+  border-inline-start: 1px solid var(--concert-line);
+  border-radius: 0;
+  box-shadow: none;
+}
+.concert-panel > header {
+  min-height: 60px;
+  margin-bottom: 18px;
+}
+.concert-panel > header h2 {
+  font-size: 15px;
+}
+.concert-panel h3 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  font-weight: 600;
+}
+.concert-panel label {
+  display: block;
+  margin: 20px 0 8px;
+  font-size: 13px;
+  color: #435a3c;
+}
+.concert-panel label select,
+.concert-panel label input:not([type='range']) {
+  margin-top: 8px;
+  font-size: 14px;
+}
+.concert-panel .storage-note {
+  margin-top: 20px;
+  font-size: 11px;
+}
+.concert-panel .primary-button {
+  margin-top: 16px;
+}
+.concert-panel .muted {
+  margin: 0 0 22px;
+}
+.panel-loading {
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  color: #657a54;
+  background: #edf3e6;
+  border-radius: 8px;
+  font-size: 12px;
+}
+.panel-error {
+  padding: 14px;
+  margin: 0 0 18px;
+  background: #f9f1e7;
+  border: 1px solid #e8d9c5;
+  border-radius: 10px;
+  color: #7c5b31;
+  font-size: 12px;
+}
+.panel-error p {
+  margin: 0 0 10px;
+}
+:is(.concert-app, .concert-dialog) .segmented {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  background: #eaf0e2;
+  border-radius: 10px;
+}
+:is(.concert-app, .concert-dialog) .segmented button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  color: #5b7250;
+  font-size: 12px;
+}
+:is(.concert-app, .concert-dialog) .segmented button.active {
+  background: #315b45;
+  color: #fff;
+  font-weight: 500;
+}
+.floor-tabs {
+  flex-wrap: wrap;
+}
+.floor-tabs button {
+  flex: 1 0 44px;
+}
+.section-picker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  max-height: 220px;
+  margin: 14px 0;
+  padding: 2px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+.section-picker button {
+  min-height: 40px;
+  padding: 7px 3px;
+  border: 1px solid #dce4d1;
+  border-radius: 7px;
+  background: #f4f7ef;
+  color: #506f46;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.section-picker button.active {
+  border-color: #416c83;
+  background: #416c83;
+  color: #fff;
+}
+.event-note {
+  padding: 14px;
+  margin-top: 18px;
+  background: #f0f4e9;
+  border: 1px solid #e0e8d4;
+  border-radius: 10px;
+  font-size: 13px;
+}
+.event-note p {
+  margin: 9px 0;
+  font-size: 12px;
+  color: #687b5a;
+  line-height: 1.85;
+}
+.event-note a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  color: #3c653a;
+  font-size: 12px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.concert-panel input[type='range'] {
+  min-height: 28px;
+  padding: 0;
+  margin-top: 12px;
+  border: 0;
+  box-shadow: none;
+  accent-color: #426c4d;
+  background: none;
+}
+.concert-panel output {
+  float: inline-end;
+  color: #627958;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+.range-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #6d7e61;
+  font-size: 11px;
+}
+.position-info {
+  padding: 18px 0;
+  margin-top: 24px;
+  border-block: 1px solid #dfe6d6;
+}
+.position-info > span {
+  font-size: 12px;
+  color: #6d7f61;
+}
+.position-info strong {
+  display: block;
+  font-size: 34px;
+  font-weight: 500;
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+}
+.position-info small {
+  font-size: 14px;
+  font-weight: 400;
+}
+.position-info p {
+  margin: 0;
+  font-size: 11px;
+  color: #6e7f62;
+}
+.position-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+.position-actions .secondary-button {
+  flex: 1;
+}
+.position-actions .icon-button {
+  border: 1px solid #d3dfc7;
+  background: #f1f6e9;
+  min-height: 44px;
+  width: 44px;
+}
+.concert-seat-map {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: #eef2e8;
+  overflow: hidden;
+}
+.map-caption {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex: none;
+  padding: 14px 18px;
+  color: #687b5c;
+  font-size: 11px;
+}
+.map-svg-viewport {
+  display: block;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: auto;
+  scrollbar-width: thin;
+}
+.map-surface {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  margin-inline: auto;
+}
+.concert-seat-map .map-surface svg {
+  width: 100%;
+  height: 100%;
+  flex: none;
+}
+.concert-seat-map.compact {
+  height: 235px;
+  margin: 18px 0;
+  border: 1px solid #dfe6d4;
+  border-radius: 10px;
+}
+.map-zoom {
+  position: absolute;
+  inset-block-start: 52px;
+  inset-inline-end: 14px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 2px;
+  padding: 4px;
+  border: 1px solid #d5dfca;
+  border-radius: 11px;
+  background: #fbfcf7f5;
+}
+.map-zoom button {
+  min-width: 40px;
+  min-height: 36px;
+  padding: 6px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  color: #486442;
+  font-size: 13px;
+}
+.map-zoom output {
+  padding: 3px 2px;
+  color: #667c58;
+  font-size: 11px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.seat-map-section {
+  cursor: pointer;
+  outline-offset: 2px;
+}
+.seat-map-section text {
+  user-select: none;
+  pointer-events: none;
+}
+.seat-map-section:focus-visible path,
+.seat-map-section:focus-visible rect {
+  stroke: #203f58;
+  stroke-width: 3px;
+}
+.dialog-intro {
+  margin: 0 0 20px;
+  color: #6a7c60;
+  font-size: 13px;
+}
+.directory-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 12px;
+  border: 1px solid #cbdac0;
+  border-radius: 10px;
+  background: #fff;
+}
+.directory-search input {
+  border: 0 !important;
+  padding-inline-start: 0 !important;
+  min-height: 48px;
+  background: none;
+}
+.directory-search:focus-within {
+  outline: 2px solid #315e79;
+  outline-offset: 2px;
+}
+.directory-search input:focus-visible {
+  outline: none;
+}
+.directory-tabs {
+  display: flex;
+  gap: 24px;
+  margin: 20px 0 16px;
+  border-bottom: 1px solid #dce5d1;
+}
+.directory-tabs button {
+  min-height: 44px;
+  padding: 10px 2px;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  background: none;
+  color: #6f8061;
+  font-size: 13px;
+}
+.directory-tabs button.active {
+  color: #315b43;
+  border-bottom-color: #315b43;
+  font-weight: 600;
+}
+.directory-regions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 2px 2px 18px;
+}
+.directory-regions button {
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid #e3e9db;
+  border-radius: 20px;
+  background: #f0f5e8;
+  color: #5f7850;
+  font-size: 12px;
+}
+.directory-regions button.active {
+  color: #315b43;
+  background: #e2ecd5;
+  border-color: #adc39b;
+}
+.directory-results {
+  max-height: min(430px, 48dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.directory-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 76px;
+  padding: 14px 8px;
+  border: 0;
+  border-bottom: 1px solid #e5eadf;
+  background: none;
+  color: #36513c;
+  text-align: start;
+}
+.directory-row > span:nth-child(2) {
+  flex: 1;
+  min-width: 0;
+}
+.directory-row strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.directory-row small {
+  display: block;
+  margin-top: 4px;
+  color: #6e8061;
+  font-size: 11px;
+}
+.directory-icon {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: none;
+  border: 1px solid #dfe7d2;
+  border-radius: 10px;
+  background: #edf3e5;
+  color: #6e865a;
+}
+.directory-row > svg {
+  width: 16px;
+  height: 16px;
+  color: #718b5f;
+}
+:is(.concert-app, .concert-dialog) .form-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px;
+}
+.concert-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 160px;
+  padding: 32px 20px;
+  background: #eff4e8;
+  border-radius: 10px;
+  color: #5c7650;
+  text-align: center;
+  font-size: 13px;
+}
+.compare-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.compare-card {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #dce5d0;
+  border-radius: 12px;
+  background: #f8faf3;
+}
+.compare-card .concert-seat-map {
+  height: 190px;
+  margin: 0 0 16px;
+}
+.compare-card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 600;
+}
+.compare-card p {
+  margin: 8px 0;
+  color: #6a7e5d;
+  font-size: 12px;
+}
+.compare-card > button {
+  width: 100%;
+  margin-top: 8px;
+  font-size: 12px !important;
+}
+.help-content {
+  color: #5b7151;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.help-content > section {
+  display: flex;
+  gap: 14px;
+  margin: 20px 0 28px;
+}
+.help-content > section > svg {
+  margin-top: 4px;
+}
+.help-content h3 {
+  margin: 0 0 8px;
+  color: #36573b;
+  font-size: 14px;
+  font-weight: 600;
+}
+.help-content p {
+  margin: 0 0 14px;
+}
+.share-link-input {
+  font-size: 13px !important;
+}
+.concert-toast,
+.concert-alert {
+  position: fixed;
+  top: 84px;
+  left: 50%;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 18px;
+  border-radius: 10px;
+  color: #fff;
+  background: #315b45f2;
+  box-shadow: 0 4px 16px #1831271f;
+  font-size: 13px;
+  transform: translateX(-50%);
+}
+.concert-alert {
+  background: #6b5033;
+}
+.concert-alert .icon-button {
+  width: 32px;
+  min-height: 32px;
+  color: #fff;
+}
+.concert-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 32px;
+  text-align: center;
+}
+.concert-loading > svg {
+  width: 38px;
+  height: 38px;
+  color: #69825a;
+  stroke-width: 1.2;
+}
+.concert-loading h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+@media (hover: hover) {
+  .concert-app .primary-button:hover,
+  .concert-dialog .primary-button:hover {
+    background: #244a36;
+  }
+  .concert-app .secondary-button:hover,
+  .concert-dialog .secondary-button:hover {
+    background: #e8f0de;
+  }
+  .concert-app .icon-button:hover,
+  .concert-dialog .icon-button:hover,
+  .concert-help-button:hover {
+    background: #eaf0e2;
+  }
+  .concert-search:hover {
+    background: #eaf0e2;
+    border-color: #c6d5bb;
+  }
+  .concert-data-status button:hover:not(:disabled),
+  .viewer-tools button:hover,
+  .viewer-modes button:hover:not(.active),
+  .map-zoom button:hover:not(:disabled) {
+    background: #e4edd9;
+    color: #355c3c;
+  }
+  .directory-row:hover {
+    background: #eef4e5;
+  }
+  .seat-map-section:hover path,
+  .seat-map-section:hover rect {
+    fill: #8da47e;
+  }
+  .seat-map-section.selected:hover path,
+  .seat-map-section.selected:hover rect {
+    fill: #416c83;
+  }
+  .concert-app .text-button:hover,
+  .concert-dialog .text-button:hover {
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+}
+@media (max-width: 1000px) {
+  .concert-topbar {
+    gap: 18px;
+  }
+  .concert-brand {
+    min-width: 170px;
+  }
+  .viewer-hint {
+    display: none;
+  }
+  .concert-explore-layout.panel-open {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
+  .concert-dock {
+    gap: 16px;
+  }
+  .concert-dock > div {
+    gap: 16px;
+  }
+  .selected-position {
+    column-gap: 8px;
+  }
+  .selected-position strong {
+    font-size: 17px;
+  }
+  .concert-dock nav button {
+    min-width: 96px;
+  }
+}
+@media (max-width: 760px) {
+  .concert-app.is-exploring {
+    min-height: 560px;
+  }
+  .concert-topbar {
+    min-height: 64px;
+    padding: 10px 12px;
+    gap: 12px;
+  }
+  .concert-brand {
+    min-width: 0;
+    gap: 8px;
+  }
+  .concert-brand > span {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+  .concert-brand > span svg {
+    width: 21px;
+    height: 21px;
+  }
+  .concert-brand h1 {
+    font-size: 16px;
+    letter-spacing: 0;
+    white-space: nowrap;
+  }
+  .concert-brand p {
+    display: none;
+  }
+  .concert-search {
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 10px;
+    gap: 6px;
+  }
+  .concert-search > span {
+    font-size: 12px;
+    white-space: nowrap;
+  }
+  .concert-search kbd {
+    display: none;
+  }
+  .concert-help-button {
+    width: 40px;
+    min-height: 42px;
+    flex: none;
+    margin: 0;
+    padding: 8px;
+  }
+  .concert-help-button span {
+    display: none;
+  }
+  .concert-data-status {
+    min-height: 36px;
+    padding: 2px 12px;
+    gap: 8px;
+    font-size: 11px;
+  }
+  .concert-data-status button {
+    font-size: 11px;
+    min-height: 34px;
+    padding: 4px;
+  }
+  .concert-contextbar {
+    display: block;
+    padding: 12px;
+    min-height: 0;
+  }
+  .concert-context > button {
+    width: 100%;
+    justify-content: space-between;
+    min-height: 44px;
+    gap: 14px;
+  }
+  .concert-context strong {
+    font-size: 17px;
+  }
+  .concert-context small {
+    margin-top: 2px;
+    font-size: 11px;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+  }
+  .concert-display-tabs {
+    margin-top: 12px;
+    border-radius: 10px;
+  }
+  .concert-display-tabs button {
+    flex: 1;
+    min-width: 0;
+    min-height: 38px;
+    font-size: 12px;
+  }
+  .concert-explore-layout,
+  .concert-explore-layout.panel-open {
+    grid-template-columns: minmax(0, 1fr);
+    min-height: 220px;
+  }
+  .viewer-tools {
+    inset-block-start: 12px;
+    inset-inline-end: 12px;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 12px;
+  }
+  .viewer-tools button {
+    width: 38px;
+    height: 38px;
+  }
+  .viewer-tools svg {
+    width: 18px;
+    height: 18px;
+  }
+  .viewer-modes {
+    inset-block-end: 12px;
+    inset-inline-start: 12px;
+    gap: 2px;
+    padding: 3px;
+    border-radius: 10px;
+  }
+  .viewer-modes button {
+    min-height: 40px;
+    padding: 8px 9px;
+    gap: 5px;
+    font-size: 11px;
+  }
+  .viewer-modes svg {
+    width: 14px;
+    height: 14px;
+  }
+  .concert-dock {
+    display: block;
+    padding: 12px 12px calc(12px + env(safe-area-inset-bottom));
+    min-height: 110px;
+  }
+  .concert-dock > div {
+    margin-bottom: 12px;
+    gap: 10px;
+  }
+  .selected-position {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    column-gap: 8px;
+    row-gap: 2px;
+  }
+  .selected-position > span {
+    display: none;
+  }
+  .selected-position strong {
+    font-size: 16px;
+  }
+  .selected-position small {
+    font-size: 10px;
+  }
+  .concert-dock nav {
+    gap: 8px;
+  }
+  .concert-dock nav button {
+    flex: 1;
+    min-width: 0;
+    min-height: 44px;
+    padding: 9px 4px;
+    gap: 6px;
+    border-radius: 9px;
+    font-size: 12px;
+  }
+  .concert-dock nav button svg {
+    width: 17px;
+    height: 17px;
+  }
+  .concert-dock .compare-tray {
+    min-height: 36px;
+    padding: 6px 9px;
+    gap: 5px;
+    font-size: 11px;
+  }
+  .compare-tray > svg {
+    width: 15px;
+    height: 15px;
+  }
+  .compare-tray > svg:last-child {
+    display: none;
+  }
+  .concert-dialog,
+  .concert-dialog.wide {
+    width: calc(100vw - 24px);
+    max-height: calc(100dvh - 28px);
+    padding: 0 16px 20px;
+    border-radius: 15px;
+  }
+  .concert-dialog > header {
+    min-height: 60px;
+    padding: 10px 0;
+    margin-bottom: 16px;
+  }
+  .concert-dialog > header h2 {
+    font-size: 16px;
+  }
+  .concert-dialog.concert-panel {
+    position: fixed;
+    inset: auto 0 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    max-height: min(76dvh, 760px);
+    padding: 0 18px calc(22px + env(safe-area-inset-bottom));
+    border: 1px solid #d9e2cf;
+    border-bottom: 0;
+    border-radius: 20px 20px 0 0;
+    box-shadow: 0 -10px 50px #1733241c;
+  }
+  .concert-panel input,
+  .concert-panel select,
+  .concert-dialog input,
+  .concert-dialog select {
+    font-size: 16px !important;
+  }
+  .concert-panel label {
+    font-size: 13px;
+  }
+  .concert-panel .icon-button,
+  .concert-dialog > header .icon-button {
+    width: 44px;
+    min-height: 44px;
+  }
+  :is(.concert-app, .concert-dialog) .segmented button {
+    min-height: 44px;
+  }
+  .section-picker button {
+    min-height: 42px;
+  }
+  .concert-panel .concert-seat-map.compact {
+    height: 230px;
+  }
+  .phone-frame {
+    inset: 10% 8% 23%;
+    border-radius: 15px;
+  }
+  .phone-frame > span {
+    font-size: 10px;
+    top: 10px;
+    left: 10px;
+  }
+  .phone-zooms {
+    gap: 2px;
+    padding: 4px;
+    bottom: 10px;
+  }
+  .phone-zooms button {
+    width: 37px;
+    height: 37px;
+    font-size: 11px;
+  }
+  .map-caption {
+    padding: 10px 12px;
+    font-size: 10px;
+  }
+  .map-caption > span {
+    display: none;
+  }
+  .map-zoom {
+    inset-block-start: 38px;
+    inset-inline-end: 10px;
+  }
+  .map-zoom button {
+    min-width: 36px;
+    min-height: 36px;
+  }
+  .directory-search input {
+    min-height: 48px;
+  }
+  .directory-regions {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 14px;
+    scrollbar-width: thin;
+  }
+  .directory-regions button {
+    flex: none;
+    min-height: 38px;
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+  .directory-results {
+    max-height: 48dvh;
+  }
+  .directory-row {
+    padding: 12px 2px;
+    gap: 12px;
+    min-height: 74px;
+  }
+  .directory-row strong {
+    font-size: 13px;
+  }
+  .directory-row small {
+    font-size: 11px;
+  }
+  .compare-grid {
+    grid-template-columns: 1fr;
+  }
+  .compare-card {
+    display: grid;
+    grid-template-columns: 110px minmax(0, 1fr);
+    gap: 6px 12px;
+    align-items: start;
+  }
+  .compare-card .concert-seat-map {
+    grid-column: 1;
+    grid-row: 1 / 6;
+    width: 110px;
+    height: 160px;
+    margin: 0;
+  }
+  .compare-card h3,
+  .compare-card p,
+  .compare-card > button {
+    grid-column: 2;
+  }
+  .compare-card h3 {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+  .compare-card p {
+    font-size: 11px;
+    margin: 0;
+  }
+  .compare-card > button {
+    min-height: 38px;
+    padding: 7px 8px;
+    font-size: 11px !important;
+    margin-top: 2px;
+  }
+  .concert-toast,
+  .concert-alert {
+    top: 76px;
+    font-size: 12px;
+    width: max-content;
+    padding: 11px 14px;
+  }
+  .viewer-placeholder,
+  .stadium-fallback {
+    gap: 12px;
+    padding: 20px 16px;
+  }
+  .viewer-placeholder strong,
+  .stadium-fallback strong {
+    font-size: 15px;
+  }
+  .viewer-placeholder p,
+  .stadium-fallback p {
+    font-size: 12px;
+  }
+}
+@media (max-width: 359px) {
+  .concert-brand > span {
+    display: none;
+  }
+  .concert-topbar {
+    gap: 8px;
+  }
+  .phone-zooms button {
+    width: 34px;
+    height: 36px;
+  }
+  .selected-position small {
+    display: none;
+  }
+}
+@media (pointer: coarse) {
+  .viewer-tools button {
+    width: 42px;
+    height: 42px;
+  }
+  .viewer-modes button {
+    min-height: 44px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .concert-app *,
+  .concert-dialog * {
+    transition: none !important;
+    animation: none !important;
+    scroll-behavior: auto !important;
+  }
+  .concert-app button:active:not(:disabled),
+  .concert-dialog button:active:not(:disabled) {
+    transform: none;
+  }
+}
+@media (forced-colors: active) {
+  .concert-app button:focus-visible,
+  .concert-dialog button:focus-visible,
+  .concert-app [tabindex]:focus-visible {
+    outline-color: Highlight;
+  }
+}

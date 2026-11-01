@@ -38,7 +38,7 @@ import Goods from './pages/goofish/Goods'
 import { scrollToTop } from './utils/backTop'
 import { isMobileDevice } from './utils/isMobile'
 import WorkerAgent from './pages/WorkerAgent'
-import Games from './pages/Games'
+import Concert from './pages/Concert'
 import Markmap from './pages/Markmap'
 import Latex from './pages/Latex'
 import Markdown from './pages/Markdown'
@@ -67,6 +67,7 @@ const AppContent: React.FC = () => {
 
   // 判断是否是首页
   const isHomePage = location.pathname === '/home'
+  const isConcertPage = location.pathname === '/concert'
 
   // 路由守卫：检查是否登录
   useEffect(() => {
@@ -192,7 +193,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <ClickEffect />
+      {!isConcertPage && <ClickEffect />}
       <Navbar />
       <main style={{
         flex: 1,
@@ -219,7 +220,7 @@ const AppContent: React.FC = () => {
           <Route path="/latex" element={<Latex />} />
           <Route path="/markdown" element={<Markdown />} />
           <Route path="/worker" element={<WorkerAgent />} />
-          <Route path="/games" element={<Games />} />
+          <Route path="/concert" element={<Concert />} />
           {/* Goofish 闲鱼管理模块 */}
           <Route path="/goofish" element={<GoofishLayout />}>
             <Route index element={<Dashboard />} />
@@ -235,10 +236,10 @@ const AppContent: React.FC = () => {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
-      {!isLoginPage && !location.pathname.includes('/goofish') && <Footer />}
+      {!isLoginPage && !isConcertPage && !location.pathname.includes('/goofish') && <Footer />}
       {/* 只在 /home 路由下渲染看板娘 */}
       {isHomePage && <Live2DDashboard isVisible={true} />}
-      {isAuthenticated() && !isMobileDevice() && !isHomePage && location.pathname !== '/about' && <WechatSupport />}
+      {isAuthenticated() && !isMobileDevice() && !isHomePage && !isConcertPage && location.pathname !== '/about' && <WechatSupport />}
     </div>
   )
 }

@@ -16,7 +16,7 @@ import {
   NodeIndexOutlined,
   NotificationOutlined
 } from '@ant-design/icons'
-import { IoGameControllerOutline } from 'react-icons/io5'
+import { IoMicOutline } from 'react-icons/io5'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -209,7 +209,7 @@ const Navbar: React.FC = () => {
     { key: '/markmap', label: t('nav.aimarkmap'), icon: <NodeIndexOutlined /> },
     // 如果是移动端，不显示监工菜单项
     ...(isMobile ? [] : [{ key: '/worker', label: t('nav.worker'), icon: <RobotOutlined /> }]),
-    { key: '/games', label: t('nav.games'), icon: <IoGameControllerOutline /> },
+    { key: '/concert', label: t('nav.concert'), icon: <IoMicOutline /> },
     { key: '/news', label: t('nav.news'), icon: <NotificationOutlined /> },
     { key: '/about', label: t('nav.about'), icon: <UserOutlined /> }
   ]
