@@ -193,7 +193,7 @@ const AppContent: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      {!isConcertPage && <ClickEffect />}
+      <ClickEffect />
       <Navbar />
       <main style={{
         flex: 1,
