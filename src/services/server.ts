@@ -1,3 +1,4 @@
+import { createCartoonRoutes } from './cartoonApi'
 import { serve } from '@hono/node-server'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
@@ -135,6 +136,7 @@ app.use('/*', cors({
 // 日志中间件
 app.use('/*', logger())
 app.route('/api/concert', createConcertRoutes())
+app.route('/api/bcomic', createCartoonRoutes())
 
 // 请求计时中间件
 app.use('/*', async (c, next) => {

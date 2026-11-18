@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
+  Alert,
   Typography,
   Row,
   Col,
@@ -127,6 +128,7 @@ const CartoonDetail: React.FC = () => {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [topicInfo, setTopicInfo] = useState<TopicInfo | null>(null)
 
   useEffect(() => {
@@ -139,18 +141,20 @@ const CartoonDetail: React.FC = () => {
   const fetchTopicDetail = async (topicId: number) => {
     try {
       setLoading(true)
+      setTopicInfo(null)
+      setError(null)
       const response = await fetch(`/api/bcomic/ComicDetail?comicId=${topicId}`)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
+      if (!response.ok) throw new Error(data.msg || `HTTP ${response.status}`)
 
       if (data.code === 0 && data.data) {
         setTopicInfo(data.data)
       } else {
-        message.error(t('cartoonDetail.fetchDetailFailed'))
+        throw new Error(data.msg || t('cartoonDetail.fetchDetailFailed'))
       }
     } catch (error) {
       console.error('获取漫画详情失败:', error)
-      message.error(t('cartoonDetail.fetchDetailFailed'))
+      setError(error instanceof Error ? error.message : t('cartoonDetail.fetchDetailFailed'))
     } finally {
       setLoading(false)
     }
@@ -194,9 +198,14 @@ const CartoonDetail: React.FC = () => {
           >
             {t('cartoonDetail.backToList')}
           </BackButton>
-          <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
-            {t('cartoonDetail.notFound')}
-          </div>
+          {error ? (
+            <Alert type="error" showIcon message={t('cartoonDetail.fetchDetailFailed')} description={error}
+              action={<Button onClick={() => id && fetchTopicDetail(Number(id))}>重试</Button>} />
+          ) : (
+            <div style={{ textAlign: 'center', padding: '60px 0', color: '#999' }}>
+              {t('cartoonDetail.notFound')}
+            </div>
+          )}
         </ContentWrapper>
       </DetailContainer>
     )

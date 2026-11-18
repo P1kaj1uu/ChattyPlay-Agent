@@ -1,3 +1,4 @@
+import { createCartoonRoutes } from '../src/services/cartoonApi.js'
 import { Hono } from 'hono'
 import { cors } from 'hono/cors'
 import CryptoJS from 'crypto-js'
@@ -9,6 +10,7 @@ const videoParseBaseURL = (process.env.VIDEO_PARSE_API_BASE_URL || '').replace(/
 // CORS
 app.use('/*', cors())
 app.route('/api/concert', createConcertRoutes())
+app.route('/api/bcomic', createCartoonRoutes())
 
 // 漫画 API 使用服务端环境变量，保留前端同源请求地址。
 app.get('/api/bcomic/*', async (c) => {

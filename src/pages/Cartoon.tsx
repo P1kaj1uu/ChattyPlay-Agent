@@ -127,6 +127,31 @@ const CartoonImage: React.FC<{ src?: string; alt: string }> = ({ src, alt }) => 
   )
 }
 
+// 只将接口中的文本格式标签转换为 React 元素，不执行接口返回的 HTML。
+const renderDescriptionNode = (node: ChildNode, key: number): React.ReactNode => {
+  if (node.nodeType === 3) return node.textContent
+  if (node.nodeType !== 1) return null
+  const element = node as Element
+  const children = Array.from(element.childNodes).map(renderDescriptionNode)
+  switch (element.tagName.toLowerCase()) {
+    case 'strong':
+    case 'b': return <strong key={key}>{children}</strong>
+    case 'i': return <i key={key}>{children}</i>
+    case 'br': return <br key={key} />
+    default: return <React.Fragment key={key}>{children}</React.Fragment>
+  }
+}
+
+const CartoonDescription: React.FC<{ html: string }> = ({ html }) => {
+  const document = new DOMParser().parseFromString(html, 'text/html')
+  document.querySelectorAll('script, style, iframe, object, template').forEach(node => node.remove())
+  return (
+    <DescriptionText title={document.body.textContent || ''}>
+      {Array.from(document.body.childNodes).map(renderDescriptionNode)}
+    </DescriptionText>
+  )
+}
+
 const DescriptionText = styled.div`
   font-size: 12px;
   color: rgba(0, 0, 0, 0.45);
@@ -182,6 +207,7 @@ interface BComicListItem {
   comic_id?: number;
   title: string;
   org_title?: string;
+  real_title?: string;
   comic_introduction?: string;
   vertical_cover?: string;
   author_name?: string[];
@@ -202,7 +228,7 @@ interface CartoonData {
 
 const formatCartoon = (comic: BComicListItem): CartoonData => ({
   id: comic.comic_id ?? comic.id!,
-  title: comic.org_title || comic.title,
+  title: comic.real_title || comic.title.replace(/<[^>]*>/g, '') || comic.org_title || '',
   description: comic.comic_introduction || (comic.author_name || comic.author)?.join(' / ') || '',
   cover: comic.vertical_cover?.replace(/^http:/, 'https:'),
   views_count: Number(comic.fans) || undefined,
@@ -230,21 +256,21 @@ const Cartoon: React.FC = () => {
     try {
       setLoading(true)
       const response = await fetch('/api/bcomic/ListRank')
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
+      if (!response.ok || data.code !== 0) throw new Error(data.msg || data.message || `HTTP ${response.status}`)
 
       if (data.code === 0 && data.data?.list) {
         setRankTypes(data.data.list)
         // 默认选择第一个排行榜
         if (data.data.list.length > 0) {
-          const firstRankId = data.data.list[0].id ?? data.data.default_id
+          const firstRankId = data.data.list.find((rank: RankType) => rank.id === data.data.default_id)?.id ?? data.data.list[0].id
           setSelectedRankId(firstRankId)
           await fetchCartoonList(firstRankId)
         }
       }
     } catch (error) {
       console.error('获取排行榜类型失败:', error)
-      message.error(t('cartoon.fetchRankTypesFailed'))
+      message.error(`${t('cartoon.fetchRankTypesFailed')}：${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setLoading(false)
     }
@@ -257,15 +283,15 @@ const Cartoon: React.FC = () => {
       const response = await fetch(
         `/api/bcomic/GetRankInfo?id=${rankId}&offset=0&subId=0`
       )
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
       const data = await response.json()
+      if (!response.ok || data.code !== 0) throw new Error(data.msg || data.message || `HTTP ${response.status}`)
 
       if (data.code === 0 && data.data?.list) {
         setCartoonList(data.data.list.map(formatCartoon))
       }
     } catch (error) {
       console.error('获取漫画列表失败:', error)
-      message.error(t('cartoon.fetchCartoonListFailed'))
+      message.error(`${t('cartoon.fetchCartoonListFailed')}：${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setLoading(false)
     }
@@ -301,21 +327,26 @@ const Cartoon: React.FC = () => {
     try {
       setLoading(true)
       setIsSearching(true)
-      const response = await fetch(`/api/bcomic/Search?styleId=-1&areaId=-1&isFinish=-1&order=-1&pageNum=1&pageSize=20&isFree=-1&keyWord=${encodeURIComponent(keyword)}`)
-      if (!response.ok) throw new Error(`HTTP ${response.status}`)
+      setSearchResults([])
+      const response = await fetch(`/api/bcomic/Search?styleId=-1&areaId=-1&isFinish=-1&order=-1&pageNum=1&pageSize=20&isFree=-1&keyWord=${encodeURIComponent(keyword.trim())}`)
       const data = await response.json()
+      if (!response.ok || data.code !== 0) throw new Error(data.msg || data.message || `HTTP ${response.status}`)
 
       if (data.code === 0 && data.data?.list) {
         const formattedData: CartoonData[] = data.data.list.map(formatCartoon)
         setSearchResults(formattedData)
-        message.success(t('cartoon.foundResults').replace('X', formattedData.length.toString()))
+        if (formattedData.length > 0) {
+          message.success(t('cartoon.foundResults').replace('X', formattedData.length.toString()))
+        } else {
+          message.info(t('cartoon.noResults'))
+        }
       } else {
         setSearchResults([])
         message.info(t('cartoon.noResults'))
       }
     } catch (error) {
       console.error('搜索失败:', error)
-      message.error(t('cartoon.searchFailed'))
+      message.error(`${t('cartoon.searchFailed')}：${error instanceof Error ? error.message : String(error)}`)
     } finally {
       setLoading(false)
     }
@@ -408,9 +439,7 @@ const Cartoon: React.FC = () => {
                         }
                         description={
                           <Space direction="vertical" size={4}>
-                            <DescriptionText title={cartoon.description}>
-                              {cartoon.description}
-                            </DescriptionText>
+                            <CartoonDescription html={cartoon.description} />
                             {cartoon.likes_count && (
                               <Text type="secondary" style={{ fontSize: 12 }}>
                                 <StarOutlined /> {formatNumber(cartoon.likes_count)}
@@ -476,9 +505,7 @@ const Cartoon: React.FC = () => {
                         }
                         description={
                           <Space direction="vertical" size={4}>
-                            <DescriptionText title={cartoon.description}>
-                              {cartoon.description}
-                            </DescriptionText>
+                            <CartoonDescription html={cartoon.description} />
                             {cartoon.likes_count && (
                               <Text type="secondary" style={{ fontSize: 12 }}>
                                 <StarOutlined /> {formatNumber(cartoon.likes_count)}
