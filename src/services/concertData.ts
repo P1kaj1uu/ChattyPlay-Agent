@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto'
 import {
   newQuickJSWASMModuleFromVariant,
   shouldInterruptAfterDeadline
@@ -7,6 +8,7 @@ import type { Catalog, Section } from '../components/concert/types'
 import { isConcertCatalog, isConcertSections } from './concertValidation.js'
 
 const MAX_SOURCE_BYTES = 8 * 1024 * 1024
+const MAX_MODEL_BYTES = 64 * 1024 * 1024
 let engine: ReturnType<typeof newQuickJSWASMModuleFromVariant> | undefined
 
 export class ConcertSourceError extends Error {
@@ -66,24 +68,11 @@ function configuredUrl(
   }
 }
 
-function assetUrl(path: string, base: string, origin: string): string {
-  const url = new URL(path, base)
-  if (
-    url.origin !== origin ||
-    !/^\/releases\/[\w-]+\/assets\/[\w.-]+\.js$/.test(url.pathname)
-  ) {
-    throw new ConcertSourceError('参考站资源地址与配置的 OSS 地址不匹配', {
-      code: 'CONCERT_ASSET_REJECTED',
-      stage: 'assets'
-    })
-  }
-  return url.href
-}
-
 async function readText(
   fetcher: typeof fetch,
   url: string,
-  stage: string
+  stage: string,
+  maxBytes = MAX_SOURCE_BYTES
 ): Promise<string> {
   try {
     const response = await fetcher(url, {
@@ -92,7 +81,7 @@ async function readText(
       signal: AbortSignal.timeout(12000),
       headers: {
         'Cache-Control': 'no-cache',
-        Accept: 'text/html,application/javascript'
+        Accept: 'application/json,text/html,application/javascript'
       }
     })
     if (!response.ok || !response.body)
@@ -110,7 +99,7 @@ async function readText(
         const { value, done } = await reader.read()
         if (done) break
         bytes += value.byteLength
-        if (bytes > MAX_SOURCE_BYTES) {
+        if (bytes > maxBytes) {
           await reader.cancel()
           throw new ConcertSourceError('参考站资源超过大小限制', {
             code: 'CONCERT_SOURCE_TOO_LARGE',
@@ -240,76 +229,94 @@ export async function extractConcertData(
   }
 }
 
+// The current upstream publishes a versioned manifest and JSON model documents.
+// Read those documents directly; release bundles are application code, not a data API.
 export function createConcertDataService(fetcher: typeof fetch = fetch) {
-  const releases = new Map<
-    string,
-    Promise<{ version: string; source: string; catalog: Catalog }>
-  >()
-  async function currentRelease() {
-    const site = configuredUrl('VITE_CONCERT_API_URL')
-    const assetOrigin = configuredUrl('VITE_CONCERT_OSS_API_URL').origin
-    site.hash = ''
-    site.searchParams.set('_concert_sync', String(Date.now()))
-    // Recheck the entry page for EVERY request. Only content-hashed releases are
-    // reused; there is deliberately no TTL cache of the "latest" release pointer.
-    const html = await readText(fetcher, site.href, 'homepage')
-    const moduleTag = html.match(/<script\b[^>]*type=["']module["'][^>]*>/)?.[0]
-    const entry = moduleTag?.match(/\bsrc=["']([^"']+)["']/)?.[1]
-    if (!entry) throw new ConcertSourceError('参考站未提供当前发布版本')
-    const entryUrl = assetUrl(entry, site.href, assetOrigin)
-    let release = releases.get(entryUrl)
-    if (!release) {
-      release = (async () => {
-        const main = await readText(fetcher, entryUrl, 'entry')
-        const dataPath = main.match(/assets\/data-[\w-]+\.js/)?.[0]
-        if (!dataPath) throw new ConcertSourceError('参考站未提供数据模块')
-        const dataUrl = assetUrl(`../${dataPath}`, entryUrl, assetOrigin)
-        const source = await readText(fetcher, dataUrl, 'data')
-        const catalog = await extractConcertData(source, null)
-        if (!isConcertCatalog(catalog))
-          throw new ConcertSourceError('参考站场馆或演出数据不完整')
-        return { version: dataUrl, source, catalog }
-      })()
-      releases.set(entryUrl, release)
-      if (releases.size > 2) releases.delete(releases.keys().next().value!)
-      release.catch(() => {
-        if (releases.get(entryUrl) === release) releases.delete(entryUrl)
-      })
+  const documents = new Map<string, Promise<any>>()
+  async function json(url: string, stage: string) {
+    try {
+      return JSON.parse(await readText(fetcher, url, stage))
+    } catch (error) {
+      if (error instanceof ConcertSourceError) throw error
+      throw new ConcertSourceError('参考站 JSON 数据格式发生变化', { stage })
     }
-    return release
+  }
+  async function document(reference: { url: string; sha256: string }) {
+    const url = new URL(reference.url)
+    if (url.origin !== configuredUrl('VITE_CONCERT_OSS_API_URL').origin ||
+        !/^\/(?:releases\/[\w-]+\/catalog|catalog\/[\w-]+)\/[\w./-]+\.json$/.test(url.pathname) ||
+        !/^[a-f0-9]{64}$/.test(reference.sha256))
+      throw new ConcertSourceError('参考站模型资源地址无效', { stage: 'assets' })
+    const key = url.href + reference.sha256
+    let pending = documents.get(key)
+    if (!pending) {
+      pending = (async () => {
+        const text = await readText(fetcher, url.href, 'data', MAX_MODEL_BYTES)
+        if (createHash('sha256').update(text).digest('hex') !== reference.sha256)
+          throw new ConcertSourceError('参考站模型校验失败', { stage: 'data' })
+        return JSON.parse(text)
+      })()
+      documents.set(key, pending)
+      if (documents.size > 48) documents.delete(documents.keys().next().value!)
+      pending.catch(() => { if (documents.get(key) === pending) documents.delete(key) })
+    }
+    return pending
+  }
+  async function currentRelease() {
+    const url = new URL('/api/venues', configuredUrl('VITE_CONCERT_API_URL'))
+    url.search = new URLSearchParams({ schemaVersion: '1', format: 'manifest' }).toString()
+    const manifest = await json(url.href, 'manifest')
+    const index = await document(manifest.index)
+    if (index.version !== manifest.version || !Array.isArray(index.venues) || !Array.isArray(index.performances))
+      throw new ConcertSourceError('参考站目录版本不匹配')
+    const catalog: Catalog = {
+      lazySections: true,
+      venues: index.venues.filter((v: { id: string }) => index.availableVenues?.includes(v.id) ?? true).map((v: any) => ({
+        ...v, short: v.short || v.name, english: v.english || '', aliases: v.aliases || '',
+        region: v.region || '', kind: v.kind || 'arena', defaultLayout: index.defaultViews[v.id]?.layout || v.defaultLayout || 'end',
+        sections: [], defaults: index.defaultViews[v.id] || { venue: v.id, section: '', depth: 40, lateral: 50, standing: false, date: '', layout: v.defaultLayout || 'end' }
+      })),
+      events: index.performances.filter((e: { venue: string }) => index.availableVenues?.includes(e.venue) ?? true)
+    }
+    if (!isConcertCatalog(catalog)) throw new ConcertSourceError('参考站场馆或演出数据不完整')
+    return { version: manifest.version as string, catalog }
   }
   return {
     async catalog(): Promise<ConcertCatalogResponse> {
       const release = await currentRelease()
-      return {
-        catalog: release.catalog,
-        version: release.version,
-        checkedAt: new Date().toISOString()
-      }
+      return { catalog: release.catalog, version: release.version, checkedAt: new Date().toISOString() }
     },
-    async layout(
-      venue: string,
-      date: string,
-      layout?: string,
-      version?: string
-    ): Promise<ConcertLayoutResponse> {
+    async layout(venue: string, date: string, layout?: string, version?: string): Promise<ConcertLayoutResponse> {
       const release = await currentRelease()
-      if (version && version !== release.version)
-        throw new ConcertVersionChanged('参考站已有新版本，请重新同步目录')
-      if (!release.catalog.venues.some((item) => item.id === venue))
-        throw new ConcertSourceError('场馆不存在')
-      const sections = await extractConcertData(release.source, {
-        venue,
-        date,
-        layout
-      })
-      if (!isConcertSections(sections))
-        throw new ConcertSourceError('参考站分区数据不完整')
-      return {
-        sections,
-        version: release.version,
-        checkedAt: new Date().toISOString()
+      if (version && version !== release.version) throw new ConcertVersionChanged('参考站已有新版本，请重新同步目录')
+      if (!release.catalog.venues.some(v => v.id === venue)) throw new ConcertSourceError('场馆不存在')
+      const event = release.catalog.events.find(e => e.venue === venue && e.date === date)
+      const url = new URL(`/api/venues/${encodeURIComponent(venue)}/model`, configuredUrl('VITE_CONCERT_API_URL'))
+      url.searchParams.set('schemaVersion', '1')
+      if (event) url.searchParams.set('performanceId', event.id)
+      // Performances select their own stage layout; a venue preview layout can conflict.
+      if (layout && !event) url.searchParams.set('layout', layout)
+      let reference
+      try {
+        reference = await json(url.href, 'model')
+      } catch (error) {
+        // Legacy preview links and generic layout controls can request a layout
+        // absent from this model. Let the upstream select its supported default.
+        if (event || !url.searchParams.has('layout') ||
+            !(error instanceof ConcertSourceError) || error.upstreamStatus !== 409) throw error
+        url.searchParams.delete('layout')
+        reference = await json(url.href, 'model')
       }
+      if (reference.venue?.id !== venue || reference.schemaVersion !== 1) throw new ConcertSourceError('参考站模型版本不匹配')
+      const model = await document(reference.model)
+      const selection = model.selections?.[reference.model.selectionKey]
+      // Rendering arrays can contain duplicate stand IDs. Use the canonical
+      // selectable sections when the render array fails the existing validation.
+      const sections = isConcertSections(selection?.renderSections)
+        ? selection.renderSections
+        : selection?.sections
+      if (model.venue?.id !== venue || !isConcertSections(sections)) throw new ConcertSourceError('参考站分区数据不完整')
+      return { sections, version: release.version, checkedAt: new Date().toISOString() }
     }
   }
 }
