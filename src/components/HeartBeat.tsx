@@ -23,12 +23,22 @@ interface HeartBeatProps {
 
 const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
   const containerRef = useRef<HTMLDivElement>(null)
-  const timerRef = useRef<ReturnType<typeof setTimeout>>()
 
   useEffect(() => {
     if (!containerRef.current) return
 
-    console.log('初始化粒子心跳效果')
+    let disposed = false
+    let completed = false
+    let timer: ReturnType<typeof setTimeout>
+    const finish = () => {
+      if (disposed || completed) return
+      completed = true
+      clearTimeout(timer)
+      onComplete()
+    }
+    // 模型加载超时也应进入首页，避免一直停在黑屏。
+    timer = setTimeout(finish, 10000)
+    let heartbeatTimeline: gsap.core.Timeline | undefined
 
     // 创建场景
     const scene = new THREE.Scene()
@@ -43,7 +53,15 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
     camera.position.z = 1.8
 
     // 创建渲染器
-    const renderer = new THREE.WebGLRenderer({ antialias: true })
+    let renderer: THREE.WebGLRenderer
+    try {
+      renderer = new THREE.WebGLRenderer({ antialias: true })
+    } catch (error) {
+      console.error('心跳渲染器初始化失败:', error)
+      clearTimeout(timer)
+      timer = setTimeout(finish, 0)
+      return () => { disposed = true; clearTimeout(timer) }
+    }
     renderer.setClearColor(new THREE.Color('rgb(0,0,0)'))
     renderer.setSize(window.innerWidth, window.innerHeight)
     renderer.setPixelRatio(window.devicePixelRatio)
@@ -127,7 +145,16 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
     loader.load(
       '/model/heartBeat.obj',
       (obj) => {
-        console.log('模型加载成功')
+        if (disposed || completed) {
+          obj.traverse((child) => {
+            if (child instanceof THREE.Mesh) {
+              child.geometry.dispose()
+              const materials = Array.isArray(child.material) ? child.material : [child.material]
+              materials.forEach(material => material.dispose())
+            }
+          })
+          return
+        }
         heart = (obj as any).children[0]
         heart.geometry.rotateX(-Math.PI * 0.5)
         heart.geometry.scale(0.04, 0.04, 0.04)
@@ -135,6 +162,8 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
         group.add(heart)
 
         // 基础网格材质
+        const originalMaterials = Array.isArray(heart.material) ? heart.material : [heart.material]
+        originalMaterials.forEach((material: THREE.Material) => material.dispose())
         heart.material = new THREE.MeshBasicMaterial({
           color: new THREE.Color('rgb(0,0,0)')
         })
@@ -147,7 +176,7 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
         init()
 
         // 设置心跳动画
-        gsap
+        heartbeatTimeline = gsap
           .timeline({
             repeat: -1,
             repeatDelay: 0.3
@@ -166,19 +195,16 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
         // 开始渲染循环
         renderer.setAnimationLoop(render)
 
-        // 模型加载完成后，开始3秒计时
-        console.log('设置3秒定时器')
-        timerRef.current = setTimeout(() => {
-          console.log('3秒到达，调用 onComplete')
-          renderer.setAnimationLoop(null) // 停止渲染循环
-          onComplete()
-        }, 3000)
+        // 正常加载后完整播放 3 秒。
+        clearTimeout(timer)
+        timer = setTimeout(finish, 3000)
       },
       (progress) => {
         console.log('加载进度:', Math.round((progress.loaded / progress.total) * 100) + '%')
       },
       (error) => {
         console.error('模型加载失败:', error)
+        finish()
       }
     )
 
@@ -241,9 +267,15 @@ const HeartBeat: React.FC<HeartBeatProps> = ({ onComplete }) => {
 
     // 清理
     return () => {
-      console.log('清理 HeartBeat 组件')
-      if (timerRef.current) {
-        clearTimeout(timerRef.current)
+      disposed = true
+      clearTimeout(timer)
+      heartbeatTimeline?.kill()
+      controls.dispose()
+      geometry.dispose()
+      material.dispose()
+      if (heart) {
+        heart.geometry.dispose()
+        heart.material.dispose()
       }
       window.removeEventListener('resize', handleResize)
       renderer.setAnimationLoop(null)

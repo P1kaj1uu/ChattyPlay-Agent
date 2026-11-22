@@ -63,7 +63,7 @@ NProgress.configure({
 const AppContent: React.FC = () => {
   const location = useLocation()
   const navigate = useNavigate()
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => !(location.pathname === '/' && new URLSearchParams(location.search).get('code')))
 
   // 判断是否是首页
   const isHomePage = location.pathname === '/home'
@@ -82,7 +82,7 @@ const AppContent: React.FC = () => {
       return
     }
     // 如果已登录且在登录页，跳转到首页
-    if (publicRoutes.includes(location.pathname) && isAuthenticated()) {
+    if (publicRoutes.includes(location.pathname) && isAuthenticated() && !new URLSearchParams(location.search).get('code')) {
       navigate('/home', { replace: true })
       return
     }
@@ -90,7 +90,7 @@ const AppContent: React.FC = () => {
     if (!publicRoutes.includes(location.pathname) && !isAuthenticated()) {
       navigate('/', { replace: true })
     }
-  }, [location.pathname, navigate])
+  }, [location.pathname, location.search, navigate])
 
   // 初始化加载
   useEffect(() => {

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { Form, Input, Button, Checkbox, message, Space } from 'antd'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
+import { Form, Input, Button, Checkbox, message, Space, Spin } from 'antd'
 import {
   UserOutlined,
   LockOutlined,
@@ -284,16 +284,21 @@ const loadTurnstileScript = (): Promise<void> => {
 }
 
 // 保存 OAuth 登录会话（本站 JWT + 用户信息）
-const applyOAuthSession = (data: { token: string; user: { id: number; username: string; email?: string; avatar?: string } }) => {
+const applyOAuthSession = (provider: 'google' | 'github', data: { token: string; user: { id: number; username: string; email?: string; avatar?: string } }) => {
   setToken(data.token)
   localStorage.setItem('isLoggedIn', 'true')
   localStorage.setItem('username', data.user.username)
+  localStorage.setItem('authProvider', provider)
   localStorage.setItem('userId', String(data.user.id))
   if (data.user.email) {
     localStorage.setItem('email', data.user.email)
+  } else {
+    localStorage.removeItem('email')
   }
   if (data.user.avatar) {
     localStorage.setItem('avatar', data.user.avatar)
+  } else {
+    localStorage.removeItem('avatar')
   }
 }
 
@@ -302,6 +307,9 @@ const Login: React.FC = () => {
   const [loginForm] = Form.useForm()
   const [registerForm] = Form.useForm()
   const [verifyCode, setVerifyCode] = useState('')
+  const [githubCode] = useState(() => new URLSearchParams(window.location.search).get('code'))
+  const [oauthPending, setOAuthPending] = useState(Boolean(githubCode))
+  const githubCallbackStarted = useRef(false)
   const [loading, setLoading] = useState(false)
   const [isAgreed, setIsAgreed] = useState(true)
   const [showHeartBeat, setShowHeartBeat] = useState(false)
@@ -374,11 +382,10 @@ const Login: React.FC = () => {
 
   // GitHub OAuth 回调处理：URL 带 code 时用 code 向后端换取本站 JWT
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search)
-    const githubCode = params.get('code')
-    if (!githubCode) return
+    if (!githubCode || githubCallbackStarted.current) return
+    githubCallbackStarted.current = true
 
-    window.history.replaceState({}, '', window.location.pathname)
+    window.history.replaceState(window.history.state, '', window.location.pathname)
     setLoading(true)
     ;(async () => {
       try {
@@ -391,7 +398,7 @@ const Login: React.FC = () => {
         })
         const data = await response.json()
         if (data.success) {
-          applyOAuthSession(data)
+          applyOAuthSession('github', data)
           message.success(t('login.loginSuccess'))
           setShowHeartBeat(true)
         } else {
@@ -402,6 +409,7 @@ const Login: React.FC = () => {
         message.error(error.message || t('login.loginFailed'))
       } finally {
         setLoading(false)
+        setOAuthPending(false)
       }
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -459,13 +467,13 @@ const Login: React.FC = () => {
     if (turnstileReady && turnstileLoginRef.current) {
       initTurnstile('login')
     }
-  }, [turnstileReady, isLoginMode])
+  }, [turnstileReady, isLoginMode, oauthPending])
 
   useEffect(() => {
     if (turnstileReady && !isLoginMode && turnstileRegisterRef.current) {
       initTurnstile('register')
     }
-  }, [turnstileReady, isLoginMode])
+  }, [turnstileReady, isLoginMode, oauthPending])
 
   // 获取 Turnstile token
   const getTurnstileToken = (mode: 'login' | 'register'): string | null => {
@@ -545,6 +553,7 @@ const Login: React.FC = () => {
       if (data.success) {
         // 保存登录状态和 token
         setToken(data.token)
+        localStorage.removeItem('authProvider')
         localStorage.setItem('isLoggedIn', 'true')
         localStorage.setItem('username', data.user.username)
         localStorage.setItem('userId', data.user.id.toString())
@@ -628,9 +637,9 @@ const Login: React.FC = () => {
     }
   }
 
-  const handleHeartBeatComplete = () => {
-    navigate('/home')
-  }
+  const handleHeartBeatComplete = useCallback(() => {
+    navigate('/home', { replace: true })
+  }, [navigate])
 
   const handleReset = () => {
     loginForm.resetFields()
@@ -656,7 +665,7 @@ const Login: React.FC = () => {
   // Google OAuth
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
-      console.log('Google Access Token:', tokenResponse)
+      setLoading(true)
 
       // 后端用 access_token 验证身份并签发本站 JWT
       try {
@@ -670,7 +679,7 @@ const Login: React.FC = () => {
         const data = await response.json()
 
         if (data.success) {
-          applyOAuthSession(data)
+          applyOAuthSession('google', data)
           message.success(t('login.loginSuccess'))
           setShowHeartBeat(true)
         } else {
@@ -679,6 +688,8 @@ const Login: React.FC = () => {
       } catch (error: any) {
         console.error('Google login error:', error)
         message.error(error.message || t('login.loginFailed'))
+      } finally {
+        setLoading(false)
       }
     },
     onError: () => {
@@ -701,6 +712,14 @@ const Login: React.FC = () => {
 
     // 跳转到 GitHub 授权页面
     window.location.href = githubAuthUrl
+  }
+
+  if (oauthPending) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'grid', placeItems: 'center', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+        <Spin size="large" />
+      </div>
+    )
   }
 
   return (
@@ -992,11 +1011,11 @@ const Login: React.FC = () => {
             <OAuthDivider>{t('login.thirdPartyLoginTip')}</OAuthDivider>
 
             <OAuthButtonContainer>
-              <OAuthButton variant="google" onClick={() => googleLogin()}>
+              <OAuthButton variant="google" disabled={loading} onClick={() => googleLogin()}>
                 <FcGoogle />
                 Google
               </OAuthButton>
-              <OAuthButton variant="github" onClick={handleGithubLogin}>
+              <OAuthButton variant="github" disabled={loading} onClick={handleGithubLogin}>
                 <FaGithub />
                 GitHub
               </OAuthButton>

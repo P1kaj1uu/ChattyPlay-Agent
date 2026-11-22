@@ -156,7 +156,11 @@ const Navbar: React.FC = () => {
   const [drawerVisible, setDrawerVisible] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
-  const [username, setUsername] = useState<string>('')
+  const getDisplayName = () => {
+    const provider = localStorage.getItem('authProvider')
+    return provider === 'google' ? 'Google' : provider === 'github' ? 'Github' : localStorage.getItem('username') || ''
+  }
+  const [username, setUsername] = useState<string>(getDisplayName)
 
   useEffect(() => {
     const checkMobile = () => {
@@ -179,7 +183,7 @@ const Navbar: React.FC = () => {
     const checkLoginStatus = () => {
       const loginStatus = localStorage.getItem('isLoggedIn')
       setIsLoggedIn(loginStatus === 'true')
-      setUsername(localStorage.getItem('username') || '')
+      setUsername(getDisplayName())
     }
 
     checkLoginStatus()
@@ -189,8 +193,8 @@ const Navbar: React.FC = () => {
       if (e.key === 'isLoggedIn') {
         setIsLoggedIn(e.newValue === 'true')
       }
-      if (e.key === 'username') {
-        setUsername(e.newValue || '')
+      if (e.key === 'username' || e.key === 'authProvider') {
+        setUsername(getDisplayName())
       }
     }
 
@@ -225,6 +229,7 @@ const Navbar: React.FC = () => {
     removeToken()
     localStorage.removeItem('isLoggedIn')
     localStorage.removeItem('username')
+    localStorage.removeItem('authProvider')
     setIsLoggedIn(false)
     message.success(t('common.logoutSuccess'))
     navigate('/')
